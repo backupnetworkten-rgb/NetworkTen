@@ -361,13 +361,17 @@ return (
     setAnchorEl(null)
     }
 
-    PaperProps={{
+    slotProps={{
+
+    paper:{
 
     sx:{
 
     borderRadius:"14px",
 
     minWidth:"180px"
+
+    }
 
     }
 
