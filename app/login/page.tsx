@@ -112,9 +112,8 @@ localStorage.setItem(
 JSON.stringify({
 
 name:
-user?.displayName
-|| email
-.split("@")[0],
+  user?.user?.displayName
+  || email.split("@")[0],
 
 email:
 user?.email
