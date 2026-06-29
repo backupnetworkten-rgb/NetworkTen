@@ -154,12 +154,14 @@ export default function Navbar() {
                   anchorEl={aboutAnchor}
                   open={Boolean(aboutAnchor)}
                   onClose={closeAboutMenu}
-                  PaperProps={{
-                    elevation: 0,
-                    sx: {
-                      mt: 1.5, borderRadius: "18px", minWidth: 240, p: 1,
-                      border: "1px solid #eef2f7",
-                      boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+                  slotProps={{
+                    paper: {
+                      elevation: 0,
+                      sx: {
+                        mt: 1.5, borderRadius: "18px", minWidth: 240, p: 1,
+                        border: "1px solid #eef2f7",
+                        boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+                      },
                     },
                   }}
                 >
@@ -438,7 +440,9 @@ onClose={
 closeUser
 }
 
-PaperProps={{
+slotProps={{
+
+paper:{
 
 sx:{
 
@@ -455,6 +459,8 @@ border:
 
 boxShadow:
 "0 30px 80px rgba(16,32,72,.12)"
+
+}
 
 }
 
@@ -677,12 +683,14 @@ Login
         anchor="right"
         open={cartOpen}
         onClose={() => setCartOpen(false)}
-        PaperProps={{
-          sx: {
-            width: { xs: "100vw", sm: 420 },
-            background: "#f7f8fa",
-            display: "flex",
-            flexDirection: "column",
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: "100vw", sm: 420 },
+              background: "#f7f8fa",
+              display: "flex",
+              flexDirection: "column",
+            },
           },
         }}
       >
