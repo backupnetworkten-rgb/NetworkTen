@@ -10,7 +10,7 @@ import {
   Chip,
   Divider
 } from "@mui/material";
-import Grid from "@mui/material/GridLegacy";
+import Grid from "@mui/material/Grid";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import AdminLayout from "@/components/admin/AdminLayout";
 
@@ -88,7 +88,7 @@ export default function DashboardPage() {
       {/* STATS */}
       <Grid container spacing={2}>
         {stats.map((item, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
             <Paper
               elevation={0}
               sx={{
@@ -121,7 +121,7 @@ export default function DashboardPage() {
       {/* CONTENT */}
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {/* ACTIVITY */}
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: "18px", border: "1px solid #edf1f7" }}>
             <Typography sx={{ fontSize: "18px", fontWeight: 900, color: "#102048", mb: 2 }}>
               Recent Activity
@@ -153,7 +153,7 @@ export default function DashboardPage() {
         </Grid>
 
         {/* QUICK ACTIONS */}
-        <Grid item xs={12} lg={4}>
+        <Grid size={{ xs: 12, lg: 4 }}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: "18px", border: "1px solid #edf1f7" }}>
             <Typography sx={{ fontSize: "18px", fontWeight: 900, color: "#102048", mb: 2 }}>
               Quick Actions
