@@ -136,7 +136,7 @@ export default function CertificationSection() {
   const [selectedPdf, setSelectedPdf] =
     useState("");
 
-  const openCertificate = (pdf) => {
+  const openCertificate = (pdf: string) => {
     setSelectedPdf(pdf);
 
     setOpen(true);
