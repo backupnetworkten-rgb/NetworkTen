@@ -224,8 +224,8 @@ export default function CheckoutPage() {
         state: newAddr.state,
         tag:   newAddr.type as "Home" | "Office" | "Other",
       };
-      const { updateUserAddresses } = await import("@/services/userService");
-      await updateUserAddresses([...savedAddresses, newAddressEntry]);
+      const { saveAddress } = await import("@/services/userService");
+      await saveAddress(newAddressEntry);
       setSelectedAddr(newAddressEntry.id);
       setShowNewAddr(false);
       setNewAddr({ name: "", phone: "", line1: "", line2: "", city: "", pin: "", state: "", type: "Home" });
