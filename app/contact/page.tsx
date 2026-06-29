@@ -33,7 +33,7 @@ import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import emailjs from "@emailjs/browser";
 
 export default function ContactPage() {
-  const formRef = useRef(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [loading, setLoading] =
     useState(false);
@@ -58,9 +58,7 @@ export default function ContactPage() {
 
       setOpen(true);
 
-      (
-        formRef.current as HTMLFormElement
-      ).reset();
+      formRef.current?.reset();
     } catch (error) {
       console.log(error);
     }
@@ -243,7 +241,7 @@ export default function ContactPage() {
               },
             }}
           >
-            Let’s discuss your networking,
+            Let's discuss your networking,
             surveillance, automation and
             enterprise infrastructure
             requirements with our expert
