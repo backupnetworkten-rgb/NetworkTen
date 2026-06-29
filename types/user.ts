@@ -1,6 +1,6 @@
 export interface Address {
   id: string;
-  tag: "Home" | "Work" | "Other";
+  tag: "Home" | "Office" | "Other";
   name: string;
   phone: string;
   line1: string;
