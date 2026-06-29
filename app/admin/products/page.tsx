@@ -157,7 +157,6 @@ export default function AdminProductsPage() {
 
   return (
     <AdminLayout title="Products">
-
       {/* ── HEADER ── */}
       <Box sx={{
         p: "22px 28px", mb: 3, borderRadius: "20px",
@@ -180,10 +179,13 @@ export default function AdminProductsPage() {
           <Typography sx={{ fontSize: "13px", fontWeight: 800, color: "#8BC53F" }}>● Active Store</Typography>
         </Box>
       </Box>
-
       <Grid container spacing={3}>
         {/* ── LEFT COLUMN ── */}
-        <Grid item xs={12} lg={8}>
+        <Grid
+          size={{
+            xs: 12,
+            lg: 8
+          }}>
 
           {/* Basic Info */}
           <Paper elevation={0} sx={cardSx}>
@@ -193,28 +195,48 @@ export default function AdminProductsPage() {
               sub="Fill in the core product details"
             />
             <Grid container spacing={2.5}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField fullWidth label="Product Name *" name="name" value={product.name} onChange={handleChange} sx={inputSx} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6
+                }}>
                 <TextField fullWidth label="Brand" name="brand" value={product.brand} onChange={handleChange} sx={inputSx} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6
+                }}>
                 <TextField select fullWidth label="Category" name="category" value={product.category} onChange={handleChange} sx={inputSx}>
                   {CATEGORIES.map((cat) => <MenuItem key={cat} value={cat}>{cat}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 4
+                }}>
                 <TextField fullWidth label="Original Price (₹)" name="price" type="number" value={product.price} onChange={handleChange} sx={inputSx} />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 4
+                }}>
                 <TextField fullWidth label="Sale Price (₹)" name="salePrice" type="number" value={product.salePrice} onChange={handleChange} sx={inputSx} />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 4
+                }}>
                 <TextField fullWidth label="Stock Quantity" name="stock" type="number" value={product.stock} onChange={handleChange} sx={inputSx} />
               </Grid>
               {discount > 0 && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Fade in>
                     <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "10px", px: 2, py: 0.8 }}>
                       <CheckCircleRoundedIcon sx={{ fontSize: 16, color: "#16a34a" }} />
@@ -433,7 +455,11 @@ export default function AdminProductsPage() {
         </Grid>
 
         {/* ── RIGHT COLUMN: PREVIEW ── */}
-        <Grid item xs={12} lg={4}>
+        <Grid
+          size={{
+            xs: 12,
+            lg: 4
+          }}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: "20px", border: "1px solid #e8edf5", background: "#fff", boxShadow: "0 2px 12px rgba(16,32,72,0.04)", position: "sticky", top: "90px" }}>
 
             <Typography sx={{ fontWeight: 800, color: "#102048", fontSize: "15px", mb: 0.5 }}>Live Preview</Typography>
