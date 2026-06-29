@@ -87,408 +87,401 @@ router.push(
 
 };
 
-return(
+return (
+  <Box
 
-<Box
+  sx={{
 
-sx={{
+  width:"250px",
 
-width:"250px",
+  height:"100vh",
 
-height:"100vh",
+  position:"fixed",
 
-position:"fixed",
+  left:0,
 
-left:0,
+  top:0,
 
-top:0,
+  background:
+  "linear-gradient(180deg,#08142e 0%,#0d1b3d 100%)",
 
-background:
-"linear-gradient(180deg,#08142e 0%,#0d1b3d 100%)",
+  borderRight:
+  "1px solid rgba(255,255,255,.06)",
 
-borderRight:
-"1px solid rgba(255,255,255,.06)",
+  display:"flex",
 
-display:"flex",
+  flexDirection:"column",
 
-flexDirection:"column",
+  zIndex:1200
 
-zIndex:1200
+  }}
 
-}}
+  >
+    {/* LOGO */}
+    <Box
+    sx={{
+    px:3,
+    pt:3,
+    pb:2
+    }}
 
->
+    >
 
-{/* LOGO */}
+    <Box
+    sx={{
+    display:"flex",
+    alignItems:"center",
+    gap:1.5
+    }}
 
-<Box
-sx={{
-px:3,
-pt:3,
-pb:2
-}}
+    >
 
->
+    <Avatar
 
-<Box
-sx={{
-display:"flex",
-alignItems:"center",
-gap:1.5
-}}
+    sx={{
 
->
+    width:40,
 
-<Avatar
+    height:40,
 
-sx={{
+    background:"#8BC53F",
 
-width:40,
+    color:"#08142e",
 
-height:40,
+    fontWeight:900,
 
-background:"#8BC53F",
+    fontSize:"18px"
 
-color:"#08142e",
+    }}
 
-fontWeight:900,
+    >
 
-fontSize:"18px"
+    N
 
-}}
+    </Avatar>
 
->
+    <Box>
 
-N
+    <Typography
 
-</Avatar>
+    sx={{
 
-<Box>
+    fontWeight:900,
 
-<Typography
+    fontSize:"18px",
 
-sx={{
+    color:"#fff",
 
-fontWeight:900,
+    lineHeight:1
 
-fontSize:"18px",
+    }}
 
-color:"#fff",
+    >
 
-lineHeight:1
+    NetworkTen
 
-}}
+    </Typography>
 
->
+    <Typography
 
-NetworkTen
+    sx={{
 
-</Typography>
+    fontSize:"11px",
 
-<Typography
+    color:
+    "rgba(255,255,255,.55)",
 
-sx={{
+    mt:.5
 
-fontSize:"11px",
+    }}
 
-color:
-"rgba(255,255,255,.55)",
+    >
 
-mt:.5
+    Admin Panel
 
-}}
+    </Typography>
 
->
+    </Box>
 
-Admin Panel
+    </Box>
 
-</Typography>
+    </Box>
+    <Divider
+    sx={{
+    borderColor:
+    "rgba(255,255,255,.08)"
+    }}
+    />
+    {/* ADMIN */}
+    <Box
+    sx={{
+    px:3,
+    py:2
+    }}
 
-</Box>
+    >
 
-</Box>
+    <Typography
 
-</Box>
+    sx={{
 
-<Divider
-sx={{
-borderColor:
-"rgba(255,255,255,.08)"
-}}
-/>
+    fontSize:"13px",
 
-{/* ADMIN */}
+    fontWeight:700,
 
-<Box
-sx={{
-px:3,
-py:2
-}}
+    color:"#fff"
 
->
+    }}
 
-<Typography
+    >
 
-sx={{
+    Administrator
 
-fontSize:"13px",
+    </Typography>
 
-fontWeight:700,
+    <Typography
 
-color:"#fff"
+    sx={{
 
-}}
+    fontSize:"11px",
 
->
+    color:
+    "rgba(255,255,255,.5)",
 
-Administrator
+    mt:.5
 
-</Typography>
+    }}
 
-<Typography
+    >
 
-sx={{
+    Full Access
 
-fontSize:"11px",
+    </Typography>
 
-color:
-"rgba(255,255,255,.5)",
+    </Box>
+    {/* MENU */}
+    <List
+    sx={{
+    px:2,
+    py:1
+    }}
 
-mt:.5
+    >
 
-}}
+    {menuItems.map((item)=>{
 
->
+    const active =
+    pathname === item.path;
 
-Full Access
+    return (
+      <Link
 
-</Typography>
+      key={item.path}
 
-</Box>
+      href={item.path}
 
-{/* MENU */}
+      style={{
+      textDecoration:"none"
+      }}
 
-<List
-sx={{
-px:2,
-py:1
-}}
+      >
+        <ListItemButton
 
->
+        sx={{
 
-{menuItems.map((item)=>{
+        height:"44px",
 
-const active =
-pathname === item.path;
+        borderRadius:"12px",
 
-return(
+        mb:.8,
 
-<Link
+        background:
+        active
+        ? "#8BC53F"
+        : "transparent",
 
-key={item.path}
+        color:
+        active
+        ? "#08142e"
+        : "#fff",
 
-href={item.path}
+        transition:
+        ".25s",
 
-style={{
-textDecoration:"none"
-}}
+        "&:hover":{
 
->
+        background:
+        active
+        ? "#8BC53F"
+        : "rgba(255,255,255,.08)"
 
-<ListItemButton
+        }
 
-sx={{
+        }}
 
-height:"44px",
+        >
 
-borderRadius:"12px",
+        <ListItemIcon
 
-mb:.8,
+        sx={{
 
-background:
-active
-? "#8BC53F"
-: "transparent",
+        minWidth:"34px",
 
-color:
-active
-? "#08142e"
-: "#fff",
+        color:
+        active
+        ? "#08142e"
+        : "#fff",
 
-transition:
-".25s",
+        "& svg":{
 
-"&:hover":{
+        fontSize:"20px"
 
-background:
-active
-? "#8BC53F"
-: "rgba(255,255,255,.08)"
+        }
 
-}
+        }}
 
-}}
+        >
 
->
+        {item.icon}
 
-<ListItemIcon
+        </ListItemIcon>
 
-sx={{
+        <ListItemText
 
-minWidth:"34px",
+        primary={item.label}
 
-color:
-active
-? "#08142e"
-: "#fff",
+        slotProps={{
+          primary: {
+            sx: {
 
-"& svg":{
+            fontSize:"13px",
 
-fontSize:"20px"
+            fontWeight:700
 
-}
+            }
 
-}}
+          }
+        }}
 
->
+        />
 
-{item.icon}
+        </ListItemButton>
+      </Link>
+    );
 
-</ListItemIcon>
+    })}
 
-<ListItemText
+    </List>
+    <Box
+    sx={{
+    flexGrow:1
+    }}
+    />
+    {/* FOOTER */}
+    <Box
+    sx={{
+    p:2
+    }}
 
-primary={item.label}
+    >
 
-primaryTypographyProps={{
+    <Divider
+    sx={{
+    borderColor:
+    "rgba(255,255,255,.08)",
+    mb:2
+    }}
+    />
 
-fontSize:"13px",
+    <Typography
 
-fontWeight:700
+    sx={{
 
-}}
+    fontSize:"11px",
 
-/>
+    color:
+    "rgba(255,255,255,.45)",
 
-</ListItemButton>
+    mb:1.5,
 
-</Link>
+    textAlign:"center"
 
-);
+    }}
 
-})}
+    >
 
-</List>
+    Version 1.0
 
-<Box
-sx={{
-flexGrow:1
-}}
-/>
+    </Typography>
 
-{/* FOOTER */}
+    <ListItemButton
 
-<Box
-sx={{
-p:2
-}}
+    onClick={handleLogout}
 
->
+    sx={{
 
-<Divider
-sx={{
-borderColor:
-"rgba(255,255,255,.08)",
-mb:2
-}}
-/>
+    height:"44px",
 
-<Typography
+    borderRadius:"12px",
 
-sx={{
+    background:
+    "rgba(255,255,255,.06)",
 
-fontSize:"11px",
+    color:"#fff",
 
-color:
-"rgba(255,255,255,.45)",
+    "&:hover":{
 
-mb:1.5,
+    background:"#ef4444"
 
-textAlign:"center"
+    }
 
-}}
+    }}
 
->
+    >
 
-Version 1.0
+    <ListItemIcon
 
-</Typography>
+    sx={{
 
-<ListItemButton
+    minWidth:"34px",
 
-onClick={handleLogout}
+    color:"#fff"
 
-sx={{
+    }}
 
-height:"44px",
+    >
 
-borderRadius:"12px",
+    <LogoutRoundedIcon
+    sx={{
+    fontSize:"20px"
+    }}
+    />
 
-background:
-"rgba(255,255,255,.06)",
+    </ListItemIcon>
 
-color:"#fff",
+    <ListItemText
 
-"&:hover":{
+    primary="Logout"
 
-background:"#ef4444"
+    slotProps={{
+      primary: {
+        sx: {
 
-}
+        fontWeight:700,
 
-}}
+        fontSize:"13px"
 
->
+        }
 
-<ListItemIcon
+      }
+    }}
 
-sx={{
+    />
 
-minWidth:"34px",
+    </ListItemButton>
 
-color:"#fff"
-
-}}
-
->
-
-<LogoutRoundedIcon
-sx={{
-fontSize:"20px"
-}}
-/>
-
-</ListItemIcon>
-
-<ListItemText
-
-primary="Logout"
-
-primaryTypographyProps={{
-
-fontWeight:700,
-
-fontSize:"13px"
-
-}}
-
-/>
-
-</ListItemButton>
-
-</Box>
-
-</Box>
-
+    </Box>
+  </Box>
 );
 
 }
