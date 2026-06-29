@@ -37,7 +37,7 @@ const videos = [
 ];
 
 export default function VideosSection() {
-  const videoRefs = useRef([]);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const [playing, setPlaying] =
     useState([
