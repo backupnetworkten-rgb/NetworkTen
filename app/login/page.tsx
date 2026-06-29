@@ -116,14 +116,14 @@ name:
   || email.split("@")[0],
 
 email:
-user?.email
+  user?.user?.email
 
 })
 
 );
 
 alert(
-"Login Successful ✅"
+"Login Successful"
 );
 
 // STEP 4
