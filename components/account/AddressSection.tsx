@@ -123,7 +123,13 @@ export default function AddressSection({ user }: { user: UserData | null }) {
       sx={{ p: { xs: 3, md: 4 }, borderRadius: "28px", border: "1px solid #E7E9F0", background: "#fff" }}
     >
       {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={2}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 2
+        }}>
         <PanelHeader
           icon={LocationOnRoundedIcon}
           eyebrow="Delivery"
@@ -153,9 +159,7 @@ export default function AddressSection({ user }: { user: UserData | null }) {
           Add new
         </Button>
       </Box>
-
       <Divider sx={{ my: 3.5, borderColor: "#F0F1F6" }} />
-
       {/* Empty state */}
       {addresses.length === 0 ? (
         <Box
@@ -191,8 +195,18 @@ export default function AddressSection({ user }: { user: UserData | null }) {
                   "&:hover": { boxShadow: "0 8px 28px rgba(10,17,48,0.07)", borderColor: "#D2D7E8" },
                 }}
               >
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start" gap={1}>
-                  <Box flex={1} minWidth={0}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: 1
+                  }}>
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minWidth: 0
+                    }}>
                     <Chip
                       label={a.tag}
                       size="small"
@@ -223,7 +237,9 @@ export default function AddressSection({ user }: { user: UserData | null }) {
                     )}
                   </Box>
 
-                  <Stack direction="row" spacing={0.25} flexShrink={0}>
+                  <Stack direction="row" spacing={0.25} sx={{
+                    flexShrink: 0
+                  }}>
                     <Tooltip title="Edit">
                       <IconButton
                         size="small"
@@ -262,7 +278,6 @@ export default function AddressSection({ user }: { user: UserData | null }) {
           })}
         </Box>
       )}
-
       {/* Premium Dialog */}
       <Dialog
         open={open}
@@ -289,7 +304,12 @@ export default function AddressSection({ user }: { user: UserData | null }) {
             justifyContent: "space-between",
           }}
         >
-          <Box display="flex" alignItems="center" gap={1.5}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5
+            }}>
             <Box
               sx={{
                 width: 36,
@@ -331,7 +351,11 @@ export default function AddressSection({ user }: { user: UserData | null }) {
             </Alert>
           )}
 
-          <Box display="grid" gap={2}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2
+            }}>
             <TextField
               select
               fullWidth
@@ -345,7 +369,12 @@ export default function AddressSection({ user }: { user: UserData | null }) {
               <MenuItem value="Other">📍 Other</MenuItem>
             </TextField>
 
-            <Box display="grid" gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr" }} gap={2}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                gap: 2
+              }}>
               <TextField
                 fullWidth
                 label="Full name"
@@ -381,10 +410,11 @@ export default function AddressSection({ user }: { user: UserData | null }) {
             />
 
             <Box
-              display="grid"
-              gap={2}
-              sx={{ gridTemplateColumns: { xs: "1fr 1fr", sm: "1fr 1fr 120px" } }}
-            >
+              sx={{
+                display: "grid",
+                gap: 2,
+                gridTemplateColumns: { xs: "1fr 1fr", sm: "1fr 1fr 120px" }
+              }}>
               <TextField
                 fullWidth
                 label="City"
@@ -435,7 +465,6 @@ export default function AddressSection({ user }: { user: UserData | null }) {
           </Button>
         </DialogContent>
       </Dialog>
-
       <Snackbar
         open={!!toast}
         autoHideDuration={3500}

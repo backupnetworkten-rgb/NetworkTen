@@ -4,7 +4,9 @@ import { Box, Typography } from "@mui/material";
 
 export default function AccountHero() {
   return (
-    <Box mb={5}>
+    <Box sx={{
+      mb: 5
+    }}>
       <Typography
         sx={{
           fontSize: 11,

@@ -100,7 +100,6 @@ export default function ProductsPage() {
   return (
     <>
       <Header />
-
       <Box
         sx={{
           background: "linear-gradient(180deg,#f5f8fd 0%,#eef3fb 100%)",
@@ -260,7 +259,11 @@ export default function ProductsPage() {
               <CircularProgress sx={{ color: "#102048" }} />
             </Box>
           ) : filteredProducts.length === 0 ? (
-            <Box textAlign="center" py={12}>
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 12
+              }}>
               <Typography sx={{ fontSize: "48px", mb: 2 }}>🔍</Typography>
               <Typography
                 sx={{ fontWeight: 900, fontSize: "22px", color: "#102048", mb: 1 }}
@@ -508,7 +511,6 @@ export default function ProductsPage() {
 
         </Container>
       </Box>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={2500}
@@ -523,7 +525,6 @@ export default function ProductsPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-
       <Footer />
     </>
   );

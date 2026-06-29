@@ -43,7 +43,13 @@ export default function AccountSidebar({
       }}
     >
       {/* User info */}
-      <Box display="flex" alignItems="center" gap={2} mb={3}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          mb: 3
+        }}>
         <Avatar
           src={user?.photoURL}
           sx={{
@@ -71,9 +77,7 @@ export default function AccountSidebar({
           </Typography>
         </Box>
       </Box>
-
       <Divider sx={{ borderColor: "rgba(255,255,255,0.08)", mb: 2.5 }} />
-
       {/* Nav */}
       <Stack
         direction={{ xs: "row", md: "column" }}

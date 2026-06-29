@@ -13,7 +13,12 @@ export default function PanelHeader({
   subtitle: string;
 }) {
   return (
-    <Box display="flex" alignItems="flex-start" gap={2}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 2
+      }}>
       <Box
         sx={{
           width: 46,
