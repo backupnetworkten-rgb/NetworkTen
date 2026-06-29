@@ -284,13 +284,17 @@ export default function AddressSection({ user }: { user: UserData | null }) {
         onClose={() => setOpen(false)}
         fullWidth
         maxWidth="sm"
-        TransitionComponent={Transition}
-        PaperProps={{
-          sx: {
-            borderRadius: "24px",
-            boxShadow: "0 24px 60px rgba(10,17,48,0.18)",
-            overflow: "hidden",
-          },
+        slots={{
+          transition: Transition
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "24px",
+              boxShadow: "0 24px 60px rgba(10,17,48,0.18)",
+              overflow: "hidden",
+            },
+          }
         }}
       >
         {/* Dialog dark header */}
