@@ -188,7 +188,7 @@ export default function EditProductPage() {
   if (loading) {
     return (
       <AdminLayout title="Edit Product">
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}></>>
           <CircularProgress sx={{ color: "#102048" }} />
         </Box>
       </AdminLayout>
