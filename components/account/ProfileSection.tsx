@@ -307,14 +307,16 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
             label="Full name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
-                  <BadgeRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
-                </Box>
-              ),
-            }}
             sx={fieldSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
+                    <BadgeRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
+                  </Box>
+                ),
+              }
+            }}
           />
 
           {/* Email — disabled */}
@@ -324,14 +326,16 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
             label="Email address"
             value={form.email}
             helperText="Email is linked to your sign-in and cannot be changed here."
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
-                  <EmailRoundedIcon sx={{ fontSize: 18, color: "#C0C5D6" }} />
-                </Box>
-              ),
-            }}
             sx={fieldSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
+                    <EmailRoundedIcon sx={{ fontSize: 18, color: "#C0C5D6" }} />
+                  </Box>
+                ),
+              }
+            }}
           />
 
           {/* Phone */}
@@ -340,14 +344,16 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
             label="Phone number"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
-                  <PhoneRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
-                </Box>
-              ),
-            }}
             sx={fieldSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
+                    <PhoneRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
+                  </Box>
+                ),
+              }
+            }}
           />
 
           {/* Save button */}

@@ -64,354 +64,349 @@ year:"numeric"
 }
 );
 
-return(
+return (
+  <Box
 
-<Box
+  sx={{
 
-sx={{
+  height:"88px",
 
-height:"88px",
+  display:"flex",
 
-display:"flex",
+  alignItems:"center",
 
-alignItems:"center",
+  justifyContent:"space-between",
 
-justifyContent:"space-between",
+  px:4,
 
-px:4,
+  background:
+  "rgba(255,255,255,.95)",
 
-background:
-"rgba(255,255,255,.95)",
+  backdropFilter:
+  "blur(12px)",
 
-backdropFilter:
-"blur(12px)",
+  borderBottom:
+  "1px solid #edf1f7",
 
-borderBottom:
-"1px solid #edf1f7",
+  position:"sticky",
 
-position:"sticky",
+  top:0,
 
-top:0,
+  zIndex:1000
 
-zIndex:1000
+  }}
 
-}}
+  >
+    {/* LEFT */}
+    <Box>
 
->
+    <Typography
 
-{/* LEFT */}
+    sx={{
 
-<Box>
+    fontSize:"12px",
 
-<Typography
+    fontWeight:700,
 
-sx={{
+    letterSpacing:"1px",
 
-fontSize:"12px",
+    textTransform:"uppercase",
 
-fontWeight:700,
+    color:"#8BC53F",
 
-letterSpacing:"1px",
+    mb:.5
 
-textTransform:"uppercase",
+    }}
 
-color:"#8BC53F",
+    >
 
-mb:.5
+    NetworkTen Admin
 
-}}
+    </Typography>
 
->
+    <Typography
 
-NetworkTen Admin
+    sx={{
 
-</Typography>
+    fontSize:"28px",
 
-<Typography
+    fontWeight:900,
 
-sx={{
+    color:"#102048",
 
-fontSize:"28px",
+    lineHeight:1
 
-fontWeight:900,
+    }}
 
-color:"#102048",
+    >
 
-lineHeight:1
+    {title}
 
-}}
+    </Typography>
 
->
+    </Box>
+    {/* RIGHT */}
+    <Box
 
-{title}
+    sx={{
 
-</Typography>
+    display:"flex",
 
-</Box>
+    alignItems:"center",
 
-{/* RIGHT */}
+    gap:2
 
-<Box
+    }}
 
-sx={{
+    >
 
-display:"flex",
+    <TextField
 
-alignItems:"center",
+    size="small"
 
-gap:2
+    placeholder="Search..."
 
-}}
+    sx={{
 
->
+    width:"260px",
 
-<TextField
+    "& .MuiOutlinedInput-root":{
 
-size="small"
+    borderRadius:"14px",
 
-placeholder="Search..."
+    background:"#fff"
 
-InputProps={{
+    }
 
-startAdornment:(
+    }}
 
-<InputAdornment
-position="start"
+    slotProps={{
+      input: {
 
->
+      startAdornment:(
 
-<SearchRoundedIcon
-sx={{
-color:"#98A2B3"
-}}
-/>
+      <InputAdornment
+      position="start"
 
-</InputAdornment>
+      >
 
-)
+      <SearchRoundedIcon
+      sx={{
+      color:"#98A2B3"
+      }}
+      />
 
-}}
+      </InputAdornment>
 
-sx={{
+      )
 
-width:"260px",
+      }
+    }}
 
-"& .MuiOutlinedInput-root":{
+    />
 
-borderRadius:"14px",
+    <Chip
 
-background:"#fff"
+    icon={ <CalendarMonthRoundedIcon />
+    }
 
-}
+    label={today}
 
-}}
+    sx={{
 
-/>
+    height:"40px",
 
-<Chip
+    background:"#fff",
 
-icon={ <CalendarMonthRoundedIcon />
-}
+    border:
+    "1px solid #edf1f7"
 
-label={today}
+    }}
 
-sx={{
+    />
 
-height:"40px",
+    <IconButton
 
-background:"#fff",
+    sx={{
 
-border:
-"1px solid #edf1f7"
+    background:"#fff",
 
-}}
+    border:
+    "1px solid #edf1f7",
 
-/>
+    width:"44px",
 
-<IconButton
+    height:"44px"
 
-sx={{
+    }}
 
-background:"#fff",
+    >
 
-border:
-"1px solid #edf1f7",
+    <Badge
 
-width:"44px",
+    badgeContent={3}
 
-height:"44px"
+    color="error"
 
-}}
+    >
 
->
+    <NotificationsRoundedIcon />
 
-<Badge
+    </Badge>
 
-badgeContent={3}
+    </IconButton>
 
-color="error"
+    <Box
 
->
+    onClick={(e)=>
+    setAnchorEl(
+    e.currentTarget
+    )
+    }
 
-<NotificationsRoundedIcon />
+    sx={{
 
-</Badge>
+    display:"flex",
 
-</IconButton>
+    alignItems:"center",
 
-<Box
+    gap:1.5,
 
-onClick={(e)=>
-setAnchorEl(
-e.currentTarget
-)
-}
+    background:"#fff",
 
-sx={{
+    border:
+    "1px solid #edf1f7",
 
-display:"flex",
+    borderRadius:"16px",
 
-alignItems:"center",
+    px:1.5,
 
-gap:1.5,
+    py:1,
 
-background:"#fff",
+    cursor:"pointer"
 
-border:
-"1px solid #edf1f7",
+    }}
 
-borderRadius:"16px",
+    >
 
-px:1.5,
+    <Avatar
 
-py:1,
+    sx={{
 
-cursor:"pointer"
+    width:42,
 
-}}
+    height:42,
 
->
+    background:"#8BC53F",
 
-<Avatar
+    color:"#08142e",
 
-sx={{
+    fontWeight:800
 
-width:42,
+    }}
 
-height:42,
+    >
 
-background:"#8BC53F",
+    A
 
-color:"#08142e",
+    </Avatar>
 
-fontWeight:800
+    <Box>
 
-}}
+    <Typography
 
->
+    sx={{
 
-A
+    fontWeight:800,
 
-</Avatar>
+    fontSize:"14px",
 
-<Box>
+    color:"#102048"
 
-<Typography
+    }}
 
-sx={{
+    >
 
-fontWeight:800,
+    Admin
 
-fontSize:"14px",
+    </Typography>
 
-color:"#102048"
+    <Typography
 
-}}
+    sx={{
 
->
+    fontSize:"11px",
 
-Admin
+    color:"#667085"
 
-</Typography>
+    }}
 
-<Typography
+    >
 
-sx={{
+    Administrator
 
-fontSize:"11px",
+    </Typography>
 
-color:"#667085"
+    </Box>
 
-}}
+    </Box>
 
->
+    <Menu
 
-Administrator
+    anchorEl={anchorEl}
 
-</Typography>
+    open={open}
 
-</Box>
+    onClose={()=>
+    setAnchorEl(null)
+    }
 
-</Box>
+    PaperProps={{
 
-<Menu
+    sx:{
 
-anchorEl={anchorEl}
+    borderRadius:"14px",
 
-open={open}
+    minWidth:"180px"
 
-onClose={()=>
-setAnchorEl(null)
-}
+    }
 
-PaperProps={{
+    }}
 
-sx:{
+    >
 
-borderRadius:"14px",
+    <MenuItem>
 
-minWidth:"180px"
+    <PersonRoundedIcon
+    sx={{
+    mr:1
+    }}
+    />
 
-}
+    Profile
 
-}}
+    </MenuItem>
 
->
+    <MenuItem
+    onClick={
+    handleLogout
+    }
+    >
 
-<MenuItem>
+    <LogoutRoundedIcon
+    sx={{
+    mr:1
+    }}
+    />
 
-<PersonRoundedIcon
-sx={{
-mr:1
-}}
-/>
+    Logout
 
-Profile
+    </MenuItem>
 
-</MenuItem>
+    </Menu>
 
-<MenuItem
-onClick={
-handleLogout
-}
->
-
-<LogoutRoundedIcon
-sx={{
-mr:1
-}}
-/>
-
-Logout
-
-</MenuItem>
-
-</Menu>
-
-</Box>
-
-</Box>
-
+    </Box>
+  </Box>
 );
 
 }

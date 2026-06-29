@@ -63,568 +63,564 @@ alert(
 
 };
 
-return(
+return (
+  <Box
 
-<Box
+  sx={{
 
-sx={{
+  minHeight:"100vh",
 
-minHeight:"100vh",
+  display:"flex",
 
-display:"flex",
+  alignItems:"center",
 
-alignItems:"center",
+  justifyContent:"center",
 
-justifyContent:"center",
+  background:
+  "linear-gradient(135deg,#08142e 0%,#102048 100%)",
 
-background:
-"linear-gradient(135deg,#08142e 0%,#102048 100%)",
+  p:2,
 
-p:2,
+  position:"relative",
 
-position:"relative",
+  overflow:"hidden"
 
-overflow:"hidden"
+  }}
+  >
+    <Link
 
-}}
->
+    href="/"
 
-<Link
+    style={{
 
-href="/"
+    position:"absolute",
 
-style={{
+    top:"24px",
 
-position:"absolute",
+    left:"24px",
 
-top:"24px",
+    textDecoration:"none",
 
-left:"24px",
+    zIndex:999
 
-textDecoration:"none",
+    }}
 
-zIndex:999
+    >
 
-}}
+    <Button
 
->
+    startIcon={
+    <ArrowBackRoundedIcon />
+    }
 
-<Button
+    sx={{
 
-startIcon={
-<ArrowBackRoundedIcon />
-}
+    height:"46px",
 
-sx={{
+    px:2.5,
 
-height:"46px",
+    borderRadius:"14px",
 
-px:2.5,
+    background:
+    "rgba(255,255,255,.08)",
 
-borderRadius:"14px",
+    backdropFilter:
+    "blur(14px)",
 
-background:
-"rgba(255,255,255,.08)",
+    border:
+    "1px solid rgba(255,255,255,.10)",
 
-backdropFilter:
-"blur(14px)",
+    color:"#fff",
 
-border:
-"1px solid rgba(255,255,255,.10)",
+    fontWeight:800,
 
-color:"#fff",
+    textTransform:"none",
 
-fontWeight:800,
+    "&:hover":{
 
-textTransform:"none",
+    background:
+    "rgba(139,197,63,.14)",
 
-"&:hover":{
+    transform:
+    "translateY(-2px)"
 
-background:
-"rgba(139,197,63,.14)",
+    }
 
-transform:
-"translateY(-2px)"
+    }}
 
-}
+    >
 
-}}
+    Back To Home
 
->
+    </Button>
 
-Back To Home
+    </Link>
+    <Box
 
-</Button>
+    sx={{
 
-</Link>
+    position:"absolute",
 
-<Box
+    width:"350px",
 
-sx={{
+    height:"350px",
 
-position:"absolute",
+    borderRadius:"50%",
 
-width:"350px",
+    background:
+    "rgba(139,197,63,.08)",
 
-height:"350px",
+    top:"-100px",
 
-borderRadius:"50%",
+    right:"-100px",
 
-background:
-"rgba(139,197,63,.08)",
+    filter:"blur(100px)"
 
-top:"-100px",
+    }}
 
-right:"-100px",
+    />
+    <Paper
 
-filter:"blur(100px)"
+    elevation={0}
 
-}}
+    sx={{
 
-/>
+    width:"100%",
 
-<Paper
+    maxWidth:"850px",
 
-elevation={0}
+    overflow:"hidden",
 
-sx={{
+    borderRadius:"24px",
 
-width:"100%",
+    display:"grid",
 
-maxWidth:"850px",
+    gridTemplateColumns:{
+    xs:"1fr",
+    md:"1fr 1fr"
+    },
 
-overflow:"hidden",
+    background:"#fff",
 
-borderRadius:"24px",
+    boxShadow:
+    "0 30px 80px rgba(0,0,0,.25)"
 
-display:"grid",
+    }}
 
-gridTemplateColumns:{
-xs:"1fr",
-md:"1fr 1fr"
-},
+    >
 
-background:"#fff",
+    {/* LEFT SECTION */}
 
-boxShadow:
-"0 30px 80px rgba(0,0,0,.25)"
+    <Box
 
-}}
+    sx={{
 
->
+    display:{
+    xs:"none",
+    md:"flex"
+    },
 
-{/* LEFT SECTION */}
+    flexDirection:"column",
 
-<Box
+    justifyContent:"flex-end",
 
-sx={{
+    position:"relative",
 
-display:{
-xs:"none",
-md:"flex"
-},
+    minHeight:"520px",
 
-flexDirection:"column",
+    backgroundImage:
+    "url('https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1800&auto=format&fit=crop')",
 
-justifyContent:"flex-end",
+    backgroundSize:"cover",
 
-position:"relative",
+    backgroundPosition:"center",
 
-minHeight:"520px",
+    p:4
 
-backgroundImage:
-"url('https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1800&auto=format&fit=crop')",
+    }}
 
-backgroundSize:"cover",
+    >
 
-backgroundPosition:"center",
+    <Box
 
-p:4
+    sx={{
 
-}}
+    position:"absolute",
 
->
+    inset:0,
 
-<Box
+    background:
+    "linear-gradient(to top,rgba(8,20,46,.95),rgba(8,20,46,.3))"
 
-sx={{
+    }}
 
-position:"absolute",
+    />
 
-inset:0,
+    <Box
+    sx={{
+    position:"relative",
+    zIndex:2
+    }}
 
-background:
-"linear-gradient(to top,rgba(8,20,46,.95),rgba(8,20,46,.3))"
+    >
 
-}}
+    <Typography
 
-/>
+    sx={{
 
-<Box
-sx={{
-position:"relative",
-zIndex:2
-}}
+    color:"#8BC53F",
 
->
+    fontWeight:700,
 
-<Typography
+    fontSize:"12px",
 
-sx={{
+    letterSpacing:"2px",
 
-color:"#8BC53F",
+    mb:1
 
-fontWeight:700,
+    }}
 
-fontSize:"12px",
+    >
 
-letterSpacing:"2px",
+    NETWORKTEN
 
-mb:1
+    </Typography>
 
-}}
+    <Typography
 
->
+    sx={{
 
-NETWORKTEN
+    color:"#fff",
 
-</Typography>
+    fontSize:"34px",
 
-<Typography
+    fontWeight:900,
 
-sx={{
+    lineHeight:1.1,
 
-color:"#fff",
+    mb:2
 
-fontSize:"34px",
+    }}
 
-fontWeight:900,
+    >
 
-lineHeight:1.1,
+    Admin
+    Control
+    Panel
 
-mb:2
+    </Typography>
 
-}}
+    <Typography
 
->
+    sx={{
 
-Admin
-Control
-Panel
+    color:
+    "rgba(255,255,255,.75)",
 
-</Typography>
+    fontSize:"14px",
 
-<Typography
+    lineHeight:1.8
 
-sx={{
+    }}
 
-color:
-"rgba(255,255,255,.75)",
+    >
 
-fontSize:"14px",
+    Manage products,
+    customer enquiries,
+    orders and business
+    operations securely.
 
-lineHeight:1.8
+    </Typography>
 
-}}
+    </Box>
 
->
+    </Box>
 
-Manage products,
-customer enquiries,
-orders and business
-operations securely.
+    {/* RIGHT SECTION */}
 
-</Typography>
+    <Box
 
-</Box>
+    sx={{
 
-</Box>
+    display:"flex",
 
-{/* RIGHT SECTION */}
+    alignItems:"center",
 
-<Box
+    justifyContent:"center",
 
-sx={{
+    p:4
 
-display:"flex",
+    }}
 
-alignItems:"center",
+    >
 
-justifyContent:"center",
+    <Box
+    sx={{
+    width:"100%",
+    maxWidth:"340px"
+    }}
 
-p:4
+    >
 
-}}
+    <Box
+    sx={{
+    textAlign:"center",
+    mb:4
+    }}
 
->
+    >
 
-<Box
-sx={{
-width:"100%",
-maxWidth:"340px"
-}}
+    <Box
 
->
+    sx={{
 
-<Box
-sx={{
-textAlign:"center",
-mb:4
-}}
+    width:"72px",
 
->
+    height:"72px",
 
-<Box
+    borderRadius:"18px",
 
-sx={{
+    background:
+    "linear-gradient(135deg,#8BC53F,#74ab35)",
 
-width:"72px",
+    display:"flex",
 
-height:"72px",
+    alignItems:"center",
 
-borderRadius:"18px",
+    justifyContent:"center",
 
-background:
-"linear-gradient(135deg,#8BC53F,#74ab35)",
+    mx:"auto",
 
-display:"flex",
+    mb:2
 
-alignItems:"center",
+    }}
 
-justifyContent:"center",
+    >
 
-mx:"auto",
+    <AdminPanelSettingsRoundedIcon
 
-mb:2
+    sx={{
+    fontSize:"38px",
+    color:"#fff"
+    }}
 
-}}
+    />
 
->
+    </Box>
 
-<AdminPanelSettingsRoundedIcon
+    <Typography
 
-sx={{
-fontSize:"38px",
-color:"#fff"
-}}
+    sx={{
 
-/>
+    fontSize:"28px",
 
-</Box>
+    fontWeight:900,
 
-<Typography
+    color:"#102048"
 
-sx={{
+    }}
 
-fontSize:"28px",
+    >
 
-fontWeight:900,
+    Admin Login
 
-color:"#102048"
+    </Typography>
 
-}}
+    <Typography
 
->
+    sx={{
 
-Admin Login
+    fontSize:"13px",
 
-</Typography>
+    color:"#667085",
 
-<Typography
+    mt:1
 
-sx={{
+    }}
 
-fontSize:"13px",
+    >
 
-color:"#667085",
+    Secure access to
+    NetworkTen dashboard
 
-mt:1
+    </Typography>
 
-}}
+    </Box>
 
->
+    <TextField
 
-Secure access to
-NetworkTen dashboard
+    fullWidth
 
-</Typography>
+    label="Admin ID"
 
-</Box>
+    value={adminId}
 
-<TextField
+    onChange={(e)=>
+    setAdminId(
+    e.target.value
+    )
+    }
 
-fullWidth
+    sx={{
+    mb:2
+    }}
 
-label="Admin ID"
+    />
 
-value={adminId}
+    <TextField
 
-onChange={(e)=>
-setAdminId(
-e.target.value
-)
-}
+    fullWidth
 
-sx={{
-mb:2
-}}
+    label="Password"
 
-/>
+    type={
+    showPassword
+    ? "text"
+    : "password"
+    }
 
-<TextField
+    value={password}
 
-fullWidth
+    onChange={(e)=>
+    setPassword(
+    e.target.value
+    )
+    }
 
-label="Password"
+    sx={{
+    mb:3
+    }}
 
-type={
-showPassword
-? "text"
-: "password"
-}
+    slotProps={{
+      input: {
 
-value={password}
+      endAdornment:(
 
-onChange={(e)=>
-setPassword(
-e.target.value
-)
-}
+      <InputAdornment
+      position="end"
 
-InputProps={{
+      >
 
-endAdornment:(
+      <IconButton
 
-<InputAdornment
-position="end"
+      onClick={()=>
+      setShowPassword(
+      !showPassword
+      )
+      }
 
->
+      edge="end"
 
-<IconButton
+      >
 
-onClick={()=>
-setShowPassword(
-!showPassword
-)
-}
+      {showPassword
+      ? <VisibilityOff />
+      : <Visibility />
+      }
 
-edge="end"
+      </IconButton>
 
->
+      </InputAdornment>
 
-{showPassword
-? <VisibilityOff />
-: <Visibility />
-}
+      )
 
-</IconButton>
+      }
+    }}
 
-</InputAdornment>
+    />
 
-)
+    <Button
 
-}}
+    fullWidth
 
-sx={{
-mb:3
-}}
+    variant="contained"
 
-/>
+    onClick={handleLogin}
 
-<Button
+    sx={{
 
-fullWidth
+    height:"52px",
 
-variant="contained"
+    borderRadius:"12px",
 
-onClick={handleLogin}
+    background:
+    "linear-gradient(135deg,#8BC53F,#74ab35)",
 
-sx={{
+    fontWeight:800,
 
-height:"52px",
+    fontSize:"14px",
 
-borderRadius:"12px",
+    textTransform:"none",
 
-background:
-"linear-gradient(135deg,#8BC53F,#74ab35)",
+    boxShadow:
+    "0 10px 25px rgba(139,197,63,.25)",
 
-fontWeight:800,
+    "&:hover":{
 
-fontSize:"14px",
+    background:
+    "linear-gradient(135deg,#74ab35,#5f9129)"
 
-textTransform:"none",
+    }
 
-boxShadow:
-"0 10px 25px rgba(139,197,63,.25)",
+    }}
 
-"&:hover":{
+    >
 
-background:
-"linear-gradient(135deg,#74ab35,#5f9129)"
+    Login To Dashboard
 
-}
+    </Button>
 
-}}
+    <Box
 
->
+    sx={{
 
-Login To Dashboard
+    display:"flex",
 
-</Button>
+    alignItems:"center",
 
-<Box
+    justifyContent:"center",
 
-sx={{
+    gap:1,
 
-display:"flex",
+    mt:2
 
-alignItems:"center",
+    }}
 
-justifyContent:"center",
+    >
 
-gap:1,
+    <SecurityRoundedIcon
 
-mt:2
+    sx={{
+    fontSize:"16px",
+    color:"#8BC53F"
+    }}
 
-}}
+    />
 
->
+    <Typography
 
-<SecurityRoundedIcon
+    sx={{
 
-sx={{
-fontSize:"16px",
-color:"#8BC53F"
-}}
+    fontSize:"11px",
 
-/>
+    color:"#98A2B3"
 
-<Typography
+    }}
 
-sx={{
+    >
 
-fontSize:"11px",
+    Authorized Access Only
 
-color:"#98A2B3"
+    </Typography>
 
-}}
+    </Box>
 
->
+    </Box>
 
-Authorized Access Only
+    </Box>
 
-</Typography>
-
-</Box>
-
-</Box>
-
-</Box>
-
-</Paper>
-
-</Box>
-
+    </Paper>
+  </Box>
 );
 
 }

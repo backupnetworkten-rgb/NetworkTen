@@ -135,15 +135,17 @@ export default function SecuritySection() {
             placeholder="Enter current password"
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
-                </InputAdornment>
-              ),
-              endAdornment: visibilityBtn("current"),
-            }}
             sx={fieldSx}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
+                  </InputAdornment>
+                ),
+                endAdornment: visibilityBtn("current"),
+              }
+            }}
           />
         </Box>
 
@@ -160,8 +162,10 @@ export default function SecuritySection() {
             placeholder="At least 6 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            InputProps={{ endAdornment: visibilityBtn("next") }}
             sx={fieldSx}
+            slotProps={{
+              input: { endAdornment: visibilityBtn("next") }
+            }}
           />
         </Box>
 
@@ -176,8 +180,10 @@ export default function SecuritySection() {
             placeholder="Re-enter new password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            InputProps={{ endAdornment: visibilityBtn("confirm") }}
             sx={fieldSx}
+            slotProps={{
+              input: { endAdornment: visibilityBtn("confirm") }
+            }}
           />
         </Box>
 

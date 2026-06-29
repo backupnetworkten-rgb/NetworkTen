@@ -120,9 +120,7 @@ export default function BlogPage() {
           content="CCTV solutions, smart networking, access control systems, conference room setup, security systems, business automation"
         />
       </Head>
-
       <Navbar />
-
       {/* HERO */}
       <Box
         sx={{
@@ -208,13 +206,6 @@ export default function BlogPage() {
             placeholder="Search articles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchRoundedIcon sx={{ color: "#98A2B3" }} />
-                </InputAdornment>
-              ),
-            }}
             sx={{
               maxWidth: "420px",
               width: "100%",
@@ -225,10 +216,18 @@ export default function BlogPage() {
               },
               "& fieldset": { border: "none" },
             }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchRoundedIcon sx={{ color: "#98A2B3" }} />
+                  </InputAdornment>
+                ),
+              }
+            }}
           />
         </Box>
       </Box>
-
       {/* BLOG SECTION */}
       <Box
         sx={{
@@ -625,7 +624,6 @@ export default function BlogPage() {
           )}
         </Box>
       </Box>
-
       <Snackbar
         open={snack.open}
         autoHideDuration={2500}
@@ -636,7 +634,6 @@ export default function BlogPage() {
           {snack.msg}
         </Alert>
       </Snackbar>
-
       <Footer />
     </>
   );

@@ -215,12 +215,14 @@ export default function ProductsPage() {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               sx={filterSx}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <TuneRoundedIcon sx={{ color: "#102048" }} />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <TuneRoundedIcon sx={{ color: "#102048" }} />
+                    </InputAdornment>
+                  ),
+                }
               }}
             >
               <MenuItem value="All">All Categories</MenuItem>
@@ -239,12 +241,14 @@ export default function ProductsPage() {
               value={sort}
               onChange={(e) => setSort(e.target.value)}
               sx={filterSx}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SortRoundedIcon sx={{ color: "#102048" }} />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SortRoundedIcon sx={{ color: "#102048" }} />
+                    </InputAdornment>
+                  ),
+                }
               }}
             >
               <MenuItem value="latest">Latest First</MenuItem>
