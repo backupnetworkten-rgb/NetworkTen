@@ -146,9 +146,7 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
           subtitle="Manage your photo and personal details"
         />
       </Box>
-
       <Divider sx={{ borderColor: "#F0F1F6" }} />
-
       {/* ── Avatar card ── */}
       <Box sx={{ px: { xs: 3, md: 5 }, py: 4 }}>
         <Box
@@ -276,9 +274,7 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
           </Box>
         </Box>
       </Box>
-
       <Divider sx={{ borderColor: "#F0F1F6", mx: { xs: 3, md: 5 } }} />
-
       {/* ── Form fields ── */}
       <Box
         sx={{
@@ -300,7 +296,11 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
           Personal details
         </Typography>
 
-        <Box display="grid" gap={3}>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3
+          }}>
           {/* Full name */}
           <TextField
             fullWidth
@@ -391,7 +391,6 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
           </Box>
         </Box>
       </Box>
-
       {/* Toast */}
       <Snackbar
         open={!!toast}

@@ -252,7 +252,14 @@ router.push(
   if (loading) return (
     <>
       <Header />
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="70vh" sx={{ background: C.pageBg }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "70vh",
+          background: C.pageBg
+        }}>
         <CircularProgress sx={{ color: C.razorBlue }} />
       </Box>
       <Footer />
@@ -262,9 +269,24 @@ router.push(
   if (!product) return (
     <>
       <Header />
-      <Box textAlign="center" py={16} sx={{ background: C.pageBg, minHeight: "70vh" }}>
-        <Typography fontSize="48px">😕</Typography>
-        <Typography fontWeight={600} fontSize="20px" color={C.heading} mt={1} fontFamily={sans}>Product Not Found</Typography>
+      <Box
+        sx={{
+          textAlign: "center",
+          py: 16,
+          background: C.pageBg,
+          minHeight: "70vh"
+        }}>
+        <Typography sx={{
+          fontSize: "48px"
+        }}>😕</Typography>
+        <Typography
+          color={C.heading}
+          sx={{
+            fontWeight: 600,
+            fontSize: "20px",
+            mt: 1,
+            fontFamily: sans
+          }}>Product Not Found</Typography>
         <Button onClick={() => router.push("/products")} sx={{ mt: 2, textTransform: "none", color: C.blue, fontWeight: 700, fontFamily: sans }}>
           ← Back to Products
         </Button>
@@ -283,8 +305,18 @@ router.push(
         <Container maxWidth="lg">
 
           {/* ── BREADCRUMB ───────────────────────────────────────────────── */}
-          <Box display="flex" alignItems="center" gap={0.5} mb={2}
-            sx={{ background: C.surface, px: 2.5, py: 1.2, borderRadius: "10px", border: `1px solid ${C.border}` }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              mb: 2,
+              background: C.surface,
+              px: 2.5,
+              py: 1.2,
+              borderRadius: "10px",
+              border: `1px solid ${C.border}`
+            }}>
             <Button
               startIcon={<ArrowBackRoundedIcon sx={{ fontSize: "13px !important" }} />}
               onClick={() => router.push("/products")}
@@ -505,8 +537,16 @@ router.push(
                 <Box sx={{ height: "1px", background: C.border, mb: 2.5 }} />
 
                 {/* Price */}
-                <Box mb={2.5}>
-                  <Box display="flex" alignItems="baseline" gap={1.5} flexWrap="wrap">
+                <Box sx={{
+                  mb: 2.5
+                }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: 1.5,
+                      flexWrap: "wrap"
+                    }}>
                     <Typography sx={{
                       fontSize: { xs: "28px", md: "32px" }, fontWeight: 800, color: C.heading,
                       fontFamily: sans, lineHeight: 1, letterSpacing: "-1px", fontVariantNumeric: "tabular-nums",
@@ -519,12 +559,16 @@ router.push(
                       </Typography>
                     )}
                     {discount > 0 && (
-                      <Box display="inline-flex" alignItems="center" gap={0.5}
+                      <Box
                         sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 0.5,
                           background: "transparent",
                           border: `1.5px solid ${C.red}`,
                           borderRadius: "6px",
-                          px: 1.1, py: 0.4,
+                          px: 1.1,
+                          py: 0.4
                         }}>
                         <LocalOfferOutlinedIcon sx={{ fontSize: 11, color: C.red }} />
                         <Typography sx={{ fontSize: "11.5px", fontWeight: 700, color: C.red, fontFamily: sans }}>
@@ -638,8 +682,15 @@ router.push(
                 </Box>
 
                 {/* Total */}
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}
-                  sx={{ borderTop: `1px solid ${C.border}`, pt: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    mb: 2,
+                    borderTop: `1px solid ${C.border}`,
+                    pt: 2
+                  }}>
                   <Typography sx={{ fontSize: "14px", fontWeight: 600, color: C.textSub, fontFamily: sans }}>Total</Typography>
                   <Typography sx={{ fontSize: "22px", fontWeight: 800, color: C.heading, fontFamily: sans, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.5px" }}>
                     Rs. {total.toLocaleString("en-IN")}
@@ -696,7 +747,12 @@ router.push(
                     display: "flex", alignItems: "center", justifyContent: "space-between",
                   }}>
                     {/* Left: shield + title */}
-                    <Box display="flex" alignItems="center" gap={1.5}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5
+                      }}>
                       <Box sx={{
                         width: 38, height: 38, borderRadius: "10px",
                         background: "rgba(255,255,255,0.15)",
@@ -895,11 +951,21 @@ router.push(
           {/* ── YOU MAY ALSO LIKE ────────────────────────────────────────── */}
           {related.length > 0 && (
             <Box sx={{ background: C.surface, borderRadius: "14px", border: `1px solid ${C.border}`, p: "24px" }}>
-              <Box display="flex" alignItems="center" justifyContent="space-between" mb={2.5}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 2.5
+                }}>
                 <Typography sx={{ fontSize: { xs: "16px", md: "18px" }, fontWeight: 700, color: C.heading, fontFamily: sans, letterSpacing: "-0.3px" }}>
                   You may also like
                 </Typography>
-                <Box display="flex" gap={0.8}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.8
+                  }}>
                   {(["left", "right"] as const).map((dir) => (
                     <IconButton key={dir} onClick={() => scrollCarousel(dir)}
                       sx={{
@@ -962,7 +1028,14 @@ router.push(
                       }}>
                         {item.name}
                       </Typography>
-                      <Box display="flex" alignItems="baseline" gap={0.7} mb={1.2} flexWrap="wrap">
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "baseline",
+                          gap: 0.7,
+                          mb: 1.2,
+                          flexWrap: "wrap"
+                        }}>
                         <Typography sx={{ fontWeight: 800, fontSize: "14px", color: C.heading, fontVariantNumeric: "tabular-nums", fontFamily: sans }}>
                           Rs. {Number(item.salePrice).toLocaleString("en-IN")}
                         </Typography>
@@ -990,7 +1063,6 @@ router.push(
 
         </Container>
       </Box>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -1003,7 +1075,6 @@ router.push(
           {snackbar.message}
         </Alert>
       </Snackbar>
-
       <Footer />
     </>
   );

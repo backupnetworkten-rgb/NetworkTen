@@ -366,7 +366,6 @@ export default function CartPage() {
                         )}
                         <img src={proxyImage(item.image)} alt={item.name} style={{ width: 84, height: 84, objectFit: "contain" }} />
                       </Box>
-
                       {/* Info panel */}
                       <Box sx={{ flex: 1, minWidth: 0, p: { xs: "16px 18px", md: "18px 22px" }, display: "flex", flexDirection: "column" }}>
                         <Typography sx={{ fontSize: "9px", fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: "1px", mb: 0.5, fontFamily: sans }}>
@@ -385,7 +384,14 @@ export default function CartPage() {
                           {item.name}
                         </Typography>
 
-                        <Box display="flex" alignItems="center" flexWrap="wrap" gap={1.1} mb={1.5}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: 1.1,
+                            mb: 1.5
+                          }}>
                           <Typography sx={{ fontFamily: sans, fontWeight: 800, fontSize: { xs: "18px", md: "20px" }, color: C.heading, letterSpacing: "-0.5px" }}>
                             ₹{item.salePrice.toLocaleString("en-IN")}
                           </Typography>

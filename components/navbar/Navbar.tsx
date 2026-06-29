@@ -347,7 +347,9 @@ user?.name
 </Box>
 
 <Box
-textAlign="left"
+sx={{
+  textAlign: "left"
+}}
 >
 
 <Typography
@@ -577,11 +579,10 @@ Login
             </Box>
           ) : (
             /* RIGHT — MOBILE */
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            (<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton sx={{ background: "#f5f7fb", width: 42, height: 42 }}>
                 <SearchIcon sx={{ color: "#102048" }} />
               </IconButton>
-
               <IconButton
                 onClick={() => setCartOpen(true)}
                 sx={{ background: "#f5f7fb", width: 42, height: 42 }}
@@ -598,15 +599,13 @@ Login
                   <ShoppingCartIcon sx={{ color: "#102048" }} />
                 </Badge>
               </IconButton>
-
               <IconButton onClick={() => setOpen(true)} sx={{ background: "#f5f7fb", width: 42, height: 42 }}>
                 <MenuIcon sx={{ color: "#102048" }} />
               </IconButton>
-            </Box>
+            </Box>)
           )}
         </Toolbar>
       </AppBar>
-
       {/* ═══════════════════════════ MOBILE NAV DRAWER ════════════════════════ */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
         <Box sx={{ width: 280, p: 3 }}>
@@ -673,7 +672,6 @@ Login
           </Box>
         </Box>
       </Drawer>
-
       {/* ═══════════════════════════ CART SIDE DRAWER ═════════════════════════ */}
       <Drawer
         anchor="right"
@@ -740,7 +738,7 @@ Login
         <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 2.5 }}>
           {cartItems.length === 0 ? (
             /* ── EMPTY STATE — properly padded, never touching edges ── */
-            <Box sx={{
+            (<Box sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -760,18 +758,15 @@ Login
               }}>
                 <ShoppingBagOutlinedIcon sx={{ fontSize: 40, color: "#102048", opacity: 0.3 }} />
               </Box>
-
               <Typography sx={{ fontWeight: 800, fontSize: "17px", color: "#102048" }}>
                 Your cart is empty
               </Typography>
-
               <Typography sx={{
                 fontSize: "13px", color: "#9aa0af", lineHeight: 1.65,
                 maxWidth: 240,
               }}>
                 Looks like you haven't added anything yet. Browse our products and find something you love.
               </Typography>
-
               <Button
                 onClick={() => { setCartOpen(false); router.push("/products"); }}
                 variant="contained"
@@ -789,7 +784,6 @@ Login
               >
                 Browse Products
               </Button>
-
               <Button
                 onClick={() => setCartOpen(false)}
                 sx={{
@@ -802,7 +796,7 @@ Login
               >
                 Continue browsing
               </Button>
-            </Box>
+            </Box>)
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               {cartItems.map((item) => {

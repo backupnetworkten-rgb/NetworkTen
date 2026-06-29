@@ -89,9 +89,7 @@ export default function SecuritySection() {
         title="Password"
         subtitle="Keep your account secure with a strong password"
       />
-
       <Divider sx={{ my: 3.5, borderColor: "#F0F1F6" }} />
-
       {/* Tip strip */}
       <Box
         sx={{
@@ -110,20 +108,22 @@ export default function SecuritySection() {
           Use at least 6 characters. A mix of letters, numbers and symbols makes a stronger password.
         </Typography>
       </Box>
-
       <Collapse in={success}>
         <Alert severity="success" sx={{ mb: 2.5, borderRadius: "12px", fontSize: 13.5 }}>
           Password updated successfully.
         </Alert>
       </Collapse>
-
       <Collapse in={!!error}>
         <Alert severity="error" sx={{ mb: 2.5, borderRadius: "12px", fontSize: 13.5 }}>
           {error}
         </Alert>
       </Collapse>
-
-      <Box display="grid" gap={2.5} maxWidth={460}>
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2.5,
+          maxWidth: 460
+        }}>
         {/* Current password */}
         <Box>
           <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#5B6178", mb: 0.75, ml: 0.5 }}>
@@ -223,7 +223,12 @@ function StrengthBar({ password }: { password: string }) {
 
   return (
     <Box>
-      <Box display="flex" gap={0.5} mb={0.75}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 0.5,
+          mb: 0.75
+        }}>
         {[0, 1, 2, 3].map((i) => (
           <Box
             key={i}

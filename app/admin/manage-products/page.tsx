@@ -105,12 +105,24 @@ export default function ManageProductsPage() {
                 color: "#fff",
               }}
             >
-              <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
                 <Box>
-                  <Typography fontSize="12px" opacity=".7">
+                  <Typography opacity=".7" sx={{
+                    fontSize: "12px"
+                  }}>
                     {item.title}
                   </Typography>
-                  <Typography fontSize="28px" fontWeight={900} lineHeight={1.2}>
+                  <Typography
+                    sx={{
+                      fontSize: "28px",
+                      fontWeight: 900,
+                      lineHeight: 1.2
+                    }}>
                     {item.value}
                   </Typography>
                 </Box>
@@ -204,13 +216,29 @@ export default function ManageProductsPage() {
       </Paper>
       {/* ── PRODUCT GRID ── */}
       {loading ? (
-        <Box textAlign="center" py={10}>
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 10
+          }}>
           <CircularProgress sx={{ color: "#102048" }} />
         </Box>
       ) : filtered.length === 0 ? (
-        <Box textAlign="center" py={10}>
-          <Typography fontSize="40px">🔍</Typography>
-          <Typography fontWeight={900} fontSize="18px" color="#102048" mt={1}>
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 10
+          }}>
+          <Typography sx={{
+            fontSize: "40px"
+          }}>🔍</Typography>
+          <Typography
+            sx={{
+              fontWeight: 900,
+              fontSize: "18px",
+              color: "#102048",
+              mt: 1
+            }}>
             No Products Found
           </Typography>
         </Box>
@@ -325,46 +353,73 @@ export default function ManageProductsPage() {
                     />
 
                     <Typography
-                      fontWeight={800}
-                      fontSize="13px"
-                      color="#102048"
-                      lineHeight={1.3}
-                      mb={0.4}
                       sx={{
+                        fontWeight: 800,
+                        fontSize: "13px",
+                        color: "#102048",
+                        lineHeight: 1.3,
+                        mb: 0.4,
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
+                        overflow: "hidden"
+                      }}>
                       {item.name}
                     </Typography>
 
-                    <Typography fontSize="11px" color="#8BC53F" fontWeight={700} mb={0.5}>
+                    <Typography
+                      sx={{
+                        fontSize: "11px",
+                        color: "#8BC53F",
+                        fontWeight: 700,
+                        mb: 0.5
+                      }}>
                       {item.brand}
                     </Typography>
 
-                    <Box display="flex" alignItems="baseline" gap={0.8} mb={0.5}>
-                      <Typography fontWeight={900} fontSize="16px" color="#102048">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: 0.8,
+                        mb: 0.5
+                      }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 900,
+                          fontSize: "16px",
+                          color: "#102048"
+                        }}>
                         ₹{Number(item.salePrice).toLocaleString("en-IN")}
                       </Typography>
                       {item.price > item.salePrice && (
                         <Typography
-                          fontSize="11px"
-                          color="#98A2B3"
-                          sx={{ textDecoration: "line-through" }}
-                        >
+                          sx={{
+                            fontSize: "11px",
+                            color: "#98A2B3",
+                            textDecoration: "line-through"
+                          }}>
                           ₹{Number(item.price).toLocaleString("en-IN")}
                         </Typography>
                       )}
                     </Box>
 
-                    <Typography fontSize="11px" color="#667085" mb={1.5}>
+                    <Typography
+                      sx={{
+                        fontSize: "11px",
+                        color: "#667085",
+                        mb: 1.5
+                      }}>
                       Stock: <strong>{item.stock}</strong>
                     </Typography>
 
                     {/* ── BUTTONS ── */}
-                    <Box display="flex" gap={1} mt="auto">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 1,
+                        mt: "auto"
+                      }}>
                       <Button
                         fullWidth
                         size="small"
@@ -421,7 +476,11 @@ export default function ManageProductsPage() {
           Delete Product
         </DialogTitle>
         <DialogContent>
-          <Typography fontSize="14px" color="#667085">
+          <Typography
+            sx={{
+              fontSize: "14px",
+              color: "#667085"
+            }}>
             Are you sure you want to remove this product permanently?
           </Typography>
         </DialogContent>

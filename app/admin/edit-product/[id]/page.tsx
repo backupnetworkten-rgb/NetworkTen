@@ -521,7 +521,7 @@ export default function EditProductPage() {
                 {images[0].url && !images[0].error && images[0].loaded ? (
                   <img src={proxyImage(images[0].url)} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 ) : (
-                  <Box textAlign="center" sx={{ opacity: 0.4 }}>
+                  <Box sx={{ textAlign: "center", opacity: 0.4 }}>
                     <AddPhotoAlternateRoundedIcon sx={{ fontSize: 40, color: "#94a3b8" }} />
                     <Typography sx={{ fontSize: "11px", color: "#94a3b8", mt: 0.5 }}>
                       {images[0].error ? "Invalid URL" : "No image"}
