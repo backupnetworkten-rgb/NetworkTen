@@ -470,7 +470,9 @@ export default function ManageProductsPage() {
       <Dialog
         open={!!deleteId}
         onClose={() => setDeleteId("")}
-        PaperProps={{ sx: { borderRadius: "18px", p: 1 } }}
+        slotProps={{
+          paper: { sx: { borderRadius: "18px", p: 1 } }
+        }}
       >
         <DialogTitle sx={{ fontWeight: 800, color: "#102048" }}>
           Delete Product
