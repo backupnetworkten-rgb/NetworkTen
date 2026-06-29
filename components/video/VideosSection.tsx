@@ -47,7 +47,7 @@ export default function VideosSection() {
     ]);
 
   const handlePlayPause = (
-    index
+    index: number
   ) => {
     const video =
       videoRefs.current[index];
