@@ -112,9 +112,7 @@ export default function ManageProductsPage() {
                   alignItems: "center"
                 }}>
                 <Box>
-                  <Typography opacity=".7" sx={{
-                    fontSize: "12px"
-                  }}>
+                 <Typography sx={{ opacity: 0.6, fontSize: "12px" }}>
                     {item.title}
                   </Typography>
                   <Typography
