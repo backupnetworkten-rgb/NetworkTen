@@ -83,7 +83,6 @@ export default function ManageProductsPage() {
 
   return (
     <AdminLayout title="Manage Products">
-
       {/* ── STATS ── */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
@@ -91,7 +90,12 @@ export default function ManageProductsPage() {
           { title: "Categories", value: totalCategories, icon: <CategoryRoundedIcon /> },
           { title: "In Stock", value: activeProducts, icon: <SellRoundedIcon /> },
         ].map((item, index) => (
-          <Grid item xs={12} md={4} key={index}>
+          <Grid
+            key={index}
+            size={{
+              xs: 12,
+              md: 4
+            }}>
             <Paper
               elevation={0}
               sx={{
@@ -118,11 +122,14 @@ export default function ManageProductsPage() {
           </Grid>
         ))}
       </Grid>
-
       {/* ── FILTERS ── */}
       <Paper elevation={0} sx={{ p: 2.5, mb: 3, borderRadius: "18px" }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 8
+            }}>
             <TextField
               fullWidth
               placeholder="Search Products"
@@ -145,7 +152,11 @@ export default function ManageProductsPage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 2
+            }}>
             <TextField
               select
               fullWidth
@@ -167,7 +178,11 @@ export default function ManageProductsPage() {
             </TextField>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid
+            size={{
+              xs: 12,
+              md: 2
+            }}>
             <Button
               fullWidth
               variant="contained"
@@ -187,7 +202,6 @@ export default function ManageProductsPage() {
           </Grid>
         </Grid>
       </Paper>
-
       {/* ── PRODUCT GRID ── */}
       {loading ? (
         <Box textAlign="center" py={10}>
@@ -209,7 +223,14 @@ export default function ManageProductsPage() {
                 : 0;
 
             return (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+              <Grid
+                key={item.id}
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
+                  lg: 3
+                }}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -390,7 +411,6 @@ export default function ManageProductsPage() {
           })}
         </Grid>
       )}
-
       {/* ── DELETE DIALOG ── */}
       <Dialog
         open={!!deleteId}
@@ -432,7 +452,6 @@ export default function ManageProductsPage() {
           </Button>
         </DialogActions>
       </Dialog>
-
     </AdminLayout>
   );
 }
