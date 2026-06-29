@@ -6,7 +6,7 @@ useState
 } from "react";
 
 import {
-onAuthStateChanged
+onAuthStateChanged, User
 } from "firebase/auth";
 
 import {
@@ -15,10 +15,7 @@ auth
 
 export default function useAuth(){
 
-const [
-user,
-setUser
-]=useState(null);
+const [user, setUser] = useState<User | null>(null);
 
 const [
 loading,
