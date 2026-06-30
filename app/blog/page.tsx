@@ -39,8 +39,17 @@ import Footer from "../../components/footer/Footer";
 
 import { BlogPost, getAllBlogs } from "@/lib/blogService";
 
+// Strips HTML tags before counting words, since `content` now stores
+// rich-text HTML (e.g. "<h2>...</h2><ul><li>...</li></ul>") and tag
+// markup would otherwise be miscounted as words.
+function stripHtml(html: string) {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, " ");
+}
+
 function getReadingTime(content: string) {
-  const words = content?.trim().split(/\s+/).filter(Boolean).length || 0;
+  const plainText = stripHtml(content);
+  const words = plainText.trim().split(/\s+/).filter(Boolean).length || 0;
   return Math.max(1, Math.ceil(words / 200));
 }
 

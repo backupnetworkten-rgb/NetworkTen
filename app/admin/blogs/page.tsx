@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
@@ -17,10 +17,21 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  Tooltip,
+  Divider,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import FormatBoldRoundedIcon from "@mui/icons-material/FormatBoldRounded";
+import FormatItalicRoundedIcon from "@mui/icons-material/FormatItalicRounded";
+import FormatUnderlinedRoundedIcon from "@mui/icons-material/FormatUnderlinedRounded";
+import FormatListBulletedRoundedIcon from "@mui/icons-material/FormatListBulletedRounded";
+import FormatListNumberedRoundedIcon from "@mui/icons-material/FormatListNumberedRounded";
+import FormatQuoteRoundedIcon from "@mui/icons-material/FormatQuoteRounded";
+import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
+import UndoRoundedIcon from "@mui/icons-material/UndoRounded";
+import RedoRoundedIcon from "@mui/icons-material/RedoRounded";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
   BlogPost,
@@ -45,6 +56,200 @@ const emptyForm = {
   }),
 };
 
+/* ────────────────────────────────────────────────────────────
+   RICH TEXT EDITOR
+   Lightweight contentEditable editor with a formatting toolbar.
+   Produces clean HTML (h1/h2/h3, strong, em, ul/ol/li, blockquote)
+   that can be rendered directly on the blog detail page via
+   dangerouslySetInnerHTML.
+   ──────────────────────────────────────────────────────────── */
+interface RichTextEditorProps {
+  value: string;
+  onChange: (html: string) => void;
+}
+
+function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+
+  // Sync external value into the editor only on mount / when switching
+  // between Add and Edit, so we don't fight the user's cursor while typing.
+  useEffect(() => {
+    if (editorRef.current && isFirstRender.current) {
+      editorRef.current.innerHTML = value || "";
+      isFirstRender.current = false;
+    }
+  }, [value]);
+
+  const exec = (command: string, arg?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(command, false, arg);
+    handleInput();
+  };
+
+  const applyBlock = (tag: string) => {
+    exec("formatBlock", tag);
+  };
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const insertLink = () => {
+    const url = window.prompt("Enter URL");
+    if (url) exec("createLink", url);
+  };
+
+  const toolbarBtn = (
+    icon: React.ReactNode,
+    label: string,
+    onClick: () => void
+  ) => (
+    <Tooltip title={label} key={label}>
+      <IconButton
+        size="small"
+        onMouseDown={(e) => e.preventDefault()} // keep editor selection intact
+        onClick={onClick}
+        sx={{
+          borderRadius: "8px",
+          color: "#102048",
+          "&:hover": { background: "#eef2fb" },
+        }}
+      >
+        {icon}
+      </IconButton>
+    </Tooltip>
+  );
+
+  return (
+    <Box
+      sx={{
+        border: "1px solid #d8deea",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
+    >
+      {/* Toolbar */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          flexWrap: "wrap",
+          px: 1,
+          py: 0.75,
+          background: "#f5f7fb",
+          borderBottom: "1px solid #d8deea",
+        }}
+      >
+        <Tooltip title="Heading 1">
+          <Button
+            size="small"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyBlock("H1")}
+            sx={{ minWidth: "36px", fontWeight: 800, fontSize: "13px", color: "#102048" }}
+          >
+            H1
+          </Button>
+        </Tooltip>
+        <Tooltip title="Heading 2">
+          <Button
+            size="small"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyBlock("H2")}
+            sx={{ minWidth: "36px", fontWeight: 800, fontSize: "12.5px", color: "#102048" }}
+          >
+            H2
+          </Button>
+        </Tooltip>
+        <Tooltip title="Heading 3">
+          <Button
+            size="small"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyBlock("H3")}
+            sx={{ minWidth: "36px", fontWeight: 800, fontSize: "12px", color: "#102048" }}
+          >
+            H3
+          </Button>
+        </Tooltip>
+        <Tooltip title="Paragraph">
+          <Button
+            size="small"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => applyBlock("P")}
+            sx={{ minWidth: "36px", fontWeight: 700, fontSize: "12px", color: "#667085" }}
+          >
+            P
+          </Button>
+        </Tooltip>
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        {toolbarBtn(<FormatBoldRoundedIcon sx={{ fontSize: 18 }} />, "Bold", () => exec("bold"))}
+        {toolbarBtn(<FormatItalicRoundedIcon sx={{ fontSize: 18 }} />, "Italic", () => exec("italic"))}
+        {toolbarBtn(<FormatUnderlinedRoundedIcon sx={{ fontSize: 18 }} />, "Underline", () => exec("underline"))}
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        {toolbarBtn(<FormatListBulletedRoundedIcon sx={{ fontSize: 18 }} />, "Bullet List", () =>
+          exec("insertUnorderedList")
+        )}
+        {toolbarBtn(<FormatListNumberedRoundedIcon sx={{ fontSize: 18 }} />, "Numbered List", () =>
+          exec("insertOrderedList")
+        )}
+        {toolbarBtn(<FormatQuoteRoundedIcon sx={{ fontSize: 18 }} />, "Quote", () => applyBlock("BLOCKQUOTE"))}
+        {toolbarBtn(<LinkRoundedIcon sx={{ fontSize: 18 }} />, "Insert Link", insertLink)}
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+
+        {toolbarBtn(<UndoRoundedIcon sx={{ fontSize: 18 }} />, "Undo", () => exec("undo"))}
+        {toolbarBtn(<RedoRoundedIcon sx={{ fontSize: 18 }} />, "Redo", () => exec("redo"))}
+      </Box>
+
+      {/* Editable area */}
+      <Box
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={handleInput}
+        onBlur={handleInput}
+        sx={{
+          minHeight: "260px",
+          maxHeight: "480px",
+          overflowY: "auto",
+          p: 2.5,
+          fontSize: "14px",
+          lineHeight: 1.8,
+          color: "#102048",
+          outline: "none",
+          "& h1": { fontSize: "26px", fontWeight: 900, color: "#102048", my: 1.5, lineHeight: 1.25 },
+          "& h2": { fontSize: "20px", fontWeight: 800, color: "#102048", my: 1.25, lineHeight: 1.3 },
+          "& h3": { fontSize: "16px", fontWeight: 800, color: "#102048", my: 1, lineHeight: 1.3 },
+          "& p": { my: 1 },
+          "& ul, & ol": { pl: 3, my: 1 },
+          "& li": { mb: 0.5 },
+          "& blockquote": {
+            borderLeft: "3px solid #8BC53F",
+            background: "#f5f7fb",
+            m: "12px 0",
+            p: "10px 16px",
+            borderRadius: "8px",
+            color: "#667085",
+            fontStyle: "italic",
+          },
+          "& a": { color: "#8BC53F", fontWeight: 700, textDecoration: "underline" },
+          "&:empty:before": {
+            content: '"Write your blog content here…"',
+            color: "#98A2B3",
+          },
+        }}
+      />
+    </Box>
+  );
+}
+
 export default function AdminBlogsPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +257,7 @@ export default function AdminBlogsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [editorKey, setEditorKey] = useState(0); // forces editor remount per dialog open
   const [snack, setSnack] = useState<{
     open: boolean;
     msg: string;
@@ -78,6 +284,7 @@ export default function AdminBlogsPage() {
   const openAddDialog = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setEditorKey((k) => k + 1);
     setOpen(true);
   };
 
@@ -92,6 +299,7 @@ export default function AdminBlogsPage() {
       category: blog.category,
       date: blog.date,
     });
+    setEditorKey((k) => k + 1);
     setOpen(true);
   };
 
@@ -231,7 +439,7 @@ export default function AdminBlogsPage() {
         </Box>
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
         <DialogTitle sx={{ fontWeight: 800, color: "#102048" }}>
           {editingId ? "Edit Blog Post" : "Add New Blog Post"}
         </DialogTitle>
@@ -269,14 +477,19 @@ export default function AdminBlogsPage() {
             multiline
             minRows={2}
           />
-          <TextField
-            label="Full Content (shown on blog detail page)"
-            value={form.content}
-            onChange={(e) => setForm({ ...form, content: e.target.value })}
-            fullWidth
-            multiline
-            minRows={5}
-          />
+
+          {/* Rich content editor */}
+          <Box>
+            <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#102048", mb: 1 }}>
+              Full Content (shown on blog detail page)
+            </Typography>
+            <RichTextEditor
+              key={editorKey}
+              value={form.content}
+              onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+            />
+          </Box>
+
           <TextField
             label="Date"
             value={form.date}
