@@ -10,9 +10,17 @@ import {
 } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
+import type SwiperCore from "swiper";
 import "swiper/css";
 
-const solutions = [
+interface Solution {
+  title: string;
+  image: string;
+  description: string;
+  products: string[];
+}
+
+const solutions: Solution[] = [
   {
     title: "BANKING & RETAILS",
     image:
@@ -130,12 +138,17 @@ const solutions = [
 ];
 
 // ── Individual Card ──────────────────────────────────────────────────────────
-function SolutionCard({ item, onHoverChange }) {
+interface SolutionCardProps {
+  item: Solution;
+  onHoverChange: (hovered: boolean) => void;
+}
+
+function SolutionCard({ item, onHoverChange }: SolutionCardProps) {
   const [hovered, setHovered] = useState(false);
-  const leaveTimer = useRef(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
-    clearTimeout(leaveTimer.current);
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
     setHovered(true);
     onHoverChange(true);
   };
@@ -354,9 +367,9 @@ function SolutionCard({ item, onHoverChange }) {
 
 // ── Main Section ─────────────────────────────────────────────────────────────
 export default function SolutionsSection() {
-  const swiperRef = useRef(null);
+  const swiperRef = useRef<SwiperCore | null>(null);
 
-  const handleCardHoverChange = (isHovered) => {
+  const handleCardHoverChange = (isHovered: boolean) => {
     if (!swiperRef.current) return;
     if (isHovered) {
       swiperRef.current.autoplay.stop();
