@@ -235,13 +235,15 @@ export default function PartnersSection() {
 
                 <Box
                   sx={{
-                    height:150,
+                    height:220,
 
                     display:"flex",
 
                     alignItems:"center",
 
                     justifyContent:"center",
+
+                    px:2,
 
                     transition:
                     ".4s",
@@ -265,13 +267,13 @@ export default function PartnersSection() {
                       width:"100%",
 
                       maxWidth:{
-                        xs:"180px",
-                        md:"230px"
+                        xs:"260px",
+                        md:"320px"
                       },
 
                       maxHeight:{
-                        xs:"85px",
-                        md:"120px"
+                        xs:"140px",
+                        md:"190px"
                       },
 
                       objectFit:
@@ -290,7 +292,7 @@ export default function PartnersSection() {
                         opacity:1,
 
                         transform:
-                        "scale(1.15)"
+                        "scale(1.12)"
                       }
                     }}
 

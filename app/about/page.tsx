@@ -24,6 +24,9 @@ import PartnersSection from "../../components/partners/PartnersSection";
 
 import PillarsSection from "../../components/pillars/PillarsSection";
 
+import InstallationSupportSection from "../../components/install/InstallationSupportSection";
+
+
 import Image from "next/image";
 
 import Link from "next/link";
@@ -601,6 +604,8 @@ export default function AboutPage() {
 
       {/* PARTNERS SECTION */}
       <PartnersSection />
+
+      <InstallationSupportSection />
 
       {/* PROJECTS / YOUTUBE */}
 
