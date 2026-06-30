@@ -614,7 +614,15 @@ export default function Navbar() {
                 onClick={() => setMobileSolutions(!mobileSolutions)}
                 sx={{ borderRadius: "12px", mb: 1 }}
               >
-                <ListItemText primary="Solutions" primaryTypographyProps={{ fontWeight: 700 }} />
+                // After
+<ListItemText
+  primary="Solutions"
+  slotProps={{
+    primary: {
+      sx: { fontWeight: 700 },
+    },
+  }}
+/>
                 {mobileSolutions ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
             </ListItem>
