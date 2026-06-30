@@ -641,10 +641,15 @@ export default function Navbar() {
                         }}
                       >
                         <Box sx={{ mr: 1.5, fontSize: "18px" }}>{sol.icon}</Box>
-                        <ListItemText
-                          primary={sol.title}
-                          primaryTypographyProps={{ fontSize: "13px", fontWeight: 700, color: "#102048" }}
-                        />
+                        // After
+<ListItemText
+  primary={sol.title}
+  slotProps={{
+    primary: {
+      sx: { fontSize: "13px", fontWeight: 700, color: "#102048" },
+    },
+  }}
+/>
                       </ListItemButton>
                     </Link>
                   </ListItem>
@@ -653,10 +658,15 @@ export default function Navbar() {
                 <ListItem disablePadding sx={{ pl: 1 }}>
                   <Link href="/solutions" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
                     <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
-                      <ListItemText
-                        primary="View All Solutions →"
-                        primaryTypographyProps={{ fontSize: "12.5px", fontWeight: 800, color: "#8BC53F" }}
-                      />
+                      // After
+<ListItemText
+  primary="View All Solutions →"
+  slotProps={{
+    primary: {
+      sx: { fontSize: "12.5px", fontWeight: 800, color: "#8BC53F" },
+    },
+  }}
+/>
                     </ListItemButton>
                   </Link>
                 </ListItem>
