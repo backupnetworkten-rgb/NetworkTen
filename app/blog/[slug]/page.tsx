@@ -90,15 +90,105 @@ export default function BlogDetailPage() {
         <Button
           startIcon={<ArrowBackRoundedIcon />}
           onClick={() => router.push("/blog")}
-          sx={{ color: "#667085", fontWeight: 700, textTransform: "none", mb: 3 }}
+          sx={{ color: "#667085", fontWeight: 700, textTransform: "none", mb: 4 }}
         >
           Back to all blogs
         </Button>
-        {blog.content.split("\n").filter(Boolean).map((para, i) => (
-          <Typography key={i} sx={{ color: "#475467", lineHeight: 1.9, fontSize: "15px", mb: 2.5 }}>
-            {para}
-          </Typography>
-        ))}
+
+        {/* RICH CONTENT — rendered from HTML produced by the admin editor.
+            Matches h1/h2/h3, bold, lists, quotes, and links to the
+            site's brand styling so published posts look premium. */}
+        <Box
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+          sx={{
+            color: "#475467",
+            fontSize: "15.5px",
+            lineHeight: 1.9,
+
+            "& h1": {
+              color: "#102048",
+              fontWeight: 900,
+              fontSize: { xs: "26px", md: "32px" },
+              lineHeight: 1.25,
+              letterSpacing: "-0.5px",
+              mt: 4,
+              mb: 2,
+            },
+            "& h2": {
+              color: "#102048",
+              fontWeight: 800,
+              fontSize: { xs: "21px", md: "24px" },
+              lineHeight: 1.3,
+              mt: 4,
+              mb: 1.75,
+              pb: 1,
+              borderBottom: "2px solid #edf1f7",
+            },
+            "& h3": {
+              color: "#102048",
+              fontWeight: 800,
+              fontSize: { xs: "17px", md: "19px" },
+              lineHeight: 1.35,
+              mt: 3,
+              mb: 1.25,
+            },
+            "& p": {
+              mb: 2.25,
+            },
+            "& strong, & b": {
+              color: "#102048",
+              fontWeight: 800,
+            },
+            "& em, & i": {
+              fontStyle: "italic",
+            },
+            "& ul, & ol": {
+              pl: 3,
+              mb: 2.5,
+              display: "grid",
+              gap: "8px",
+            },
+            "& li": {
+              pl: 0.5,
+            },
+            "& li::marker": {
+              color: "#8BC53F",
+              fontWeight: 800,
+            },
+            "& blockquote": {
+              borderLeft: "4px solid #8BC53F",
+              background: "#f5f7fb",
+              m: "24px 0",
+              p: { xs: "16px 18px", md: "18px 24px" },
+              borderRadius: "12px",
+              color: "#102048",
+              fontStyle: "italic",
+              fontSize: "15px",
+              lineHeight: 1.8,
+            },
+            "& a": {
+              color: "#8BC53F",
+              fontWeight: 700,
+              textDecoration: "underline",
+              textDecorationColor: "rgba(139,197,63,0.4)",
+            },
+            "& img": {
+              width: "100%",
+              borderRadius: "16px",
+              my: 3,
+            },
+            "& hr": {
+              border: "none",
+              borderTop: "1px solid #edf1f7",
+              my: 4,
+            },
+
+            // First element shouldn't have extra top margin under the back button
+            "& > :first-of-type": {
+              mt: 0,
+            },
+          }}
+        />
       </Box>
       <Footer />
     </>
