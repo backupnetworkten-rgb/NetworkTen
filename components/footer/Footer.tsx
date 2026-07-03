@@ -235,7 +235,7 @@ export default function Footer() {
                 {
                   icon:
                     <FacebookRoundedIcon />,
-                  link: "#",
+                  link: "https://www.facebook.com/Network_TEN?mibextid=ZbWKwL",
                 },
 
                 {
@@ -248,7 +248,7 @@ export default function Footer() {
                 {
                   icon:
                     <LinkedInIcon />,
-                  link: "#",
+                  link: "https://www.linkedin.com/in/network-ten",
                 },
 
                 {
