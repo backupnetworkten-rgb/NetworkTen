@@ -941,7 +941,7 @@ router.push(
               GST Invoice available, just mail back with details to order confirmation mail.
             </Typography>
             <Typography sx={{ fontSize: { xs: "20px", md: "28px" }, fontWeight: 800, color: C.heading, fontFamily: sans, mb: 0.5, letterSpacing: "-0.5px" }}>
-              Buy direct from official {product.brand} India
+              Buy direct from official NetworkTen India
             </Typography>
             <Typography sx={{ fontSize: "14px", color: C.textSub, fontFamily: sans }}>
               GST Invoice, Warranty, authenticity, faster support
