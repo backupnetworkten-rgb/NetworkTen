@@ -1,17 +1,15 @@
 /**
  * Shared type definitions for all "industry" data files
- * (e.g. data/industries/healthcare.ts, data/industries/education.ts, etc.)
+ * (e.g. data/industries/healthcare.ts, data/industries/education.ts,
+ * data/industries/home-villa-farmhouse.ts, etc.)
  *
  * Every industry data file should IMPORT these types rather than
  * redefining its own copies, so all industry detail page components
- * (IndustryDetailPageHealthcare.tsx, IndustryDetailPageEducation.tsx, etc.)
  * work against one consistent shape.
  */
 
 /** Every icon key used across ALL industries' "products" sections.
- *  Individual industry pages only use a subset of this union
- *  (e.g. Healthcare uses camera/access/ups/solar/conference/pos/lock/audio/telephone,
- *  Education uses smartclass/camera/fire/gps/server/network/pos/itequipment/videowall/furniture).
+ *  Individual industry pages only use a subset of this union.
  *  Add new values here whenever a new industry introduces a new icon. */
 export type IndustryProductIcon =
   // shared / general
@@ -20,6 +18,7 @@ export type IndustryProductIcon =
   | "server"
   | "network"
   | "pos"
+  | "wifi"
   // healthcare-specific
   | "access"
   | "ups"
@@ -33,7 +32,15 @@ export type IndustryProductIcon =
   | "gps"
   | "itequipment"
   | "videowall"
-  | "furniture";
+  | "furniture"
+  // home / villa / farmhouse-specific
+  | "boundarywall"
+  | "mobilebooster"
+  | "videodoorphone"
+  | "homeautomation"
+  | "intrusion"
+  | "hometheatre"
+  | "lockers";
 
 export interface IndustryProduct {
   icon: IndustryProductIcon;
