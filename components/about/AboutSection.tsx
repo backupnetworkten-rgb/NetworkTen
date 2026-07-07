@@ -521,7 +521,7 @@ export default function AboutSection() {
               }}
             >
               <source
-                src="/videos/VIDEO.mp4"
+                src="/videos/1.mp4"
                 type="video/mp4"
               />
             </video>
