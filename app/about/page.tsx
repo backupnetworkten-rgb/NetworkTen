@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
-import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
+import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
 
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -181,177 +181,176 @@ export default function AboutPage() {
               alignItems: "stretch",
             }}
           >
-            {/* VIDEO — matches height of text column */}
+            {/* IMAGE — matches height of text column, premium framed look */}
             <Box
               sx={{
                 position: "relative",
-                borderRadius: "26px",
-                overflow: "hidden",
-                background: "#08142e",
                 width: "100%",
                 height: { xs: "auto", md: "100%" },
-                aspectRatio: { xs: "16 / 9", md: "auto" },
+                aspectRatio: { xs: "4 / 3", md: "auto" },
                 minHeight: { md: 460 },
-                boxShadow: "0 28px 60px rgba(8,20,46,0.20)",
-                border: "1px solid rgba(8,20,46,0.06)",
               }}
             >
+              {/* decorative offset border frame for a premium layered look */}
               <Box
-                component="video"
-                src="/videos/Main Video.mp4"
-                controls
-                preload="metadata"
-                playsInline
-                controlsList="nodownload"
                 sx={{
                   position: "absolute",
-                  inset: 0,
+                  top: { xs: -12, md: -16 },
+                  left: { xs: -12, md: -16 },
+                  right: { xs: 12, md: 16 },
+                  bottom: { xs: 12, md: 16 },
+                  borderRadius: "26px",
+                  border: "2px solid rgba(139,197,63,0.35)",
+                  zIndex: 0,
+                }}
+              />
+
+              <Box
+                sx={{
+                  position: "relative",
+                  borderRadius: "26px",
+                  overflow: "hidden",
+                  background: "#08142e",
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-
-              {/* top gradient so the logo stays legible */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  height: "30%",
-                  background:
-                    "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 100%)",
-                  pointerEvents: "none",
-                }}
-              />
-
-              {/* NETWORK TEN watermark — top right */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: { xs: 14, md: 18 },
-                  right: { xs: 14, md: 18 },
-                  zIndex: 3,
+                  boxShadow: "0 28px 60px rgba(8,20,46,0.20)",
+                  border: "1px solid rgba(8,20,46,0.06)",
+                  zIndex: 1,
                 }}
               >
-                <Typography
+                <Box
+                  component="img"
+                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=80"
+                  alt="NetworkTen smart business technology"
                   sx={{
-                    color: "#fff",
-                    fontWeight: 900,
-                    letterSpacing: "1.5px",
-                    fontSize: { xs: "12px", md: "14px" },
-                    textShadow: "0 2px 6px rgba(0,0,0,.6)",
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+
+                {/* top gradient so the logo stays legible */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: "30%",
+                    background:
+                      "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 100%)",
+                    pointerEvents: "none",
+                  }}
+                />
+
+                {/* NETWORK TEN watermark — top right */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: { xs: 14, md: 18 },
+                    right: { xs: 14, md: 18 },
+                    zIndex: 3,
                   }}
                 >
-                  NETWORK
-                  <Box component="span" sx={{ color: "#8BC53F", ml: 0.5 }}>
-                    TEN
-                  </Box>
-                </Typography>
-              </Box>
-
-              {/* bottom gradient so number/button stay legible over any footage */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 40,
-                  height: "42%",
-                  background:
-                    "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 100%)",
-                  pointerEvents: "none",
-                }}
-              />
-
-              {/* CALL ROW — no background strip, no blur, no border. Just floating on the video */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: { xs: 16, md: 22 },
-                  right: { xs: 16, md: 22 },
-                  bottom: { xs: 60, md: 68 },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 1,
-                  zIndex: 3,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.9, minWidth: 0 }}>
-                  <Box
+                  <Typography
                     sx={{
-                      width: 28,
-                      height: 28,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg,#8BC53F,#74ab35)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 4px 10px rgba(0,0,0,.35)",
+                      color: "#fff",
+                      fontWeight: 900,
+                      letterSpacing: "1.5px",
+                      fontSize: { xs: "12px", md: "14px" },
+                      textShadow: "0 2px 6px rgba(0,0,0,.6)",
                     }}
                   >
-                    <PhoneRoundedIcon sx={{ fontSize: 14, color: "#fff" }} />
-                  </Box>
-
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      sx={{
-                        color: "rgba(255,255,255,.85)",
-                        fontSize: { xs: "7px", md: "8px" },
-                        fontWeight: 700,
-                        letterSpacing: "0.8px",
-                        textTransform: "uppercase",
-                        lineHeight: 1.1,
-                        textShadow: "0 1px 4px rgba(0,0,0,.6)",
-                      }}
-                    >
-                      Call Us Now
-                    </Typography>
-                    <Typography
-                      component="a"
-                      href="tel:+918687878755"
-                      sx={{
-                        color: "#fff",
-                        fontWeight: 800,
-                        fontSize: { xs: "12px", md: "14px" },
-                        letterSpacing: "0.2px",
-                        textDecoration: "none",
-                        lineHeight: 1.2,
-                        whiteSpace: "nowrap",
-                        textShadow: "0 1px 5px rgba(0,0,0,.65)",
-                        "&:hover": { color: "#8BC53F" },
-                      }}
-                    >
-                      +91 86878 78755
-                    </Typography>
-                  </Box>
+                    NETWORK
+                    <Box component="span" sx={{ color: "#8BC53F", ml: 0.5 }}>
+                      TEN
+                    </Box>
+                  </Typography>
                 </Box>
 
-                <Button
-                  component="a"
-                  href="tel:+918687878755"
-                  variant="contained"
+                {/* bottom gradient for legibility behind the badge */}
+                <Box
                   sx={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: "45%",
+                    background:
+                      "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(8,20,46,.55) 100%)",
+                    pointerEvents: "none",
+                  }}
+                />
+              </Box>
+
+              {/* PREMIUM "10+" FLOATING BADGE — anchored at bottom of image, slightly overlapping */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: { xs: 16, md: -20 },
+                  bottom: { xs: -18, md: -24 },
+                  zIndex: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.4,
+                  px: { xs: 2.2, md: 2.6 },
+                  py: { xs: 1.4, md: 1.7 },
+                  borderRadius: "20px",
+                  background: "#fff",
+                  boxShadow:
+                    "0 20px 45px rgba(8,20,46,0.22), 0 2px 6px rgba(8,20,46,0.10)",
+                  border: "1px solid rgba(8,20,46,0.06)",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: { xs: 40, md: 46 },
+                    height: { xs: 40, md: 46 },
                     flexShrink: 0,
-                    display: { xs: "none", sm: "inline-flex" },
+                    borderRadius: "14px",
                     background: "linear-gradient(135deg,#8BC53F,#74ab35)",
-                    borderRadius: "50px",
-                    px: 2,
-                    py: 0.5,
-                    fontWeight: 700,
-                    fontSize: "11px",
-                    textTransform: "none",
-                    minWidth: 0,
-                    boxShadow: "0 8px 18px rgba(0,0,0,.4)",
-                    "&:hover": { background: "#74ab35" },
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 10px 20px rgba(139,197,63,0.30)",
                   }}
                 >
-                  Call Now
-                </Button>
+                  <WorkspacePremiumRoundedIcon
+                    sx={{ fontSize: { xs: 20, md: 24 }, color: "#fff" }}
+                  />
+                </Box>
+
+                <Box>
+                  <Typography
+                    sx={{
+                      color: "#102048",
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      fontSize: { xs: "22px", md: "26px" },
+                    }}
+                  >
+                    10
+                    <Box component="span" sx={{ color: "#8BC53F" }}>
+                      +
+                    </Box>
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: "#667085",
+                      fontWeight: 700,
+                      letterSpacing: "0.4px",
+                      textTransform: "uppercase",
+                      fontSize: { xs: "8.5px", md: "9.5px" },
+                      lineHeight: 1.3,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Years Experience
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 

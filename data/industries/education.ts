@@ -58,7 +58,7 @@ export interface IndustryData {
 export const education: IndustryData = {
   slug: "education",
   eyebrow: "Industry Solution",
-  title: "Education",
+  title: "Education Solutions",
   tagline: "Every classroom, bus and campus gate, covered and connected.",
   description:
     "Schools and colleges run on trust between parents, staff and students — buses need tracking, campuses need watching, and classrooms need to actually work when the projector switches on. We design and install the smart classroom, surveillance, networking and IT infrastructure that keeps a campus running, whether it's one building or a multi-campus institution.",

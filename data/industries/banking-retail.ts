@@ -59,7 +59,7 @@ export interface IndustryData {
 export const bankingRetail: IndustryData = {
   slug: "banking-retail",
   eyebrow: "Industry Solution",
-  title: "Banking & Retail",
+  title: "Banking & Retail Solutions",
   tagline: "Every branch and till, watched, connected and backed up.",
   description:
     "Banks and retail floors run on trust — customers need to feel safe, cash needs to stay accounted for, and the counter can never go dark during business hours. We design and install the surveillance, access, networking and power systems that keep every branch and store running the same way, whether it's one outlet or two hundred.",
