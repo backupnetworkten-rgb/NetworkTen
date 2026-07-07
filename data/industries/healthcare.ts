@@ -1,4 +1,4 @@
-import type { IndustryData } from "./types";
+import { IndustryData } from "@/data/industries/types";
 
 export const healthcare: IndustryData = {
   slug: "healthcare-pharma",
