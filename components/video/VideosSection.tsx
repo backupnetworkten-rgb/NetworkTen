@@ -7,9 +7,9 @@ import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 
 const videos = [
-  { video: "/videos/Video1.mp4" },
-  { video: "/videos/Video2.mp4" },
-  { video: "/videos/Video3.mp4" },
+  { video: "/videos/2.mp4" },
+  { video: "/videos/3.mp4" },
+  { video: "/videos/4.mp4" },
 ];
 
 export default function VideosSection() {
