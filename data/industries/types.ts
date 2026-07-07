@@ -1,7 +1,7 @@
 /**
  * Shared type definitions for all "industry" data files
  * (e.g. data/industries/healthcare.ts, data/industries/education.ts,
- * data/industries/home-villa-farmhouse.ts, etc.)
+ * data/industries/home-villa-farmhouse.ts, data/industries/hospitality.ts, etc.)
  *
  * Every industry data file should IMPORT these types rather than
  * redefining its own copies, so all industry detail page components
@@ -40,7 +40,9 @@ export type IndustryProductIcon =
   | "homeautomation"
   | "intrusion"
   | "hometheatre"
-  | "lockers";
+  | "lockers"
+  // hospitality-specific
+  | "metaldetector";
 
 export interface IndustryProduct {
   icon: IndustryProductIcon;
