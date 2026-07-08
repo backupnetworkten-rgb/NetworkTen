@@ -4,6 +4,8 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 
 import {
@@ -19,11 +21,12 @@ import {
 declare global {
   interface Window {
     recaptchaVerifier: any;
+    recaptchaWidgetId: number | undefined;
+    grecaptcha: any;
   }
 }
 
-let confirmationResult:
-ConfirmationResult;
+let confirmationResult: ConfirmationResult | undefined;
 
 
 
@@ -90,44 +93,95 @@ async (
 
 
 
-// RECAPTCHA
+// GOOGLE LOGIN
 
-export const generateRecaptcha =
-() => {
+export const loginWithGoogle = async () => {
 
-if (
-typeof window !==
-"undefined"
-) {
+  const provider = new GoogleAuthProvider();
 
-if (
-!window
-.recaptchaVerifier
-) {
+  const result = await signInWithPopup(
+    auth,
+    provider
+  );
 
-window
-.recaptchaVerifier =
-new RecaptchaVerifier(
-auth,
-"recaptcha-container",
-{
-size:
-"invisible",
+  const user = result.user;
 
-callback:()=>{
-console.log(
-"Recaptcha verified"
-);
-}
-}
-);
+  // Save/update user in Firestore
 
-}
+  await setDoc(
+    doc(
+      db,
+      "users",
+      user.uid
+    ),
+    {
+      uid: user.uid,
 
-}
+      name: user.displayName,
+
+      email: user.email,
+
+      photoURL: user.photoURL,
+
+      loginType: "google",
+
+      createdAt: Date.now(),
+    },
+    { merge: true }
+  );
+
+  return result;
 
 };
 
+
+
+// RECAPTCHA
+
+// Renders the invisible widget ONCE per page load, and
+// stores its widgetId. On subsequent OTP attempts we
+// reset the same widget via grecaptcha.reset() rather
+// than destroying/re-rendering it — destroying the DOM
+// node while Google's script still holds references to
+// it causes "Cannot read properties of null" errors.
+
+export const generateRecaptcha = async () => {
+
+  if (typeof window === "undefined") return;
+
+  if (!window.recaptchaVerifier) {
+
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+
+        callback: () => {
+          console.log("Recaptcha verified");
+        }
+      }
+    );
+
+    window.recaptchaWidgetId =
+      await window.recaptchaVerifier.render();
+
+  } else if (
+    window.grecaptcha &&
+    window.recaptchaWidgetId !== undefined
+  ) {
+
+    // Reset the existing widget so it can be used again
+    // for a new sendOTP attempt (invisible reCAPTCHA
+    // tokens are single-use).
+
+    window.grecaptcha.reset(
+      window.recaptchaWidgetId
+    );
+
+  }
+
+};
 
 
 
@@ -140,7 +194,10 @@ phone:string
 
 try{
 
-generateRecaptcha();
+// Ensure widget exists (first time) or reset it
+// (subsequent attempts) before requesting a code
+
+await generateRecaptcha();
 
 const appVerifier=
 window.recaptchaVerifier;
@@ -214,6 +271,14 @@ async(
 otp:string
 )=>{
 
+if(!confirmationResult){
+
+throw new Error(
+"Please request an OTP first."
+);
+
+}
+
 const result=
 await confirmationResult.confirm(
 otp
@@ -242,6 +307,11 @@ createdAt:
 Date.now()
 }
 );
+
+// Clear so a stale confirmationResult can't be
+// reused if the user tries phone login again later
+
+confirmationResult=undefined;
 
 return result;
 

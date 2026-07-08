@@ -1,16 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 
 import {
   Box,
   Typography,
   Container,
   Button,
+  IconButton,
 } from "@mui/material";
 
 import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
-import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
+import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
+import VolumeOffRoundedIcon from "@mui/icons-material/VolumeOffRounded";
+import LocalPhoneRoundedIcon from "@mui/icons-material/LocalPhoneRounded";
 
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -21,6 +26,29 @@ import InstallationSupportSection from "../../components/install/InstallationSup
 import Link from "next/link";
 
 export default function AboutPage() {
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play();
+      setIsPlaying(true);
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  };
+
   return (
     <>
       <Navbar />
@@ -181,7 +209,7 @@ export default function AboutPage() {
               alignItems: "stretch",
             }}
           >
-            {/* IMAGE — matches height of text column, premium framed look */}
+            {/* VIDEO — matches height of text column, premium framed look */}
             <Box
               sx={{
                 position: "relative",
@@ -218,10 +246,16 @@ export default function AboutPage() {
                   zIndex: 1,
                 }}
               >
+                {/* VIDEO */}
                 <Box
-                  component="img"
-                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=80"
-                  alt="NetworkTen smart business technology"
+                  component="video"
+                  ref={videoRef}
+                  src="/videos/About.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  onClick={togglePlay}
                   sx={{
                     position: "absolute",
                     inset: 0,
@@ -229,6 +263,8 @@ export default function AboutPage() {
                     height: "100%",
                     objectFit: "cover",
                     display: "block",
+                    cursor: "pointer",
+                    zIndex: 1,
                   }}
                 />
 
@@ -243,6 +279,7 @@ export default function AboutPage() {
                     background:
                       "linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 100%)",
                     pointerEvents: "none",
+                    zIndex: 2,
                   }}
                 />
 
@@ -271,85 +308,134 @@ export default function AboutPage() {
                   </Typography>
                 </Box>
 
-                {/* bottom gradient for legibility behind the badge */}
+                {/* SOLID BOTTOM BAND — guarantees contrast for controls bar */}
                 <Box
                   sx={{
                     position: "absolute",
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    height: "45%",
+                    height: { xs: 60, md: 68 },
                     background:
-                      "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(8,20,46,.55) 100%)",
+                      "linear-gradient(180deg, rgba(8,20,46,0) 0%, rgba(8,20,46,0.9) 40%, rgba(8,20,46,0.98) 100%)",
+                    zIndex: 2,
                     pointerEvents: "none",
                   }}
                 />
-              </Box>
 
-              {/* PREMIUM "10+" FLOATING BADGE — anchored at bottom of image, slightly overlapping */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: { xs: 16, md: -20 },
-                  bottom: { xs: -18, md: -24 },
-                  zIndex: 4,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.4,
-                  px: { xs: 2.2, md: 2.6 },
-                  py: { xs: 1.4, md: 1.7 },
-                  borderRadius: "20px",
-                  background: "#fff",
-                  boxShadow:
-                    "0 20px 45px rgba(8,20,46,0.22), 0 2px 6px rgba(8,20,46,0.10)",
-                  border: "1px solid rgba(8,20,46,0.06)",
-                }}
-              >
+                {/* BOTTOM CONTROL BAR — phone number + play/pause + mute */}
                 <Box
                   sx={{
-                    width: { xs: 40, md: 46 },
-                    height: { xs: 40, md: 46 },
-                    flexShrink: 0,
-                    borderRadius: "14px",
-                    background: "linear-gradient(135deg,#8BC53F,#74ab35)",
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 4,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 10px 20px rgba(139,197,63,0.30)",
+                    justifyContent: "space-between",
+                    gap: 1,
+                    px: { xs: 1.6, md: 2.2 },
+                    py: { xs: 1.4, md: 1.7 },
                   }}
                 >
-                  <WorkspacePremiumRoundedIcon
-                    sx={{ fontSize: { xs: 20, md: 24 }, color: "#fff" }}
-                  />
-                </Box>
+                  {/* PHONE NUMBER */}
+                  <Box
+                    component="a"
+                    href="tel:+918687878755"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.8,
+                      textDecoration: "none",
+                      px: { xs: 1.4, md: 1.7 },
+                      py: { xs: 0.7, md: 0.8 },
+                      borderRadius: "40px",
+                      background: "rgba(255,255,255,0.16)",
+                      border: "1px solid rgba(255,255,255,0.28)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <LocalPhoneRoundedIcon
+                      sx={{ fontSize: { xs: 16, md: 18 }, color: "#8BC53F" }}
+                    />
+                    <Typography
+                      sx={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: { xs: "12px", md: "13.5px" },
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      +91 86878 78755
+                    </Typography>
+                  </Box>
 
-                <Box>
-                  <Typography
+                  {/* PLAY/PAUSE + MUTE CONTROLS */}
+                  <Box
                     sx={{
-                      color: "#102048",
-                      fontWeight: 900,
-                      lineHeight: 1,
-                      fontSize: { xs: "22px", md: "26px" },
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.6,
                     }}
                   >
-                    10
-                    <Box component="span" sx={{ color: "#8BC53F" }}>
-                      +
-                    </Box>
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "#667085",
-                      fontWeight: 700,
-                      letterSpacing: "0.4px",
-                      textTransform: "uppercase",
-                      fontSize: { xs: "8.5px", md: "9.5px" },
-                      lineHeight: 1.3,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Years Experience
-                  </Typography>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlay();
+                      }}
+                      aria-label={isPlaying ? "Pause video" : "Play video"}
+                      sx={{
+                        width: { xs: 34, md: 38 },
+                        height: { xs: 34, md: 38 },
+                        background: "rgba(255,255,255,0.16)",
+                        border: "1px solid rgba(255,255,255,0.28)",
+                        backdropFilter: "blur(8px)",
+                        "&:hover": {
+                          background: "rgba(139,197,63,0.35)",
+                        },
+                      }}
+                    >
+                      {isPlaying ? (
+                        <PauseRoundedIcon
+                          sx={{ fontSize: { xs: 19, md: 21 }, color: "#fff" }}
+                        />
+                      ) : (
+                        <PlayArrowRoundedIcon
+                          sx={{ fontSize: { xs: 19, md: 21 }, color: "#fff" }}
+                        />
+                      )}
+                    </IconButton>
+
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMute();
+                      }}
+                      aria-label={isMuted ? "Unmute video" : "Mute video"}
+                      sx={{
+                        width: { xs: 34, md: 38 },
+                        height: { xs: 34, md: 38 },
+                        background: "rgba(255,255,255,0.16)",
+                        border: "1px solid rgba(255,255,255,0.28)",
+                        backdropFilter: "blur(8px)",
+                        "&:hover": {
+                          background: "rgba(139,197,63,0.35)",
+                        },
+                      }}
+                    >
+                      {isMuted ? (
+                        <VolumeOffRoundedIcon
+                          sx={{ fontSize: { xs: 19, md: 21 }, color: "#fff" }}
+                        />
+                      ) : (
+                        <VolumeUpRoundedIcon
+                          sx={{ fontSize: { xs: 19, md: 21 }, color: "#fff" }}
+                        />
+                      )}
+                    </IconButton>
+                  </Box>
                 </Box>
               </Box>
             </Box>

@@ -10,7 +10,8 @@ import {
 signupUser,
 loginUser,
 sendOTP,
-verifyOTP
+verifyOTP,
+loginWithGoogle,
 } from "@/services/authService";
 
 import {
@@ -33,6 +34,8 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 
 import MailRoundedIcon from "@mui/icons-material/MailRounded";
+
+import GoogleIcon from "@mui/icons-material/Google";
 
 import Navbar from "../../components/navbar/Navbar";
 
@@ -65,6 +68,23 @@ const [otp,setOtp]=useState("");
 
 const [loading,setLoading]=
 useState(false);
+
+// Reset OTP state whenever the user switches tabs, so a
+// stale "showOtpField=true" from a previous attempt can't
+// cause a Verify click before a fresh OTP was ever sent.
+
+const handleTabChange = (
+  _: React.SyntheticEvent,
+  val: number
+) => {
+
+  setLoginMethod(val);
+
+  setShowOtpField(false);
+
+  setOtp("");
+
+};
 
 const handleAuth = async () => {
   try {
@@ -126,8 +146,6 @@ alert(
 "Login Successful"
 );
 
-// STEP 4
-
 const redirect=
 
 localStorage.getItem(
@@ -158,10 +176,15 @@ router.push(
 
       else {
 
+        if (!phone.trim()) {
+          alert("Please enter your phone number");
+          return;
+        }
+
         if (!showOtpField) {
 
           await sendOTP(
-            phone
+            phone.trim()
           );
 
           setShowOtpField(
@@ -174,8 +197,13 @@ router.push(
 
         } else {
 
+          if (!otp.trim()) {
+            alert("Please enter the OTP");
+            return;
+          }
+
           await verifyOTP(
-            otp
+            otp.trim()
           );
 
           alert(
@@ -203,6 +231,58 @@ router.push(
     setLoading(false);
 
   }
+};
+
+// GOOGLE LOGIN HANDLER
+
+const handleGoogleLogin = async () => {
+
+  try {
+
+    setLoading(true);
+
+    const result = await loginWithGoogle();
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        name: result.user.displayName,
+        email: result.user.email,
+      })
+    );
+
+    alert("Login Successful");
+
+    const redirect = localStorage.getItem(
+      "redirectAfterLogin"
+    );
+
+    if (redirect) {
+
+      localStorage.removeItem(
+        "redirectAfterLogin"
+      );
+
+      router.push(redirect);
+
+    } else {
+
+      router.push("/");
+
+    }
+
+  } catch (error: any) {
+
+    console.log(error);
+
+    alert(error.message);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
 };
 
   return (
@@ -483,9 +563,7 @@ router.push(
               {!isSignup && (
                 <Tabs
                   value={loginMethod}
-                  onChange={(_, val) =>
-                    setLoginMethod(val)
-                  }
+                  onChange={handleTabChange}
                   variant="fullWidth"
                   sx={{
                     mb: 2,
@@ -651,6 +729,7 @@ label="Phone Number"
 variant="outlined"
 size="small"
 placeholder="9876543210"
+disabled={showOtpField}
 
 value={phone}
 
@@ -673,34 +752,6 @@ e.target.value
               )
             }
           />
-        )}
-
-        {!showOtpField && (
-          <Button
-            variant="outlined"
-            onClick={async () => {
-              await sendOTP(phone);
-              setShowOtpField(
-                true
-              );
-            }}
-            sx={{
-              borderRadius:
-                "50px",
-              py: .9,
-              textTransform:
-                "none",
-              fontWeight: 700,
-              fontSize:
-                "12px",
-              borderColor:
-                "#102048",
-              color:
-                "#102048",
-            }}
-          >
-            Send OTP
-          </Button>
         )}
       </>
     )}
@@ -757,6 +808,7 @@ e.target.value
   <Button
     variant="contained"
     onClick={handleAuth}
+    disabled={loading}
     endIcon={
       <ArrowForwardRoundedIcon />
     }
@@ -771,6 +823,10 @@ e.target.value
       textTransform:
         "none",
       fontSize: "13px",
+      "&.Mui-disabled": {
+        background: "#c7d8b5",
+        color: "#fff",
+      },
     }}
   >
     {loading
@@ -778,9 +834,35 @@ e.target.value
       : isSignup
       ? "Create Account"
       : loginMethod === 1
-      ? "Verify & Login"
+      ? showOtpField
+        ? "Verify & Login"
+        : "Send OTP"
       : "Login"}
   </Button>
+
+  {/* GOOGLE LOGIN */}
+
+  {!isSignup && (
+    <Button
+      variant="outlined"
+      fullWidth
+      onClick={handleGoogleLogin}
+      disabled={loading}
+      startIcon={<GoogleIcon />}
+      sx={{
+        mt: 1,
+        borderRadius: "50px",
+        py: 1.1,
+        textTransform: "none",
+        fontWeight: 700,
+        fontSize: "13px",
+        borderColor: "#e0e0e0",
+        color: "#102048",
+      }}
+    >
+      Continue with Google
+    </Button>
+  )}
 
   <div id="recaptcha-container" />
 </Box>
