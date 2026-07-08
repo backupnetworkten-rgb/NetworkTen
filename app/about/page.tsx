@@ -26,7 +26,7 @@ import InstallationSupportSection from "../../components/install/InstallationSup
 import Link from "next/link";
 
 export default function AboutPage() {
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
 
