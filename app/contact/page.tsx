@@ -3,6 +3,7 @@
 import React, {
   useRef,
   useState,
+  useEffect,
 } from "react";
 
 import {
@@ -32,6 +33,12 @@ import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 
 import emailjs from "@emailjs/browser";
 
+// 👇 Replace with your NEW EmailJS Service ID (from the service you just created)
+const EMAILJS_SERVICE_ID = "service_7xyz7sy";
+const EMAILJS_TEMPLATE_ID = "template_x5yfouv";
+// 👇 Re-copy this fresh from EmailJS Dashboard → Account → General → Public Key
+const EMAILJS_PUBLIC_KEY = "KzFKcKsxL-7bNGn4M";
+
 export default function ContactPage() {
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -41,29 +48,45 @@ export default function ContactPage() {
   const [open, setOpen] =
     useState(false);
 
+  const [errorMsg, setErrorMsg] =
+    useState("");
+
+  // Initialize EmailJS SDK once when the component mounts.
+  // Required for @emailjs/browser v4+ — without this, sendForm
+  // fails at the network layer and the browser misreports it
+  // as a CORS error.
+  useEffect(() => {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }, []);
+
   const sendEmail = async (
     e: React.FormEvent
   ) => {
     e.preventDefault();
 
     setLoading(true);
+    setErrorMsg("");
 
     try {
       await emailjs.sendForm(
-        "service_5pihald",
-        "template_yvpmymr",
-        formRef.current!,
-        "KzFKcKsxL-7bNGn4M"
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        formRef.current!
       );
 
       setOpen(true);
 
       formRef.current?.reset();
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error("EmailJS error:", error);
+      setErrorMsg(
+        error?.text ||
+          error?.message ||
+          "Failed to send message. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -646,13 +669,16 @@ export default function ContactPage() {
                 label="Full Name"
                 name="name"
                 size="small"
+                required
               />
 
               <TextField
                 fullWidth
                 label="Email Address"
                 name="email"
+                type="email"
                 size="small"
+                required
               />
 
               <TextField
@@ -668,7 +694,14 @@ export default function ContactPage() {
                 rows={4}
                 label="Message"
                 name="message"
+                required
               />
+
+              {errorMsg && (
+                <Alert severity="error" sx={{ borderRadius: "12px" }}>
+                  {errorMsg}
+                </Alert>
+              )}
 
               <Button
                 type="submit"

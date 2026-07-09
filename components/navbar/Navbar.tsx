@@ -81,10 +81,11 @@ const solutions = [
   },
 ];
 
-const navItems = [
-  { label: "Home",     path: "/"         },
-  { label: "Products", path: "/products" },
-  { label: "Contact",  path: "/contact"  },
+// About sub-menu items (reused for both desktop dropdown and mobile accordion)
+const aboutItems = [
+  { label: "About Us", sub: "Learn more about NetworkTen", path: "/about"   },
+  { label: "Blog",     sub: "Latest updates & articles",   path: "/blog"    },
+  { label: "Careers",  sub: "Join our growing team",       path: "/careers" },
 ];
 
 export default function Navbar() {
@@ -182,22 +183,77 @@ export default function Navbar() {
               </Box>
             </Link>
 
-            {/* DESKTOP NAV */}
+            {/* DESKTOP NAV — order: Home, About, Products, Solutions, Contact */}
             {!mobile && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, overflow: "visible" }}>
-                {/* Home & Products */}
-                {navItems.slice(0, 2).map((item) => (
-                  <Link key={item.label} href={item.path} style={{ textDecoration: "none" }}>
-                    <Button sx={{
-                      color: "#102048", fontWeight: 700, textTransform: "none",
-                      fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
-                      transition: "0.3s",
-                      "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
-                    }}>
-                      {item.label}
-                    </Button>
-                  </Link>
-                ))}
+                {/* Home */}
+                <Link href="/" style={{ textDecoration: "none" }}>
+                  <Button sx={{
+                    color: "#102048", fontWeight: 700, textTransform: "none",
+                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    transition: "0.3s",
+                    "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                  }}>
+                    Home
+                  </Button>
+                </Link>
+
+                {/* About dropdown */}
+                <Button
+                  onClick={openAboutMenu}
+                  endIcon={<KeyboardArrowDownRoundedIcon />}
+                  sx={{
+                    color: "#102048", fontWeight: 700, textTransform: "none",
+                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    transition: "0.3s",
+                    "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                  }}
+                >
+                  About
+                </Button>
+
+                <Menu
+                  anchorEl={aboutAnchor}
+                  open={Boolean(aboutAnchor)}
+                  onClose={closeAboutMenu}
+                  slotProps={{
+                    paper: {
+                      elevation: 0,
+                      sx: {
+                        mt: 1.5, borderRadius: "18px", minWidth: 240, p: 1,
+                        border: "1px solid #eef2f7",
+                        boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
+                      },
+                    },
+                  }}
+                >
+                  {aboutItems.map((m) => (
+                    <Link key={m.label} href={m.path} style={{ textDecoration: "none", color: "inherit" }}>
+                      <MenuItem onClick={closeAboutMenu} sx={{ borderRadius: "12px", py: 1.5 }}>
+                        <Box>
+                          <Typography sx={{ fontWeight: 700, color: "#102048", fontSize: "14px" }}>
+                            {m.label}
+                          </Typography>
+                          <Typography sx={{ fontSize: "12px", color: "#667085" }}>
+                            {m.sub}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    </Link>
+                  ))}
+                </Menu>
+
+                {/* Products */}
+                <Link href="/products" style={{ textDecoration: "none" }}>
+                  <Button sx={{
+                    color: "#102048", fontWeight: 700, textTransform: "none",
+                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    transition: "0.3s",
+                    "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                  }}>
+                    Products
+                  </Button>
+                </Link>
 
                 {/* ── SOLUTIONS MEGA-MENU TRIGGER ── */}
                 <Box
@@ -399,55 +455,6 @@ export default function Navbar() {
                     Contact
                   </Button>
                 </Link>
-
-                {/* About dropdown — unchanged */}
-                <Button
-                  onClick={openAboutMenu}
-                  endIcon={<KeyboardArrowDownRoundedIcon />}
-                  sx={{
-                    color: "#102048", fontWeight: 700, textTransform: "none",
-                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
-                    transition: "0.3s",
-                    "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
-                  }}
-                >
-                  About
-                </Button>
-
-                <Menu
-                  anchorEl={aboutAnchor}
-                  open={Boolean(aboutAnchor)}
-                  onClose={closeAboutMenu}
-                  slotProps={{
-                    paper: {
-                      elevation: 0,
-                      sx: {
-                        mt: 1.5, borderRadius: "18px", minWidth: 240, p: 1,
-                        border: "1px solid #eef2f7",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
-                      },
-                    },
-                  }}
-                >
-                  {[
-                    { label: "About Us", sub: "Learn more about NetworkTen", path: "/about"   },
-                    { label: "Blog",     sub: "Latest updates & articles",   path: "/blog"    },
-                    { label: "Careers",  sub: "Join our growing team",       path: "/careers" },
-                  ].map((m) => (
-                    <Link key={m.label} href={m.path} style={{ textDecoration: "none", color: "inherit" }}>
-                      <MenuItem onClick={closeAboutMenu} sx={{ borderRadius: "12px", py: 1.5 }}>
-                        <Box>
-                          <Typography sx={{ fontWeight: 700, color: "#102048", fontSize: "14px" }}>
-                            {m.label}
-                          </Typography>
-                          <Typography sx={{ fontSize: "12px", color: "#667085" }}>
-                            {m.sub}
-                          </Typography>
-                        </Box>
-                      </MenuItem>
-                    </Link>
-                  ))}
-                </Menu>
               </Box>
             )}
           </Box>
@@ -533,24 +540,24 @@ export default function Navbar() {
                       {["🧑‍💼","👨‍💻","👩‍💻","🚀","⭐"][(user?.name?.length || 0) % 5]}
                     </Box>
                     <Box sx={{ textAlign: "left", maxWidth: 100, overflow: "hidden" }}>
-  <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "#98A2B3", lineHeight: 1 }}>
-    Welcome
-  </Typography>
-  <Typography
-    noWrap
-    sx={{
-      fontSize: "14px", fontWeight: 900,
-      background: "linear-gradient(135deg,#102048,#8BC53F)",
-      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-    }}
-  >
-    {user?.loginType === "phone"
-      ? user?.name?.replace("+91", "").slice(0, 6) + "…"
-      : user?.name?.split(" ")[0] || "User"}
-  </Typography>
-</Box>
+                      <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "#98A2B3", lineHeight: 1 }}>
+                        Welcome
+                      </Typography>
+                      <Typography
+                        noWrap
+                        sx={{
+                          fontSize: "14px", fontWeight: 900,
+                          background: "linear-gradient(135deg,#102048,#8BC53F)",
+                          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {user?.loginType === "phone"
+                          ? user?.name?.replace("+91", "").slice(0, 6) + "…"
+                          : user?.name?.split(" ")[0] || "User"}
+                      </Typography>
+                    </Box>
                     <KeyboardArrowDownRoundedIcon sx={{ color: "#667085" }} />
                   </Button>
 
@@ -600,20 +607,52 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* ═══════════════════════════ MOBILE NAV DRAWER ════════════════════════ */}
+      {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Products, Solutions, Contact ════════════════════════ */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
         <Box sx={{ width: 300, p: 3 }}>
           <List>
-            {/* Home & Products */}
-            {navItems.slice(0, 2).map((item) => (
-              <ListItem key={item.label} disablePadding>
-                <Link href={item.path} style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
-                  <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
-                    <ListItemText primary={item.label} />
-                  </ListItemButton>
-                </Link>
-              </ListItem>
-            ))}
+            {/* Home */}
+            <ListItem disablePadding>
+              <Link href="/" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+                <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+
+            {/* About accordion */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => setMobileAbout(!mobileAbout)}
+                sx={{ borderRadius: "12px", mb: 1 }}
+              >
+                <ListItemText primary="About" />
+                {mobileAbout ? <ExpandLess /> : <ExpandMore />}
+              </ListItemButton>
+            </ListItem>
+
+            <Collapse in={mobileAbout} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {aboutItems.map((item) => (
+                  <ListItem key={item.label} disablePadding sx={{ pl: 2 }}>
+                    <Link href={item.path} style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+                      <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "10px", mb: 1 }}>
+                        <ListItemText primary={item.label} />
+                      </ListItemButton>
+                    </Link>
+                  </ListItem>
+                ))}
+              </List>
+            </Collapse>
+
+            {/* Products */}
+            <ListItem disablePadding>
+              <Link href="/products" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+                <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
+                  <ListItemText primary="Products" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
 
             {/* ── MOBILE SOLUTIONS ACCORDION ── */}
             <ListItem disablePadding>
@@ -621,15 +660,14 @@ export default function Navbar() {
                 onClick={() => setMobileSolutions(!mobileSolutions)}
                 sx={{ borderRadius: "12px", mb: 1 }}
               >
-                // After
-<ListItemText
-  primary="Solutions"
-  slotProps={{
-    primary: {
-      sx: { fontWeight: 700 },
-    },
-  }}
-/>
+                <ListItemText
+                  primary="Solutions"
+                  slotProps={{
+                    primary: {
+                      sx: { fontWeight: 700 },
+                    },
+                  }}
+                />
                 {mobileSolutions ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
             </ListItem>
@@ -648,15 +686,14 @@ export default function Navbar() {
                         }}
                       >
                         <Box sx={{ mr: 1.5, fontSize: "18px" }}>{sol.icon}</Box>
-                        // After
-<ListItemText
-  primary={sol.title}
-  slotProps={{
-    primary: {
-      sx: { fontSize: "13px", fontWeight: 700, color: "#102048" },
-    },
-  }}
-/>
+                        <ListItemText
+                          primary={sol.title}
+                          slotProps={{
+                            primary: {
+                              sx: { fontSize: "13px", fontWeight: 700, color: "#102048" },
+                            },
+                          }}
+                        />
                       </ListItemButton>
                     </Link>
                   </ListItem>
@@ -665,15 +702,14 @@ export default function Navbar() {
                 <ListItem disablePadding sx={{ pl: 1 }}>
                   <Link href="/solutions" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
                     <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
-                      // After
-<ListItemText
-  primary="View All Solutions →"
-  slotProps={{
-    primary: {
-      sx: { fontSize: "12.5px", fontWeight: 800, color: "#8BC53F" },
-    },
-  }}
-/>
+                      <ListItemText
+                        primary="View All Solutions →"
+                        slotProps={{
+                          primary: {
+                            sx: { fontSize: "12.5px", fontWeight: 800, color: "#8BC53F" },
+                          },
+                        }}
+                      />
                     </ListItemButton>
                   </Link>
                 </ListItem>
@@ -688,35 +724,6 @@ export default function Navbar() {
                 </ListItemButton>
               </Link>
             </ListItem>
-
-            {/* About accordion — unchanged */}
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => setMobileAbout(!mobileAbout)}
-                sx={{ borderRadius: "12px", mb: 1 }}
-              >
-                <ListItemText primary="About" />
-                {mobileAbout ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-            </ListItem>
-
-            <Collapse in={mobileAbout} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                {[
-                  { label: "About Us", path: "/about"   },
-                  { label: "Blog",     path: "/blog"    },
-                  { label: "Careers",  path: "/careers" },
-                ].map((item) => (
-                  <ListItem key={item.label} disablePadding sx={{ pl: 2 }}>
-                    <Link href={item.path} style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
-                      <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "10px", mb: 1 }}>
-                        <ListItemText primary={item.label} />
-                      </ListItemButton>
-                    </Link>
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
           </List>
 
           <Box sx={{ display: "grid", gap: 1.2, mt: 2 }}>

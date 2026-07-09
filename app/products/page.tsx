@@ -150,9 +150,8 @@ export default function ProductsPage() {
                 mb: 2,
               }}
             >
-              Enterprise{" "}
+              Products{" "}
               <Box component="span" sx={{ color: "#8BC53F" }}>
-                Solutions
               </Box>
             </Typography>
 
