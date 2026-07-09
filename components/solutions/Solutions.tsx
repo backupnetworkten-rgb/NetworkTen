@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Typography,
@@ -15,6 +16,7 @@ import "swiper/css";
 
 interface Solution {
   title: string;
+  path: string;
   image: string;
   description: string;
   products: string[];
@@ -23,6 +25,7 @@ interface Solution {
 const solutions: Solution[] = [
   {
     title: "BANKING & RETAILS",
+    path: "/solutions/banking-retail",
     image:
       "https://plus.unsplash.com/premium_photo-1769842895659-724d64bbafd7?w=600&auto=format&fit=crop&q=60",
     description:
@@ -43,6 +46,7 @@ const solutions: Solution[] = [
   },
   {
     title: "EDUCATION",
+    path: "/solutions/education",
     image:
       "https://images.unsplash.com/photo-1681164315051-add1906a9b07?w=600&auto=format&fit=crop&q=60",
     description:
@@ -62,6 +66,7 @@ const solutions: Solution[] = [
   },
   {
     title: "HEALTHCARE & PHARMA",
+    path: "/solutions/healthcare",
     image:
       "https://plus.unsplash.com/premium_photo-1681842931981-12ecdd712705?w=600&auto=format&fit=crop&q=60",
     description:
@@ -80,6 +85,7 @@ const solutions: Solution[] = [
   },
   {
     title: "HOSPITALITY",
+    path: "/solutions/hospitality",
     image:
       "https://images.squarespace-cdn.com/content/v1/5512c58de4b07319c3fed0c7/1767016852691-G7N558EQZDHKL58CXQW3/2-99SUSHI.jpg",
     description:
@@ -99,6 +105,7 @@ const solutions: Solution[] = [
   },
   {
     title: "RETAIL & OFFICE",
+    path: "/solutions/retail-office",
     image:
       "https://images.unsplash.com/photo-1774494168068-0f716c3aafcf?w=600&auto=format&fit=crop&q=60",
     description:
@@ -121,6 +128,7 @@ const solutions: Solution[] = [
   },
   {
     title: "HOME | VILLA | FARMHOUSE",
+    path: "/solutions/home",
     image:
       "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=1800&auto=format&fit=crop",
     description:
@@ -147,6 +155,7 @@ interface SolutionCardProps {
 }
 
 function SolutionCard({ item, onHoverChange }: SolutionCardProps) {
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -161,6 +170,10 @@ function SolutionCard({ item, onHoverChange }: SolutionCardProps) {
       setHovered(false);
       onHoverChange(false);
     }, 180);
+  };
+
+  const goToSolution = () => {
+    router.push(item.path);
   };
 
   return (
@@ -348,6 +361,7 @@ function SolutionCard({ item, onHoverChange }: SolutionCardProps) {
 
           <Button
             variant="contained"
+            onClick={goToSolution}
             sx={{
               background: "#8BC53F",
               borderRadius: "40px",
