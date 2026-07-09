@@ -136,7 +136,9 @@ name:
   || email.split("@")[0],
 
 email:
-  user?.user?.email
+  user?.user?.email,
+
+loginType: "email"
 
 })
 
@@ -202,15 +204,48 @@ router.push(
             return;
           }
 
-          await verifyOTP(
+          const result = await verifyOTP(
             otp.trim()
+          );
+
+          // Persist user info so Navbar can pick it up
+          // (phone auth has no displayName/email, so we
+          // fall back to the phone number for "name")
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              name:
+                result?.user?.phoneNumber
+                || phone.trim(),
+              phone:
+                result?.user?.phoneNumber
+                || phone.trim(),
+              loginType: "phone",
+            })
           );
 
           alert(
             "Login Successful"
           );
 
-          window.location.href="/";
+          const redirect =
+            localStorage.getItem(
+              "redirectAfterLogin"
+            );
+
+          if (redirect) {
+
+            localStorage.removeItem(
+              "redirectAfterLogin"
+            );
+
+            window.location.href = redirect;
+
+          } else {
+
+            window.location.href = "/";
+
+          }
 
         }
 
@@ -248,6 +283,7 @@ const handleGoogleLogin = async () => {
       JSON.stringify({
         name: result.user.displayName,
         email: result.user.email,
+        loginType: "google",
       })
     );
 
