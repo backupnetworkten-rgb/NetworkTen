@@ -532,18 +532,25 @@ export default function Navbar() {
                     }}>
                       {["🧑‍💼","👨‍💻","👩‍💻","🚀","⭐"][(user?.name?.length || 0) % 5]}
                     </Box>
-                    <Box sx={{ textAlign: "left" }}>
-                      <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "#98A2B3", lineHeight: 1 }}>
-                        Welcome
-                      </Typography>
-                      <Typography sx={{
-                        fontSize: "14px", fontWeight: 900,
-                        background: "linear-gradient(135deg,#102048,#8BC53F)",
-                        WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2,
-                      }}>
-                        {user?.name?.split(" ")[0] || "User"}
-                      </Typography>
-                    </Box>
+                    <Box sx={{ textAlign: "left", maxWidth: 100, overflow: "hidden" }}>
+  <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "#98A2B3", lineHeight: 1 }}>
+    Welcome
+  </Typography>
+  <Typography
+    noWrap
+    sx={{
+      fontSize: "14px", fontWeight: 900,
+      background: "linear-gradient(135deg,#102048,#8BC53F)",
+      WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    }}
+  >
+    {user?.loginType === "phone"
+      ? user?.name?.replace("+91", "").slice(0, 6) + "…"
+      : user?.name?.split(" ")[0] || "User"}
+  </Typography>
+</Box>
                     <KeyboardArrowDownRoundedIcon sx={{ color: "#667085" }} />
                   </Button>
 

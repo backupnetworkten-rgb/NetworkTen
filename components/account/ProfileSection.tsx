@@ -58,6 +58,12 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
     });
   }, [user]);
 
+  // Whichever method the user authenticated with is locked;
+  // the other contact field stays open so they can add it.
+  const loginType = user?.loginType;
+  const isPhoneLogin = loginType === "phone";
+  const isEmailLogin = loginType === "email" || loginType === "google";
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -116,7 +122,10 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
       setSaving(true);
       await updateUserProfile({
         name: form.name,
-        phone: form.phone,
+        // Only send phone if it's actually editable (email/google login)
+        ...(!isPhoneLogin ? { phone: form.phone } : {}),
+        // Only send email if it's actually editable (phone login)
+        ...(isPhoneLogin ? { email: form.email } : {}),
         photoURL: form.photoURL,
       });
       setToast({ msg: "Profile updated successfully.", severity: "success" });
@@ -319,37 +328,53 @@ export default function ProfileSection({ user }: { user: UserData | null }) {
             }}
           />
 
-          {/* Email — disabled */}
+          {/* Email — disabled only for email/google login, editable for phone login */}
           <TextField
             fullWidth
-            disabled
+            disabled={isEmailLogin}
             label="Email address"
+            placeholder={isPhoneLogin ? "Add an email address" : undefined}
             value={form.email}
-            helperText="Email is linked to your sign-in and cannot be changed here."
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            helperText={
+              isEmailLogin
+                ? "Email is linked to your sign-in and cannot be changed here."
+                : "Add an email to receive order updates and receipts."
+            }
             sx={fieldSx}
             slotProps={{
               input: {
                 startAdornment: (
                   <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
-                    <EmailRoundedIcon sx={{ fontSize: 18, color: "#C0C5D6" }} />
+                    <EmailRoundedIcon
+                      sx={{ fontSize: 18, color: isEmailLogin ? "#C0C5D6" : "#8A91A8" }}
+                    />
                   </Box>
                 ),
               }
             }}
           />
 
-          {/* Phone */}
+          {/* Phone — disabled only for phone login, editable for email/google login */}
           <TextField
             fullWidth
+            disabled={isPhoneLogin}
             label="Phone number"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            helperText={
+              isPhoneLogin
+                ? "Phone number is linked to your sign-in and cannot be changed here."
+                : undefined
+            }
             sx={fieldSx}
             slotProps={{
               input: {
                 startAdornment: (
                   <Box sx={{ mr: 1.25, display: "flex", alignItems: "center" }}>
-                    <PhoneRoundedIcon sx={{ fontSize: 18, color: "#8A91A8" }} />
+                    <PhoneRoundedIcon
+                      sx={{ fontSize: 18, color: isPhoneLogin ? "#C0C5D6" : "#8A91A8" }}
+                    />
                   </Box>
                 ),
               }

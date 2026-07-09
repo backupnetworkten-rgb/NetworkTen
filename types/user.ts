@@ -12,9 +12,10 @@ export interface Address {
 
 export interface UserData {
   uid?: string;
-  name: string;
-  email: string;
-  phone: string;
+  name?: string;
+  email?: string;
+  phone?: string;
   photoURL?: string;
+  loginType?: "email" | "phone" | "google";
   addresses?: Address[];
 }
