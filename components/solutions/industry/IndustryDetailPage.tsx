@@ -61,9 +61,9 @@ export default function IndustryDetailPage({ data }: Props) {
   return (
     <Box component="main">
       <Hero data={data} />
+      <Products data={data} />
       <Stats data={data} />
       <Challenges data={data} />
-      <Products data={data} />
       <Process data={data} />
       <Testimonial data={data} />
       <FAQ data={data} />
