@@ -427,38 +427,45 @@ export default function AboutSection() {
                 </Button>
               </Link>
 
-              <Button
-                variant="outlined"
-                sx={{
-                  borderRadius: "40px",
-
-                  px: 3,
-
-                  py: 0.9,
-
-                  fontWeight: 700,
-
-                  textTransform: "none",
-
-                  fontSize: "13px",
-
-                  background: "#ffffff",
-
-                  borderColor:
-                    "rgba(15,23,42,0.10)",
-
-                  color: "#08142e",
-
-                  "&:hover": {
-                    borderColor: "#8BC53F",
-
-                    background:
-                      "rgba(139,197,63,0.05)",
-                  },
+              <Link
+                href="/solutions"
+                style={{
+                  textDecoration: "none",
                 }}
               >
-                Explore
-              </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "40px",
+
+                    px: 3,
+
+                    py: 0.9,
+
+                    fontWeight: 700,
+
+                    textTransform: "none",
+
+                    fontSize: "13px",
+
+                    background: "#ffffff",
+
+                    borderColor:
+                      "rgba(15,23,42,0.10)",
+
+                    color: "#08142e",
+
+                    "&:hover": {
+                      borderColor: "#8BC53F",
+
+                      background:
+                        "rgba(139,197,63,0.05)",
+                    },
+                  }}
+                >
+                  Explore
+                </Button>
+              </Link>
             </Box>
           </Box>
 

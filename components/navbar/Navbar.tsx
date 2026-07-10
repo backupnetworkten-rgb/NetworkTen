@@ -56,7 +56,7 @@ const solutions = [
     accent: "#9333ea",
   },
   {
-    title: "Hospitality",
+    title: "Club & Hospitality",
     icon: "🏨",
     description: "Guest experience & automation powered by modern technology.",
     path: "/solutions/hospitality",
