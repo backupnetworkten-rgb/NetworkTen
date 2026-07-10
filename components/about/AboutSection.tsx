@@ -13,7 +13,7 @@ import {
 
 import LanIcon from "@mui/icons-material/Lan";
 import SecurityIcon from "@mui/icons-material/Security";
-import CampaignIcon from "@mui/icons-material/Campaign";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
 import DesktopWindowsIcon from "@mui/icons-material/DesktopWindows";
@@ -21,33 +21,33 @@ import DesktopWindowsIcon from "@mui/icons-material/DesktopWindows";
 export default function AboutSection() {
   const services = [
     {
-      title: "Networking",
+      title: "Networking Solutions",
       icon: <LanIcon />,
     },
 
     {
-      title: "Conference",
-      icon: <CampaignIcon />,
+      title: "Audio-Visual Solutions",
+      icon: <VolumeUpIcon />,
     },
 
     {
-      title: "Surveillance",
+      title: "IT Security & Surveillance",
       icon: <SecurityIcon />,
     },
 
     {
-      title: "Smart Class",
-      icon: <DesktopWindowsIcon />,
+      title: "Communication Infrastructure",
+      icon: <PhoneInTalkIcon />,
     },
 
     {
-      title: "Furniture",
+      title: "Automation Solutions",
       icon: <SettingsSuggestIcon />,
     },
 
     {
-      title: "Communication",
-      icon: <PhoneInTalkIcon />,
+      title: "Modern Workplace Setup",
+      icon: <DesktopWindowsIcon />,
     },
   ];
 
@@ -369,7 +369,7 @@ export default function AboutSection() {
                         md: "12px",
                       },
 
-                      maxWidth: "90px",
+                      maxWidth: "110px",
                     }}
                   >
                     {item.title}
@@ -502,8 +502,6 @@ export default function AboutSection() {
           >
             {/* VIDEO */}
             <video
-              autoPlay
-              muted
               loop
               playsInline
               controls
