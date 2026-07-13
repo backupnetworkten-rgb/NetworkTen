@@ -14,6 +14,15 @@ export interface OrderItem {
   quantity: number;
 }
 
+export interface OrderBilling {
+  isB2BInvoice: boolean;
+  gstNumber: string;
+  companyName: string;
+  gstRate: number;
+  taxableValue: number;
+  gstAmount: number;
+}
+
 export interface Order {
   orderId: string;
   placedAt: string;
@@ -24,6 +33,8 @@ export interface Order {
   grandTotal: number;
   totalQty: number;
   paymentMethod: string;
+  paymentId?: string | null;
+  billing?: OrderBilling;
   address: {
     name: string;
     line1: string;

@@ -5,49 +5,56 @@ import { useRouter } from "next/navigation";
 import { Box, Container, Typography, Button, Divider, Snackbar, Alert, CircularProgress } from "@mui/material";
 import ShoppingBagOutlinedIcon       from "@mui/icons-material/ShoppingBagOutlined";
 import LockOutlinedIcon              from "@mui/icons-material/LockOutlined";
-import VerifiedOutlinedIcon          from "@mui/icons-material/VerifiedOutlined";
 import LocalShippingOutlinedIcon     from "@mui/icons-material/LocalShippingOutlined";
 import CheckCircleRoundedIcon        from "@mui/icons-material/CheckCircleRounded";
 import ContentCopyRoundedIcon        from "@mui/icons-material/ContentCopyRounded";
 import HomeOutlinedIcon              from "@mui/icons-material/HomeOutlined";
 import BusinessOutlinedIcon          from "@mui/icons-material/BusinessOutlined";
-import QrCode2OutlinedIcon           from "@mui/icons-material/QrCode2Outlined";
-import CurrencyRupeeOutlinedIcon     from "@mui/icons-material/CurrencyRupeeOutlined";
 import PrintOutlinedIcon             from "@mui/icons-material/PrintOutlined";
+import ReceiptLongOutlinedIcon       from "@mui/icons-material/ReceiptLongOutlined";
 import StorefrontOutlinedIcon        from "@mui/icons-material/StorefrontOutlined";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import { proxyImage } from "@/lib/proxyImage";
 import { fetchUserOrders, getLocalOrders, type Order } from "@/lib/orderStore";
+import { generateInvoice } from "@/lib/generateInvoice";
 
-// ─── Design tokens (matched to checkout / cart / product pages) ───────────
+import Navbar from "@/components/navbar/Navbar";
+import Footer from "@/components/footer/Footer";
+
+// ─── Premium design tokens — matched to the redesigned checkout page ───
 const C = {
-  pageBg:      "#f5f5f7",
-  surface:     "#ffffff",
-  surfaceWarm: "#fafafa",
-  surfaceGray: "#f2f2f2",
-  border:      "#e8e8e8",
-  borderLight: "#f0f0f0",
-  heading:     "#0a0a0a",
-  text:        "#1a1a1a",
-  textSub:     "#555555",
-  textMuted:   "#999999",
-  red:         "#dc2626",
-  redLight:    "#fef2f2",
-  blue:        "#1a5fb4",
-  blueLight:   "#eff6ff",
-  blueBorder:  "#bfdbfe",
-  green:       "#16a34a",
-  greenLight:  "#f0fdf4",
-  greenBorder: "#bbf7d0",
+  paper:       "#F8F5EF",
+  surface:     "#FFFFFF",
+  surfaceWarm: "#FBF9F4",
+  surfaceSunk: "#F1ECE0",
+  border:      "#E7E0D0",
+  borderLight: "#F0EBDF",
+  ink:         "#1C1A16",
+  text:        "#2B2823",
+  textSub:     "#726B5C",
+  textMuted:   "#A79F8C",
+  red:         "#AF3529",
+  redLight:    "#FBEEEC",
+  navy:        "#182644",
+  navyLight:   "#EEF0F6",
+  navyBorder:  "#D6DBE8",
+  green:       "#1D7A46",
+  greenLight:  "#EBF6EF",
+  greenBorder: "#C7E6D2",
+  brass:       "#9C7A34",
+  brassDeep:   "#7C6027",
+  brassLight:  "#F6EFDD",
+  brassBorder: "#E8D9AF",
 };
 
-const sans = "'Inter', 'DM Sans', system-ui, sans-serif";
+const sans  = "'Inter', system-ui, sans-serif";
+const serif = "'Fraunces', 'Georgia', serif";
 
 if (typeof document !== "undefined" && !document.getElementById("order-success-font")) {
   const s = document.createElement("style");
   s.id = "order-success-font";
   s.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
     * { box-sizing: border-box; }
     @keyframes ringPop {
       0%   { transform: scale(0.6); opacity: 0; }
@@ -75,52 +82,59 @@ if (typeof document !== "undefined" && !document.getElementById("order-success-f
 const sectionSx = {
   background: C.surface,
   border: `1px solid ${C.border}`,
-  borderRadius: "14px",
+  borderRadius: "16px",
   overflow: "hidden",
-  boxShadow: "0 2px 14px rgba(0,0,0,0.04)",
+  boxShadow: "0 1px 2px rgba(28,26,22,0.03), 0 8px 24px rgba(28,26,22,0.05)",
 };
 
 const headerSx = {
-  display: "flex", alignItems: "center", gap: 1.2,
-  px: "22px", py: "16px",
+  display: "flex", alignItems: "center", gap: 1.3,
+  px: "24px", py: "17px",
   borderBottom: `1px solid ${C.borderLight}`,
   background: C.surfaceWarm,
 };
 
+const headerIconWrapSx = {
+  width: 30, height: 30, borderRadius: "9px",
+  background: C.navyLight, display: "flex",
+  alignItems: "center", justifyContent: "center",
+  flexShrink: 0,
+};
+
 const TRUST = [
-  { label: "Free Delivery", sub: "Above ₹1000", bg: "#dbeafe",
+  { label: "Free Delivery", sub: "Above ₹1000",
     icon: (
-      <svg width="22" height="16" viewBox="0 0 40 24" fill="none">
-        <rect x="1" y="3" width="21" height="14" rx="2" fill="#2563eb"/>
-        <path d="M22 7h6l4 7v4H22V7z" fill="#1d4ed8"/>
-        <circle cx="7" cy="20" r="3" fill="#1e3a8a" stroke="#dbeafe" strokeWidth="1.5"/>
-        <circle cx="29" cy="20" r="3" fill="#1e3a8a" stroke="#dbeafe" strokeWidth="1.5"/>
+      <svg width="20" height="14" viewBox="0 0 40 24" fill="none">
+        <rect x="1" y="3" width="21" height="14" rx="2" fill={C.navy}/>
+        <path d="M22 7h6l4 7v4H22V7z" fill={C.brass}/>
+        <circle cx="7" cy="20" r="3" fill={C.ink} stroke={C.paper} strokeWidth="1.5"/>
+        <circle cx="29" cy="20" r="3" fill={C.ink} stroke={C.paper} strokeWidth="1.5"/>
       </svg>
     ) },
-  { label: "2 Yr Warranty", sub: "Official", bg: "#eef3ff",
+  { label: "2 Yr Warranty", sub: "Official",
     icon: (
-      <svg width="16" height="20" viewBox="0 0 26 30" fill="none">
-        <path d="M13 1L1 6v9c0 6 4.5 11.5 12 13 7.5-1.5 12-7 12-13V6L13 1z" fill="#1a5fb4"/>
+      <svg width="15" height="18" viewBox="0 0 26 30" fill="none">
+        <path d="M13 1L1 6v9c0 6 4.5 11.5 12 13 7.5-1.5 12-7 12-13V6L13 1z" fill={C.navy}/>
         <text x="13" y="17" textAnchor="middle" fontSize="8" fontWeight="800" fill="#fff" fontFamily="Arial">2 YR</text>
       </svg>
     ) },
-  { label: "GST Invoice", sub: "Included", bg: "#f0fdf4",
+  { label: "GST Invoice", sub: "Included",
     icon: (
-      <svg width="15" height="18" viewBox="0 0 24 28" fill="none">
-        <rect x="1" y="1" width="18" height="22" rx="2" fill="#16a34a"/>
-        <rect x="4" y="4" width="11" height="2" rx="1" fill="#bbf7d0"/>
-        <rect x="4" y="8" width="8" height="1.5" rx="1" fill="#bbf7d0"/>
+      <svg width="14" height="17" viewBox="0 0 24 28" fill="none">
+        <rect x="1" y="1" width="18" height="22" rx="2" fill={C.green}/>
+        <rect x="4" y="4" width="11" height="2" rx="1" fill="#dcf3e4"/>
+        <rect x="4" y="8" width="8" height="1.5" rx="1" fill="#dcf3e4"/>
         <circle cx="17" cy="22" r="6" fill="#15803d" stroke="#fff" strokeWidth="1.5"/>
         <path d="M14 22l2 2 4-4" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ) },
-  { label: "7-Day Return", sub: "Easy & Free", bg: "#fff7ed",
+  { label: "7-Day Return", sub: "Easy & Free",
     icon: (
-      <svg width="20" height="17" viewBox="0 0 30 26" fill="none">
-        <rect x="4" y="6" width="16" height="14" rx="2" fill="#d97706"/>
-        <path d="M7 11h10M7 15h7" stroke="#fef3c7" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M21 2c3.5 2 5 5.5 5 8.5s-1.5 6.5-5 8.5" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" fill="none"/>
-        <path d="M23 3l4-2.5-1.5 5.5z" fill="#f59e0b"/>
+      <svg width="19" height="16" viewBox="0 0 30 26" fill="none">
+        <rect x="4" y="6" width="16" height="14" rx="2" fill={C.brass}/>
+        <path d="M7 11h10M7 15h7" stroke={C.brassLight} strokeWidth="2" strokeLinecap="round"/>
+        <path d="M21 2c3.5 2 5 5.5 5 8.5s-1.5 6.5-5 8.5" stroke={C.brassDeep} strokeWidth="2" strokeLinecap="round" fill="none"/>
+        <path d="M23 3l4-2.5-1.5 5.5z" fill={C.brassDeep}/>
       </svg>
     ) },
 ];
@@ -134,6 +148,7 @@ export default function OrderSuccessPage() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("Order ID copied to clipboard!");
 
   useEffect(() => {
     setMounted(true);
@@ -157,38 +172,33 @@ export default function OrderSuccessPage() {
 
   if (!mounted) return null;
 
-  const copyOrderId = async () => {
-    if (!order) return;
+  const paymentId = order?.paymentId;
+
+  const copyToClipboard = async (value: string, message: string) => {
     try {
-      await navigator.clipboard.writeText(order.orderId);
+      await navigator.clipboard.writeText(value);
+      setSnackbarMsg(message);
       setSnackbar(true);
     } catch {
       /* clipboard unavailable — ignore silently */
     }
   };
 
-  // ── Top bar ────────────────────────────────────────────────────────────
-  const TopBar = (
-    <Box className="no-print" sx={{
-      background: C.heading, px: 4, py: 1.9,
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-    }}>
-      <Typography sx={{ fontFamily: sans, fontSize: "19px", color: "#fff", fontWeight: 800, letterSpacing: "-0.4px" }}>
-        Network<span style={{ color: "#5b9bf0" }}>Ten</span>
-      </Typography>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-        <CheckCircleRoundedIcon sx={{ fontSize: 14, color: C.green }} />
-        <Typography sx={{ fontSize: "12px", color: "rgba(255,255,255,.6)", fontWeight: 500, fontFamily: sans }}>
-          Order Confirmed
-        </Typography>
-      </Box>
-    </Box>
-  );
+  const handleDownloadInvoice = () => {
+    if (!order) return;
+    try {
+      generateInvoice(order);
+    } catch (err) {
+      console.error("Invoice generation failed:", err);
+      setSnackbarMsg("Could not generate invoice. Please try again.");
+      setSnackbar(true);
+    }
+  };
 
   // ── Step bar (all 3 steps done) ──────────────────────────────────────────
   const StepBar = (
     <Box className="no-print" sx={{ background: C.surface, borderBottom: `1px solid ${C.border}`, px: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", maxWidth: 960, mx: "auto", height: 54 }}>
+      <Box sx={{ display: "flex", alignItems: "center", maxWidth: 960, mx: "auto", height: 56 }}>
         {["Cart", "Checkout", "Confirmation"].map((label, i) => (
           <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 0.8, mr: 3.5 }}>
             <Box sx={{
@@ -214,20 +224,21 @@ export default function OrderSuccessPage() {
   if (loading) {
     return (
       <>
-        {TopBar}
+        <Navbar />
         {StepBar}
         <Box sx={{
-          background: C.pageBg, minHeight: "78vh",
+          background: C.paper, minHeight: "78vh",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontFamily: sans,
         }}>
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <CircularProgress size={32} sx={{ color: C.heading }} />
+            <CircularProgress size={32} sx={{ color: C.ink }} />
             <Typography sx={{ fontSize: "13px", color: C.textSub, fontFamily: sans }}>
               Loading your order…
             </Typography>
           </Box>
         </Box>
+        <Footer />
       </>
     );
   }
@@ -238,20 +249,20 @@ export default function OrderSuccessPage() {
   if (!order) {
     return (
       <>
-        {TopBar}
+        <Navbar />
         {StepBar}
-        <Box sx={{ background: C.pageBg, minHeight: "78vh", display: "flex", alignItems: "center", py: { xs: 6, md: 10 }, fontFamily: sans }}>
+        <Box sx={{ background: C.paper, minHeight: "78vh", display: "flex", alignItems: "center", py: { xs: 6, md: 10 }, fontFamily: sans }}>
           <Container maxWidth="sm">
             <Box sx={{ ...sectionSx, textAlign: "center", px: { xs: 4, md: 7 }, py: { xs: 6, md: 8 } }}>
               <Box sx={{
                 width: 88, height: 88, borderRadius: "50%",
-                background: C.surfaceGray, border: `2px solid ${C.border}`,
+                background: C.surfaceSunk, border: `2px solid ${C.border}`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 mx: "auto", mb: 3,
               }}>
                 <ShoppingBagOutlinedIcon sx={{ fontSize: 38, color: C.textMuted }} />
               </Box>
-              <Typography sx={{ fontSize: "20px", fontWeight: 800, color: C.heading, mb: 1, fontFamily: sans }}>
+              <Typography sx={{ fontSize: "21px", fontWeight: 600, color: C.ink, mb: 1, fontFamily: serif }}>
                 No recent order found
               </Typography>
               <Typography sx={{ fontSize: "13.5px", color: C.textSub, mb: 4, lineHeight: 1.8, fontFamily: sans }}>
@@ -260,10 +271,10 @@ export default function OrderSuccessPage() {
               <Button
                 onClick={() => router.push("/products")}
                 sx={{
-                  background: C.heading, color: "#fff", borderRadius: "11px", px: 4.5, py: 1.5,
+                  background: C.ink, color: "#fff", borderRadius: "12px", px: 4.5, py: 1.5,
                   fontWeight: 700, fontFamily: sans, textTransform: "none", fontSize: "14px",
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
-                  "&:hover": { background: "#222" },
+                  boxShadow: "0 6px 18px rgba(28,26,22,0.2)",
+                  "&:hover": { background: "#000" },
                 }}
               >
                 Continue Shopping
@@ -271,6 +282,7 @@ export default function OrderSuccessPage() {
             </Box>
           </Container>
         </Box>
+        <Footer />
       </>
     );
   }
@@ -280,14 +292,14 @@ export default function OrderSuccessPage() {
   // ══════════════════════════════════════════════════════════════════════
   return (
     <>
-      {TopBar}
+      <Navbar />
       {StepBar}
 
-      <Box sx={{ background: C.pageBg, minHeight: "100vh", pb: 8, fontFamily: sans }}>
+      <Box sx={{ background: C.paper, minHeight: "100vh", pb: 8, fontFamily: sans }}>
         <Container maxWidth="lg">
 
           {/* ── Hero success card ───────────────────────────────────── */}
-          <Box sx={{ ...sectionSx, textAlign: "center", px: { xs: 3, md: 6 }, py: { xs: 5, md: 6 }, mt: 3, mb: 2.5 }}>
+          <Box sx={{ ...sectionSx, textAlign: "center", px: { xs: 3, md: 6 }, py: { xs: 5, md: 6 }, mt: 3.5, mb: 2.5 }}>
 
             {/* Animated checkmark */}
             <Box sx={{ position: "relative", width: 84, height: 84, mx: "auto", mb: 3 }}>
@@ -311,29 +323,29 @@ export default function OrderSuccessPage() {
               </Box>
             </Box>
 
-            <Typography sx={{ fontSize: { xs: "22px", md: "27px" }, fontWeight: 800, color: C.heading, mb: 1, fontFamily: sans, letterSpacing: "-0.4px" }}>
-              Order placed successfully!
+            <Typography sx={{ fontSize: { xs: "23px", md: "29px" }, fontWeight: 600, color: C.ink, mb: 1, fontFamily: serif, letterSpacing: "-0.3px" }}>
+              Order placed successfully
             </Typography>
             <Typography sx={{ fontSize: "13.5px", color: C.textSub, mb: 3, fontFamily: sans }}>
-              Thank you for shopping with NetworkTen. A confirmation has been sent to your registered email.
+              Thank you for shopping with us. A confirmation has been sent to your registered email.
             </Typography>
 
             {/* Order ID + delivery estimate pills */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, justifyContent: "center" }}>
               <Box
-                onClick={copyOrderId}
+                onClick={() => copyToClipboard(order.orderId, "Order ID copied to clipboard!")}
                 sx={{
                   display: "inline-flex", alignItems: "center", gap: 1,
-                  background: C.surfaceGray, border: `1px solid ${C.border}`,
+                  background: C.surfaceSunk, border: `1px solid ${C.border}`,
                   borderRadius: "10px", px: 1.8, py: 1, cursor: "pointer",
                   transition: "all .15s",
-                  "&:hover": { borderColor: C.heading },
+                  "&:hover": { borderColor: C.ink },
                 }}
               >
                 <Typography sx={{ fontSize: "11px", color: C.textMuted, fontWeight: 600, fontFamily: sans }}>
                   Order ID
                 </Typography>
-                <Typography sx={{ fontSize: "12.5px", color: C.heading, fontWeight: 800, fontFamily: sans, letterSpacing: "0.3px" }}>
+                <Typography sx={{ fontSize: "12.5px", color: C.ink, fontWeight: 800, fontFamily: sans, letterSpacing: "0.3px" }}>
                   {order.orderId}
                 </Typography>
                 <ContentCopyRoundedIcon sx={{ fontSize: 13, color: C.textMuted }} />
@@ -341,11 +353,11 @@ export default function OrderSuccessPage() {
 
               <Box sx={{
                 display: "inline-flex", alignItems: "center", gap: 1,
-                background: C.blueLight, border: `1px solid ${C.blueBorder}`,
+                background: C.navyLight, border: `1px solid ${C.navyBorder}`,
                 borderRadius: "10px", px: 1.8, py: 1,
               }}>
-                <LocalShippingOutlinedIcon sx={{ fontSize: 14, color: C.blue }} />
-                <Typography sx={{ fontSize: "12.5px", color: C.blue, fontWeight: 700, fontFamily: sans }}>
+                <LocalShippingOutlinedIcon sx={{ fontSize: 14, color: C.navy }} />
+                <Typography sx={{ fontSize: "12.5px", color: C.navy, fontWeight: 700, fontFamily: sans }}>
                   Arriving {formatDate(order.estimatedDeliveryStart)} – {formatDate(order.estimatedDeliveryEnd)}
                 </Typography>
               </Box>
@@ -353,29 +365,31 @@ export default function OrderSuccessPage() {
           </Box>
 
           {/* ── Main grid ──────────────────────────────────────────── */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 340px" }, gap: 2.5 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 360px" }, gap: 2.75 }}>
 
             {/* LEFT — Items ordered */}
             <Box sx={sectionSx}>
               <Box sx={headerSx}>
-                <ShoppingBagOutlinedIcon sx={{ fontSize: 18, color: C.blue }} />
-                <Typography sx={{ fontSize: "14px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                <Box sx={headerIconWrapSx}>
+                  <ShoppingBagOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
+                </Box>
+                <Typography sx={{ fontSize: "14.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
                   Items ordered ({order.totalQty})
                 </Typography>
               </Box>
-              <Box sx={{ px: "22px" }}>
+              <Box sx={{ px: "24px" }}>
                 {order.items.map((item, idx) => (
                   <Box
                     key={item.id}
                     sx={{
                       display: "flex", alignItems: "center", gap: 2,
-                      py: 2,
+                      py: 2.2,
                       borderBottom: idx < order.items.length - 1 ? `1px solid ${C.borderLight}` : "none",
                     }}
                   >
                     <Box sx={{
-                      width: 64, height: 64, borderRadius: "10px",
-                      background: C.surfaceGray, border: `1px solid ${C.border}`,
+                      width: 66, height: 66, borderRadius: "11px",
+                      background: C.surfaceSunk, border: `1px solid ${C.border}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, p: 1,
                     }}>
@@ -386,11 +400,11 @@ export default function OrderSuccessPage() {
                       />
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography sx={{ fontSize: "9px", fontWeight: 700, color: C.blue, textTransform: "uppercase", letterSpacing: "1px", mb: 0.3, fontFamily: sans }}>
+                      <Typography sx={{ fontSize: "9px", fontWeight: 700, color: C.brassDeep, textTransform: "uppercase", letterSpacing: "1px", mb: 0.3, fontFamily: sans }}>
                         {item.brand}
                       </Typography>
                       <Typography sx={{
-                        fontSize: "13px", fontWeight: 600, color: C.heading, lineHeight: 1.4,
+                        fontSize: "13px", fontWeight: 600, color: C.ink, lineHeight: 1.4,
                         fontFamily: sans,
                         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                       }}>
@@ -400,7 +414,7 @@ export default function OrderSuccessPage() {
                         Qty: {item.quantity}
                       </Typography>
                     </Box>
-                    <Typography sx={{ fontSize: "14px", fontWeight: 700, color: C.heading, flexShrink: 0, fontFamily: sans }}>
+                    <Typography sx={{ fontSize: "14px", fontWeight: 700, color: C.ink, flexShrink: 0, fontFamily: sans }}>
                       ₹{(item.salePrice * item.quantity).toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -408,30 +422,44 @@ export default function OrderSuccessPage() {
               </Box>
 
               {/* Action buttons */}
-              <Box className="no-print" sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, px: "22px", py: "20px", borderTop: `1px solid ${C.borderLight}`, background: C.surfaceWarm }}>
+              <Box className="no-print" sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, px: "24px", py: "22px", borderTop: `1px solid ${C.borderLight}`, background: C.surfaceWarm }}>
                 <Button
                   startIcon={<StorefrontOutlinedIcon sx={{ fontSize: 16 }} />}
                   onClick={() => router.push("/products")}
                   sx={{
                     flex: { xs: "1 1 100%", sm: "0 1 auto" },
-                    height: 44, borderRadius: "10px", fontWeight: 700, fontSize: "13px",
+                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
                     fontFamily: sans, textTransform: "none",
-                    background: C.heading, color: "#fff", px: 2.5,
-                    boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
-                    "&:hover": { background: "#222" },
+                    background: C.ink, color: "#fff", px: 2.6,
+                    boxShadow: "0 6px 18px rgba(28,26,22,0.2)",
+                    "&:hover": { background: "#000" },
                   }}
                 >
                   Continue Shopping
+                </Button>
+                <Button
+                  startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}
+                  onClick={handleDownloadInvoice}
+                  sx={{
+                    flex: { xs: "1 1 100%", sm: "0 1 auto" },
+                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
+                    fontFamily: sans, textTransform: "none",
+                    background: C.navy, color: "#fff", px: 2.6,
+                    boxShadow: "0 6px 18px rgba(24,38,68,0.25)",
+                    "&:hover": { background: "#101c34" },
+                  }}
+                >
+                  Download Invoice
                 </Button>
                 <Button
                   startIcon={<PrintOutlinedIcon sx={{ fontSize: 16 }} />}
                   onClick={() => window.print()}
                   sx={{
                     flex: { xs: "1 1 100%", sm: "0 1 auto" },
-                    height: 44, borderRadius: "10px", fontWeight: 700, fontSize: "13px",
+                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
                     fontFamily: sans, textTransform: "none",
-                    border: `1.5px solid ${C.border}`, color: C.heading, px: 2.5,
-                    "&:hover": { borderColor: C.heading, background: C.surfaceGray },
+                    border: `1.5px solid ${C.border}`, color: C.ink, px: 2.6,
+                    "&:hover": { borderColor: C.ink, background: C.surfaceSunk },
                   }}
                 >
                   Print Receipt
@@ -440,20 +468,22 @@ export default function OrderSuccessPage() {
             </Box>
 
             {/* RIGHT — Delivery + payment + totals */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.2 }}>
 
               {/* Delivery address */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
-                  <LocalShippingOutlinedIcon sx={{ fontSize: 17, color: C.blue }} />
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                  <Box sx={headerIconWrapSx}>
+                    <LocalShippingOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
+                  </Box>
+                  <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
                     Delivery address
                   </Typography>
                 </Box>
-                <Box sx={{ p: "18px 20px" }}>
+                <Box sx={{ p: "19px 21px" }}>
                   <Box sx={{
                     display: "inline-flex", alignItems: "center", gap: 0.5,
-                    background: C.surfaceGray, color: C.textSub,
+                    background: C.surfaceSunk, color: C.textSub,
                     fontSize: "9px", fontWeight: 700, px: 0.9, py: 0.3,
                     borderRadius: "4px", textTransform: "uppercase", letterSpacing: ".5px",
                     mb: 0.8, fontFamily: sans,
@@ -463,10 +493,10 @@ export default function OrderSuccessPage() {
                       : <BusinessOutlinedIcon sx={{ fontSize: 10 }} />}
                     {order.address.tag || "Address"}
                   </Box>
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, mb: 0.4, fontFamily: sans }}>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, mb: 0.4, fontFamily: sans }}>
                     {order.address.name}
                   </Typography>
-                  <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.65, fontFamily: sans }}>
+                  <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.7, fontFamily: sans }}>
                     {order.address.line1}
                     {order.address.line2 ? <><br />{order.address.line2}</> : null}
                     <br />{order.address.phone}
@@ -474,59 +504,90 @@ export default function OrderSuccessPage() {
                 </Box>
               </Box>
 
-              {/* Payment method */}
+              {/* Payment method — with Razorpay transaction ID */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
-                  {order.paymentMethod === "upi"
-                    ? <QrCode2OutlinedIcon sx={{ fontSize: 17, color: C.blue }} />
-                    : <CurrencyRupeeOutlinedIcon sx={{ fontSize: 17, color: C.blue }} />}
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                  <Box sx={headerIconWrapSx}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <rect x="2" y="5" width="20" height="14" rx="2.5" stroke={C.navy} strokeWidth="1.8"/>
+                      <rect x="2" y="9" width="20" height="2.6" fill={C.navy}/>
+                    </svg>
+                  </Box>
+                  <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
                     Payment method
                   </Typography>
                 </Box>
-                <Box sx={{ p: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <Typography sx={{ fontSize: "13px", fontWeight: 600, color: C.heading, fontFamily: sans }}>
-                    {order.paymentMethod === "upi" ? "UPI" : "Cash on Delivery"}
-                  </Typography>
-                  <Box sx={{
-                    display: "inline-flex", alignItems: "center", gap: 0.5,
-                    background: C.greenLight, border: `1px solid ${C.greenBorder}`,
-                    borderRadius: "20px", px: 1.2, py: 0.4,
-                  }}>
-                    <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
-                    <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
-                      {order.paymentMethod === "upi" ? "Paid" : "Confirmed"}
+                <Box sx={{ p: "19px 21px" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: paymentId ? 1.6 : 0 }}>
+                    <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans }}>
+                      {order.paymentMethod === "upi" ? "UPI / Online payment" : "Cash on Delivery"}
                     </Typography>
+                    <Box sx={{
+                      display: "inline-flex", alignItems: "center", gap: 0.5,
+                      background: C.greenLight, border: `1px solid ${C.greenBorder}`,
+                      borderRadius: "20px", px: 1.3, py: 0.45,
+                    }}>
+                      <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
+                      <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
+                        {order.paymentMethod === "upi" ? "Paid" : "Confirmed"}
+                      </Typography>
+                    </Box>
                   </Box>
+
+                  {/* Transaction ID — only present for online payments verified via Razorpay */}
+                  {paymentId && (
+                    <Box
+                      onClick={() => copyToClipboard(paymentId, "Transaction ID copied to clipboard!")}
+                      sx={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        background: C.surfaceSunk, border: `1px solid ${C.border}`,
+                        borderRadius: "10px", px: 1.6, py: 1.1, cursor: "pointer",
+                        transition: "all .15s",
+                        "&:hover": { borderColor: C.brassDeep },
+                      }}
+                    >
+                      <Box>
+                        <Typography sx={{ fontSize: "9.5px", color: C.textMuted, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".5px", fontFamily: sans, mb: 0.3 }}>
+                          Transaction ID
+                        </Typography>
+                        <Typography sx={{ fontSize: "12.5px", color: C.ink, fontWeight: 700, fontFamily: sans, letterSpacing: "0.2px", wordBreak: "break-all" }}>
+                          {paymentId}
+                        </Typography>
+                      </Box>
+                      <ContentCopyRoundedIcon sx={{ fontSize: 14, color: C.textMuted, flexShrink: 0, ml: 1 }} />
+                    </Box>
+                  )}
                 </Box>
               </Box>
 
               {/* Totals */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
-                  <ShoppingBagOutlinedIcon sx={{ fontSize: 17, color: C.blue }} />
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                  <Box sx={headerIconWrapSx}>
+                    <ShoppingBagOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
+                  </Box>
+                  <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
                     Order total
                   </Typography>
                 </Box>
-                <Box sx={{ px: "20px", py: "18px" }}>
+                <Box sx={{ px: "21px", py: "19px" }}>
                   {[
-                    { label: `Subtotal (${order.totalQty} item${order.totalQty !== 1 ? "s" : ""})`, value: `₹${order.subtotal.toLocaleString("en-IN")}`, color: C.heading },
+                    { label: `Subtotal (${order.totalQty} item${order.totalQty !== 1 ? "s" : ""})`, value: `₹${order.subtotal.toLocaleString("en-IN")}`, color: C.ink },
                     ...(order.discount > 0 ? [{ label: "Coupon discount", value: `−₹${order.discount.toLocaleString("en-IN")}`, color: C.green }] : []),
-                    { label: "Delivery", value: order.shipping === 0 ? "FREE" : `₹${order.shipping}`, color: order.shipping === 0 ? C.green : C.heading },
-                    { label: "Tax", value: "Included", color: C.heading },
+                    { label: "Delivery", value: order.shipping === 0 ? "FREE" : `₹${order.shipping}`, color: order.shipping === 0 ? C.green : C.ink },
+                    { label: "Tax", value: "Included", color: C.ink },
                   ].map((row, i) => (
-                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
+                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.2 }}>
                       <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>{row.label}</Typography>
                       <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
                     </Box>
                   ))}
 
-                  <Divider sx={{ borderColor: C.borderLight, my: 1.5 }} />
+                  <Divider sx={{ borderColor: C.borderLight, my: 1.7 }} />
 
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, fontFamily: sans }}>Total paid</Typography>
-                    <Typography sx={{ fontSize: "20px", fontWeight: 800, color: C.heading, letterSpacing: "-.5px", fontFamily: sans }}>
+                    <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans }}>Total paid</Typography>
+                    <Typography sx={{ fontSize: "22px", fontWeight: 600, color: C.ink, letterSpacing: "-.5px", fontFamily: serif }}>
                       ₹{order.grandTotal.toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -544,22 +605,23 @@ export default function OrderSuccessPage() {
           </Box>
 
           {/* ── Trust strip ─────────────────────────────────────────── */}
-          <Box sx={{ ...sectionSx, display: "flex", mt: 2.5 }}>
+          <Box sx={{ ...sectionSx, display: "flex", mt: 2.75 }}>
             {TRUST.map((t, i) => (
               <Box key={i} sx={{
                 flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-                gap: 0.5, py: 1.6, px: 0.5,
+                gap: 0.6, py: 1.7, px: 0.5,
                 borderRight: i < TRUST.length - 1 ? `1px solid ${C.borderLight}` : "none",
                 textAlign: "center",
               }}>
                 <Box sx={{
-                  width: 30, height: 30, borderRadius: "50%", background: t.bg,
+                  width: 30, height: 30, borderRadius: "50%", background: "#fff",
+                  border: `1px solid ${C.border}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: "0 1px 5px rgba(0,0,0,0.08)",
+                  boxShadow: "0 1px 5px rgba(28,26,22,0.06)",
                 }}>
                   {t.icon}
                 </Box>
-                <Typography sx={{ fontSize: "9px", fontWeight: 700, color: C.heading, lineHeight: 1.2, fontFamily: sans }}>
+                <Typography sx={{ fontSize: "9px", fontWeight: 700, color: C.ink, lineHeight: 1.2, fontFamily: sans }}>
                   {t.label}
                 </Typography>
               </Box>
@@ -568,6 +630,8 @@ export default function OrderSuccessPage() {
         </Container>
       </Box>
 
+      <Footer />
+
       <Snackbar
         open={snackbar}
         autoHideDuration={2200}
@@ -575,8 +639,8 @@ export default function OrderSuccessPage() {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         className="no-print"
       >
-        <Alert severity="success" sx={{ borderRadius: "10px", fontWeight: 700, fontFamily: sans, boxShadow: "0 6px 24px rgba(0,0,0,0.12)" }}>
-          Order ID copied to clipboard!
+        <Alert severity="success" sx={{ borderRadius: "11px", fontWeight: 700, fontFamily: sans, boxShadow: "0 6px 24px rgba(0,0,0,0.12)" }}>
+          {snackbarMsg}
         </Alert>
       </Snackbar>
     </>

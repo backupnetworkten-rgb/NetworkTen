@@ -351,7 +351,7 @@ export default function CheckoutPage() {
         taxableValue,
         gstAmount,
       },
-    } as any); // remove `as any` once you extend the Order type with `billing` + `paymentId`
+    });
 
     clearCart();
     router.push("/order-success");
