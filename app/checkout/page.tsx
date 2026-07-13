@@ -406,7 +406,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: "Your Store Name",
+        name: "Network Ten",
         description: `Order for ${totalQty} item${totalQty !== 1 ? "s" : ""}`,
         order_id: order.id,
         handler: async function (response: any) {
