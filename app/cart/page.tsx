@@ -83,7 +83,7 @@ const TRUST = [
         <circle cx="29" cy="20" r="3" fill="#1e3a8a" stroke="#dbeafe" strokeWidth="1.5"/>
       </svg>
     ) },
-  { label: "2 Yr Warranty", sub: "Official", bg: "#eef3ff",
+  { label: "1 Yr Warranty", sub: "Official", bg: "#eef3ff",
     icon: (
       <svg width="16" height="20" viewBox="0 0 26 30" fill="none">
         <path d="M13 1L1 6v9c0 6 4.5 11.5 12 13 7.5-1.5 12-7 12-13V6L13 1z" fill="#1a5fb4"/>

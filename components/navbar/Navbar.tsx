@@ -106,6 +106,11 @@ export default function Navbar() {
   const solutionsRef   = useRef<HTMLDivElement>(null);
   const closeTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Search state ──────────────────────────────────────────────────────────
+  const [searchQuery,     setSearchQuery]     = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+
   const theme  = useTheme();
   const mobile = useMediaQuery(theme.breakpoints.down("lg"));
 
@@ -117,6 +122,14 @@ export default function Navbar() {
     const unsub = onCartChange(() => setCartItems(getCart()));
     return unsub;
   }, []);
+
+  // Autofocus the mobile search field when it opens
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      const t = setTimeout(() => mobileSearchInputRef.current?.focus(), 150);
+      return () => clearTimeout(t);
+    }
+  }, [mobileSearchOpen]);
 
   if (!mounted) return null;
 
@@ -142,6 +155,29 @@ export default function Navbar() {
   };
   const handleSolutionsLeave = () => {
     closeTimer.current = setTimeout(() => setSolutionsOpen(false), 180);
+  };
+
+  // ── Search handlers ──────────────────────────────────────────────────────
+  const runSearch = (query: string) => {
+    const q = query.trim();
+    if (!q) return;
+    router.push(`/products?search=${encodeURIComponent(q)}`);
+    setSearchQuery("");
+    setMobileSearchOpen(false);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      runSearch(searchQuery);
+    } else if (e.key === "Escape") {
+      setSearchQuery("");
+      setMobileSearchOpen(false);
+    }
+  };
+
+  const toggleMobileSearch = () => {
+    setMobileSearchOpen((prev) => !prev);
   };
 
   return (
@@ -298,11 +334,11 @@ export default function Navbar() {
                         top: "calc(100% + 14px)",
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 720,
+                        width: 740,
                         borderRadius: "24px",
                         border: "1px solid #eef2f7",
                         boxShadow: "0 24px 60px rgba(0,0,0,0.10)",
-                        p: 2.5,
+                        p: 2.8,
                         zIndex: 1400,
                         background: "#fff",
                         // little caret / arrow pointing up
@@ -322,13 +358,36 @@ export default function Navbar() {
                         },
                       }}
                     >
-                      {/* Header row */}
-                      <Box sx={{ mb: 2, px: 0.5 }}>
-                        <Typography sx={{ fontWeight: 900, fontSize: "13px", color: "#102048", mb: 0.2 }}>
-                          Industry Solutions
+                      {/* Premium header row */}
+                      <Box
+                        sx={{
+                          mb: 2.4,
+                          px: 0.5,
+                          pb: 2,
+                          borderBottom: "1px solid #f0f2f5",
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6 }}>
+                          <Box sx={{
+                            width: 5, height: 5, borderRadius: "50%",
+                            background: "#8BC53F",
+                          }} />
+                          <Typography sx={{
+                            fontWeight: 900, fontSize: "10.5px",
+                            letterSpacing: "2.2px", textTransform: "uppercase",
+                            color: "#8BC53F",
+                          }}>
+                            Solutions
+                          </Typography>
+                        </Box>
+                        <Typography sx={{
+                          fontWeight: 900, fontSize: "19px",
+                          color: "#102048", lineHeight: 1.25,
+                        }}>
+                          Built for every industry
                         </Typography>
-                        <Typography sx={{ fontSize: "11.5px", color: "#9aa0af" }}>
-                          Enterprise-grade technology tailored for every sector
+                        <Typography sx={{ fontSize: "12px", color: "#9aa0af", mt: 0.4 }}>
+                          Enterprise-grade technology, tailored to your sector
                         </Typography>
                       </Box>
 
@@ -338,7 +397,7 @@ export default function Navbar() {
                           display: "grid",
                           gridTemplateColumns: "repeat(3, 1fr)",
                           gap: 1.2,
-                          mb: 2,
+                          mb: 2.2,
                         }}
                       >
                         {solutions.map((sol) => (
@@ -409,37 +468,52 @@ export default function Navbar() {
                         ))}
                       </Box>
 
-                      {/* Bottom CTA row */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          px: 0.5,
-                          pt: 1.5,
-                          borderTop: "1px solid #f0f2f5",
-                        }}
+                      {/* Premium "View All Solutions" CTA banner */}
+                      <Link
+                        href="/solutions"
+                        style={{ textDecoration: "none" }}
+                        onClick={() => setSolutionsOpen(false)}
                       >
-                        <Typography sx={{ fontSize: "12px", color: "#9aa0af" }}>
-                          Can't find your industry?
-                        </Typography>
-                        <Link href="/solutions" style={{ textDecoration: "none" }}>
-                          <Button
-                            endIcon={<ArrowForwardRoundedIcon sx={{ fontSize: 14 }} />}
-                            onClick={() => setSolutionsOpen(false)}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            p: "16px 20px",
+                            borderRadius: "16px",
+                            background: "linear-gradient(135deg, #102048 0%, #1a2f5c 100%)",
+                            cursor: "pointer",
+                            transition: "all 0.25s",
+                            "&:hover": {
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 14px 32px rgba(16,32,72,0.28)",
+                            },
+                          }}
+                        >
+                          <Box>
+                            <Typography sx={{ color: "#fff", fontWeight: 800, fontSize: "13.5px" }}>
+                              View All Solutions
+                            </Typography>
+                            <Typography sx={{ color: "rgba(255,255,255,0.62)", fontSize: "11px", mt: 0.3 }}>
+                              Explore our complete industry portfolio
+                            </Typography>
+                          </Box>
+                          <Box
                             sx={{
-                              color: "#8BC53F",
-                              fontWeight: 800,
-                              textTransform: "none",
-                              fontSize: "12.5px",
-                              px: 0,
-                              "&:hover": { background: "transparent", color: "#74ab35" },
+                              width: 36,
+                              height: 36,
+                              borderRadius: "50%",
+                              background: "#8BC53F",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
-                            View all solutions
-                          </Button>
-                        </Link>
-                      </Box>
+                            <ArrowForwardRoundedIcon sx={{ fontSize: 16, color: "#fff" }} />
+                          </Box>
+                        </Box>
+                      </Link>
                     </Paper>
                   </Fade>
                 </Box>
@@ -462,15 +536,41 @@ export default function Navbar() {
           {/* RIGHT — DESKTOP */}
           {!mobile ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.1 }}>
-              {/* Search */}
+              {/* Search — now functional */}
               <Box sx={{
                 display: "flex", alignItems: "center",
                 background: "#f5f7fb", borderRadius: "40px",
                 px: 2, height: "46px", width: "250px",
                 border: "1px solid #edf1f7",
+                transition: "border-color 0.2s",
+                "&:focus-within": { borderColor: "#8BC53F" },
               }}>
-                <SearchIcon sx={{ color: "#7b8794", fontSize: 22, mr: 1 }} />
-                <InputBase placeholder="Search products..." sx={{ width: "100%", fontSize: "14px" }} />
+                <IconButton
+                  onClick={() => runSearch(searchQuery)}
+                  size="small"
+                  sx={{ p: 0.4, mr: 1 }}
+                  aria-label="Search"
+                >
+                  <SearchIcon sx={{ color: "#7b8794", fontSize: 22 }} />
+                </IconButton>
+                <InputBase
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  sx={{ width: "100%", fontSize: "14px" }}
+                  inputProps={{ "aria-label": "Search products" }}
+                />
+                {searchQuery && (
+                  <IconButton
+                    onClick={() => setSearchQuery("")}
+                    size="small"
+                    sx={{ p: 0.3 }}
+                    aria-label="Clear search"
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: 15, color: "#9aa0af" }} />
+                  </IconButton>
+                )}
               </Box>
 
               {/* Cart */}
@@ -591,8 +691,17 @@ export default function Navbar() {
           ) : (
             /* RIGHT — MOBILE */
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton sx={{ background: "#f5f7fb", width: 42, height: 42 }}>
-                <SearchIcon sx={{ color: "#102048" }} />
+              <IconButton
+                onClick={toggleMobileSearch}
+                sx={{
+                  background: mobileSearchOpen ? "#102048" : "#f5f7fb",
+                  width: 42, height: 42,
+                  transition: "all 0.2s",
+                }}
+              >
+                {mobileSearchOpen
+                  ? <CloseRoundedIcon sx={{ color: "#fff" }} />
+                  : <SearchIcon sx={{ color: "#102048" }} />}
               </IconButton>
               <IconButton onClick={() => setCartOpen(true)} sx={{ background: "#f5f7fb", width: 42, height: 42 }}>
                 <Badge badgeContent={count} sx={{ "& .MuiBadge-badge": { background: "#8BC53F", color: "#fff", fontWeight: 800, fontSize: "10px", minWidth: 17, height: 17 } }}>
@@ -605,6 +714,58 @@ export default function Navbar() {
             </Box>
           )}
         </Toolbar>
+
+        {/* ── MOBILE SEARCH BAR (expands under toolbar) ── */}
+        {mobile && (
+          <Collapse in={mobileSearchOpen} timeout={220} unmountOnExit>
+            <Box sx={{ px: 2, pb: 2 }}>
+              <Box sx={{
+                display: "flex", alignItems: "center",
+                background: "#f5f7fb", borderRadius: "40px",
+                px: 2, height: "46px",
+                border: "1.5px solid #8BC53F",
+              }}>
+                <SearchIcon sx={{ color: "#7b8794", fontSize: 20, mr: 1 }} />
+                <InputBase
+                  inputRef={mobileSearchInputRef}
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  sx={{ width: "100%", fontSize: "14px" }}
+                  inputProps={{ "aria-label": "Search products" }}
+                />
+                {searchQuery && (
+                  <IconButton
+                    onClick={() => setSearchQuery("")}
+                    size="small"
+                    sx={{ p: 0.3, mr: 0.3 }}
+                    aria-label="Clear search"
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: 15, color: "#9aa0af" }} />
+                  </IconButton>
+                )}
+                <Button
+                  onClick={() => runSearch(searchQuery)}
+                  sx={{
+                    background: "#8BC53F",
+                    color: "#fff",
+                    minWidth: "36px",
+                    width: "36px",
+                    height: "34px",
+                    borderRadius: "30px",
+                    p: 0,
+                    ml: 0.5,
+                    "&:hover": { background: "#74ab35" },
+                  }}
+                  aria-label="Run search"
+                >
+                  <SearchIcon sx={{ fontSize: 17 }} />
+                </Button>
+              </Box>
+            </Box>
+          </Collapse>
+        )}
       </AppBar>
 
       {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Products, Solutions, Contact ════════════════════════ */}
