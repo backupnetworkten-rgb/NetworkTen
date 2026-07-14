@@ -82,7 +82,7 @@ function Section({
     <Paper
       elevation={0}
       sx={{
-        p: { xs: 2, sm: 3 },
+        p: { xs: 1.75, sm: 3 },
         borderRadius: "16px",
         border: "1px solid #eef0f4",
         borderLeft: `5px solid ${accentColor}`,
@@ -90,12 +90,21 @@ function Section({
         background: "#ffffff",
         boxShadow: "0 1px 2px rgba(16, 24, 40, 0.04)",
         transition: "box-shadow 0.2s ease",
+        overflow: "hidden",
         "&:hover": {
           boxShadow: "0 4px 14px rgba(16, 24, 40, 0.08)",
         },
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          mb: 0.5,
+          flexWrap: "wrap",
+        }}
+      >
         <Box
           sx={{
             width: 34,
@@ -107,6 +116,7 @@ function Section({
             justifyContent: "center",
             background: `${accentColor}1A`,
             color: accentColor,
+            flexShrink: 0,
           }}
         >
           {icon}
@@ -115,15 +125,16 @@ function Section({
           sx={{
             fontWeight: 800,
             color: "#08142e",
-            fontSize: { xs: "0.98rem", sm: "1.08rem" },
+            fontSize: { xs: "0.92rem", sm: "1.08rem" },
             letterSpacing: "0.2px",
+            wordBreak: "break-word",
           }}
         >
           {title}
         </Typography>
       </Box>
       <Divider sx={{ mb: 2.5, mt: 1.5 }} />
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.75, sm: 2.5 }}>
         {children}
       </Grid>
     </Paper>
@@ -164,11 +175,13 @@ function SignaturePad({
   ) => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
     if ("touches" in e) {
       const t = e.touches[0];
-      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+      return { x: (t.clientX - rect.left) * scaleX, y: (t.clientY - rect.top) * scaleY };
     }
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
   };
 
   const startDraw = (
@@ -353,10 +366,17 @@ export default function ServiceReportForm({
       maxWidth="md"
       fullWidth
       fullScreen={fullScreen}
+      scroll="paper"
       slotProps={{
         paper: {
           sx: {
             borderRadius: fullScreen ? 0 : "18px",
+            width: fullScreen ? "100%" : undefined,
+            height: fullScreen ? "100%" : undefined,
+            maxHeight: fullScreen ? "100%" : "90vh",
+            m: fullScreen ? 0 : 4,
+            display: "flex",
+            flexDirection: "column",
           },
         },
       }}
@@ -364,16 +384,26 @@ export default function ServiceReportForm({
       <DialogTitle
         sx={{
           fontWeight: 800,
+          fontSize: { xs: "1rem", sm: "1.25rem" },
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 1,
           background: "linear-gradient(135deg, #08142e 0%, #16294f 100%)",
           color: "#fff",
-          py: { xs: 1.75, sm: 2.25 },
+          py: { xs: 1.5, sm: 2.25 },
+          px: { xs: 2, sm: 3 },
+          flexShrink: 0,
         }}
       >
-        {initialData ? "Edit Service Report" : "New Service Report"}
-        <IconButton onClick={onClose} size="small" sx={{ color: "#fff" }}>
+        <Box component="span" sx={{ wordBreak: "break-word" }}>
+          {initialData ? "Edit Service Report" : "New Service Report"}
+        </Box>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          sx={{ color: "#fff", flexShrink: 0 }}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </DialogTitle>
@@ -383,7 +413,11 @@ export default function ServiceReportForm({
           background:
             "linear-gradient(180deg, #f6f8fb 0%, #fbfbfd 220px, #fbfbfd 100%)",
           pt: 3,
-          px: { xs: 1.75, sm: 3 },
+          px: { xs: 1.5, sm: 3 },
+          pb: { xs: 3, sm: 3 },
+          flex: 1,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         {/* Report Info */}
@@ -691,11 +725,12 @@ export default function ServiceReportForm({
 
       <DialogActions
         sx={{
-          p: 2.5,
+          p: { xs: 1.5, sm: 2.5 },
           borderTop: "1px solid #eef1f6",
           background: "#fff",
-          position: { xs: "sticky", sm: "static" },
-          bottom: 0,
+          flexShrink: 0,
+          gap: 1,
+          pb: { xs: "calc(12px + env(safe-area-inset-bottom))", sm: 2.5 },
         }}
       >
         <Button
