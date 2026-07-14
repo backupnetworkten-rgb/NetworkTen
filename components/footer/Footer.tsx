@@ -58,6 +58,11 @@ const quickLinks = [
   },
 
   {
+    label: "Service Report",
+    path: "/service-report",
+  },
+
+  {
     label: "Blog",
     path: "/blog",
   },
@@ -73,16 +78,36 @@ const quickLinks = [
   },
 ];
 
-const services = [
-  "Networking",
+const solutionsLinks = [
+  {
+    label: "Banking & Retails",
+    path: "/solutions/banking-retail",
+  },
 
-  "CCTV Surveillance",
+  {
+    label: "Education",
+    path: "/solutions/education",
+  },
 
-  "Automation",
+  {
+    label: "Healthcare & Pharma",
+    path: "/solutions/healthcare",
+  },
 
-  "Audio Visual",
+  {
+    label: "Hospitality",
+    path: "/solutions/hospitality",
+  },
 
-  "Video Conferencing",
+  {
+    label: "Retail & Office",
+    path: "/solutions/retail-office",
+  },
+
+  {
+    label: "Home | Villa | Farmhouse",
+    path: "/solutions/home",
+  },
 ];
 
 export default function Footer() {
@@ -369,7 +394,7 @@ export default function Footer() {
             )}
           </Box>
 
-          {/* SERVICES */}
+          {/* SOLUTIONS */}
           <Box>
             <Typography
               sx={{
@@ -380,58 +405,65 @@ export default function Footer() {
                 fontSize: "18px",
               }}
             >
-              Services
+              Solutions
             </Typography>
 
-            {services.map(
+            {solutionsLinks.map(
               (item, index) => (
-                <Box
+                <Link
                   key={index}
-                  sx={{
-                    display:
-                      "flex",
-
-                    alignItems:
-                      "center",
-
-                    gap: 0.5,
-
-                    mb: 1.3,
-
-                    color:
-                      "rgba(255,255,255,0.70)",
-
-                    transition:
-                      "0.3s",
-
-                    cursor:
-                      "pointer",
-
-                    "&:hover": {
-                      color:
-                        "#8BC53F",
-
-                      transform:
-                        "translateX(4px)",
-                    },
+                  href={item.path}
+                  style={{
+                    textDecoration: "none",
                   }}
                 >
-                  <KeyboardArrowRightRoundedIcon
+                  <Box
                     sx={{
-                      fontSize:
-                        17,
-                    }}
-                  />
+                      display:
+                        "flex",
 
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "13px",
+                      alignItems:
+                        "center",
+
+                      gap: 0.5,
+
+                      mb: 1.3,
+
+                      color:
+                        "rgba(255,255,255,0.70)",
+
+                      transition:
+                        "0.3s",
+
+                      cursor:
+                        "pointer",
+
+                      "&:hover": {
+                        color:
+                          "#8BC53F",
+
+                        transform:
+                          "translateX(4px)",
+                      },
                     }}
                   >
-                    {item}
-                  </Typography>
-                </Box>
+                    <KeyboardArrowRightRoundedIcon
+                      sx={{
+                        fontSize:
+                          17,
+                      }}
+                    />
+
+                    <Typography
+                      sx={{
+                        fontSize:
+                          "13px",
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                  </Box>
+                </Link>
               )
             )}
           </Box>

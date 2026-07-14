@@ -35,7 +35,6 @@ import { subscribeToCurrentUser } from "@/services/userService";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 
-// ── Razorpay type declaration ──
 declare global {
   interface Window {
     Razorpay: any;
@@ -65,7 +64,7 @@ const C = {
   goldLight:   "#faf5eb",
 };
 
-const GST_RATE = 0.18; // 18%
+const GST_RATE = 0.18;
 
 const sans = "'Inter', 'DM Sans', system-ui, sans-serif";
 
@@ -147,7 +146,6 @@ function genId() {
   return `addr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
-// Basic GSTIN format check: 15 chars, e.g. 22AAAAA0000A1Z5
 function isValidGstin(value: string) {
   return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(value.trim().toUpperCase());
 }
@@ -170,7 +168,6 @@ export default function CheckoutPage() {
   const [snackbarSev,    setSnackbarSev]    = useState<"success" | "error" | "info">("success");
   const [placingOrder,   setPlacingOrder]   = useState(false);
 
-  // GST / billing state — this now actually drives pricing + gets saved to the order
   const [gstNumber,   setGstNumber]   = useState("");
   const [companyName, setCompanyName] = useState("");
   const [gstErr,       setGstErr]     = useState("");
@@ -209,7 +206,6 @@ export default function CheckoutPage() {
     };
   }, []);
 
-  // ── Load Razorpay checkout.js script once ──
   useEffect(() => {
     if (document.getElementById("razorpay-checkout-js")) return;
     const script = document.createElement("script");
@@ -221,16 +217,13 @@ export default function CheckoutPage() {
 
   if (!mounted) return null;
 
-  // A "GST invoice" (B2B) only kicks in once a valid GSTIN is entered.
-  // Company name alone doesn't change tax treatment — GSTIN is what matters legally.
   const gstinTrimmed = gstNumber.trim().toUpperCase();
   const isB2BInvoice = gstinTrimmed.length > 0 && isValidGstin(gstinTrimmed);
 
-  const cartSubtotal = cartTotal(items); // this is treated as GST-inclusive MRP total, same as before
+  const cartSubtotal = cartTotal(items);
   const discount      = applied === "NETWORK10" ? Math.round(cartSubtotal * 0.1) : 0;
   const shipping       = cartSubtotal >= 1000 ? 0 : 99;
 
-  // Amount before shipping, after discount
   const netGoodsValue = cartSubtotal - discount;
 
   let taxableValue = 0;
@@ -238,14 +231,12 @@ export default function CheckoutPage() {
   let grandTotal = 0;
 
   if (isB2BInvoice) {
-    // B2B: treat netGoodsValue as the TAXABLE value, add 18% GST on top
     taxableValue = netGoodsValue;
     gstAmount    = Math.round(taxableValue * GST_RATE);
     grandTotal   = taxableValue + gstAmount + shipping;
   } else {
-    // B2C: prices are GST-inclusive as before, tax not broken out separately
     taxableValue = Math.round(netGoodsValue / (1 + GST_RATE));
-    gstAmount    = netGoodsValue - taxableValue; // implied, informational only
+    gstAmount    = netGoodsValue - taxableValue;
     grandTotal   = netGoodsValue + shipping;
   }
 
@@ -311,50 +302,67 @@ export default function CheckoutPage() {
     }
   };
 
-  // ── Shared "save order + redirect" logic, used by both COD and Razorpay success paths ──
-  const finalizeOrder = (paymentId?: string) => {
+  // ── FIX: finalizeOrder is now async and actually awaits the Firestore write.
+  // Any failure is caught, logged, and shown to the user instead of being silent.
+  const finalizeOrder = async (paymentId?: string) => {
     const addr = savedAddresses.find((a) => a.id === selectedAddr) || savedAddresses[0];
+
+    if (!addr) {
+      showSnack("No delivery address found. Please add one and try again.", "error");
+      setPlacingOrder(false);
+      return;
+    }
+
     const placedAt      = new Date();
     const deliveryStart = new Date(placedAt);
     deliveryStart.setDate(deliveryStart.getDate() + 3);
     const deliveryEnd   = new Date(placedAt);
     deliveryEnd.setDate(deliveryEnd.getDate() + 6);
 
-    saveLastOrder({
-      orderId: generateOrderId(),
-      placedAt: placedAt.toISOString(),
-      items: items.map((i) => ({
-        id: i.id, name: i.name, brand: i.brand,
-        image: i.image, salePrice: i.salePrice, quantity: i.quantity,
-      })),
-      subtotal: cartSubtotal,
-      discount,
-      shipping,
-      grandTotal,
-      totalQty,
-      paymentMethod: payMethod,
-      paymentId: paymentId || null,
-      address: {
-        name:  addr.name,
-        line1: addr.line1,
-        line2: addr.line2,
-        phone: addr.phone,
-        tag:   addr.tag,
-      },
-      estimatedDeliveryStart: deliveryStart.toISOString(),
-      estimatedDeliveryEnd:   deliveryEnd.toISOString(),
-      billing: {
-        isB2BInvoice,
-        gstNumber:    isB2BInvoice ? gstinTrimmed : "",
-        companyName:  isB2BInvoice ? companyName.trim() : "",
-        gstRate:      GST_RATE,
-        taxableValue,
-        gstAmount,
-      },
-    });
+    try {
+      await saveLastOrder({
+        orderId: generateOrderId(),
+        placedAt: placedAt.toISOString(),
+        items: items.map((i) => ({
+          id: i.id, name: i.name, brand: i.brand,
+          image: i.image, salePrice: i.salePrice, quantity: i.quantity,
+        })),
+        subtotal: cartSubtotal,
+        discount,
+        shipping,
+        grandTotal,
+        totalQty,
+        paymentMethod: payMethod,
+        paymentId: paymentId || null,
+        address: {
+          name:  addr.name,
+          line1: addr.line1,
+          line2: addr.line2,
+          phone: addr.phone,
+          tag:   addr.tag,
+        },
+        estimatedDeliveryStart: deliveryStart.toISOString(),
+        estimatedDeliveryEnd:   deliveryEnd.toISOString(),
+        billing: {
+          isB2BInvoice,
+          gstNumber:    isB2BInvoice ? gstinTrimmed : "",
+          companyName:  isB2BInvoice ? companyName.trim() : "",
+          gstRate:      GST_RATE,
+          taxableValue,
+          gstAmount,
+        },
+      });
 
-    clearCart();
-    router.push("/order-success");
+      clearCart();
+      router.push("/order-success");
+    } catch (err) {
+      console.error("Order save failed:", err);
+      showSnack(
+        "Your payment succeeded, but we couldn't save the order. Please contact support with your payment ID.",
+        "error"
+      );
+      setPlacingOrder(false);
+    }
   };
 
   const handlePlaceOrder = async () => {
@@ -375,7 +383,7 @@ export default function CheckoutPage() {
 
     // Cash on Delivery — no payment gateway involved, save order directly.
     if (payMethod === "cod") {
-      finalizeOrder();
+      await finalizeOrder(); // ── FIX: await added
       return;
     }
 
@@ -387,7 +395,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 1. Ask our server to create a Razorpay order
       const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -401,7 +408,6 @@ export default function CheckoutPage() {
 
       const addr = savedAddresses.find((a) => a.id === selectedAddr) || savedAddresses[0];
 
-      // 2. Open Razorpay's checkout modal
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -410,7 +416,6 @@ export default function CheckoutPage() {
         description: `Order for ${totalQty} item${totalQty !== 1 ? "s" : ""}`,
         order_id: order.id,
         handler: async function (response: any) {
-          // 3. Verify the payment signature on our server before trusting it
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
@@ -420,7 +425,7 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyData.success) {
-              finalizeOrder(response.razorpay_payment_id);
+              await finalizeOrder(response.razorpay_payment_id); // ── FIX: await added
             } else {
               showSnack("Payment verification failed. If money was deducted, it will be refunded automatically.", "error");
               setPlacingOrder(false);
@@ -432,7 +437,7 @@ export default function CheckoutPage() {
           }
         },
         modal: {
-          ondismiss: () => setPlacingOrder(false), // user closed the modal without paying
+          ondismiss: () => setPlacingOrder(false),
         },
         prefill: {
           name: addr?.name || "",
@@ -469,7 +474,6 @@ export default function CheckoutPage() {
     <>
       <Navbar />
 
-      {/* Slim header strip: back link + page title + step indicator + secure badge */}
       <Box sx={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
         <Container maxWidth="lg">
           <Box sx={{
@@ -502,7 +506,6 @@ export default function CheckoutPage() {
               </Box>
             </Box>
 
-            {/* Step indicator */}
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {[
                 { label: "Cart",         done: true },
@@ -590,10 +593,8 @@ export default function CheckoutPage() {
             gap: 3, pt: 3.5,
           }}>
 
-            {/* ── LEFT ── */}
             <Box>
 
-              {/* Delivery Address */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={{
@@ -668,7 +669,6 @@ export default function CheckoutPage() {
                     </Box>
                   )}
 
-                  {/* Add new address toggle */}
                   <Box
                     onClick={() => setShowNewAddr(!showNewAddr)}
                     sx={{
@@ -685,7 +685,6 @@ export default function CheckoutPage() {
                     {showNewAddr ? "Cancel" : "Add new address"}
                   </Box>
 
-                  {/* New address form */}
                   <Collapse in={showNewAddr}>
                     <Divider sx={{ borderColor: C.borderLight, my: 2 }} />
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
@@ -740,7 +739,6 @@ export default function CheckoutPage() {
                       </FormControl>
                     </Box>
 
-                    {/* Save Address button */}
                     <Button
                       fullWidth
                       onClick={handleSaveAddress}
@@ -766,7 +764,6 @@ export default function CheckoutPage() {
                 </Box>
               </Box>
 
-              {/* Payment */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={{
@@ -882,7 +879,6 @@ export default function CheckoutPage() {
                 </Box>
               </Box>
 
-              {/* GST & Notes */}
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={{
@@ -928,7 +924,6 @@ export default function CheckoutPage() {
               </Box>
             </Box>
 
-            {/* ── RIGHT: SUMMARY ── */}
             <Box sx={{ position: { md: "sticky" }, top: { md: 20 }, alignSelf: "flex-start" }}>
               <Box sx={{
                 background: C.surface, border: `1px solid ${C.border}`,
@@ -952,7 +947,6 @@ export default function CheckoutPage() {
                   </Typography>
                 </Box>
 
-                {/* Items */}
                 <Box sx={{ px: 2.6, py: 1.6, borderBottom: `1px solid ${C.borderLight}` }}>
                   {items.map((item, idx) => (
                     <Box
@@ -996,7 +990,6 @@ export default function CheckoutPage() {
                   ))}
                 </Box>
 
-                {/* Coupon */}
                 <Box sx={{ px: 2.6, py: 1.6, borderBottom: `1px solid ${C.borderLight}` }}>
                   <Typography sx={{ fontSize: "11px", fontWeight: 700, color: C.textSub, textTransform: "uppercase", letterSpacing: ".5px", mb: 1, fontFamily: sans }}>
                     Coupon
@@ -1054,7 +1047,6 @@ export default function CheckoutPage() {
                   )}
                 </Box>
 
-                {/* Totals */}
                 <Box sx={{ px: 2.6, py: 2.2 }}>
                   {isB2BInvoice ? (
                     <>
@@ -1152,7 +1144,6 @@ export default function CheckoutPage() {
                   </Box>
                 </Box>
 
-                {/* Trust strip */}
                 <Box sx={{ display: "flex", borderTop: `1px solid ${C.borderLight}` }}>
                   {TRUST.map((t, i) => (
                     <Box key={i} sx={{
