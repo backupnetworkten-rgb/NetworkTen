@@ -41,9 +41,17 @@ export interface Order {
     line2?: string;
     phone: string;
     tag: string;
+    city: string;
+    state: string;
+    pin: string;
   };
   estimatedDeliveryStart: string;
   estimatedDeliveryEnd: string;
+  shiprocket?: {
+    orderId?: number;
+    shipmentId?: number;
+    status?: string;
+  };
 }
 
 export function generateOrderId(): string {
@@ -66,6 +74,7 @@ export async function saveLastOrder(order: Order): Promise<void> {
       );
     } catch (e) {
       console.error("Firestore order save failed:", e);
+      throw e; // re-throw so finalizeOrder's try/catch can react to it
     }
   }
 }
@@ -75,7 +84,6 @@ export function getLocalOrders(): Order[] {
   try {
     const raw = localStorage.getItem("nt_orders");
     if (!raw) {
-      // migrate old key
       const old = localStorage.getItem("lastOrder");
       if (old) {
         const parsed = JSON.parse(old);
@@ -99,5 +107,47 @@ export async function fetchUserOrders(): Promise<Order[]> {
     return snap.docs.map((d) => d.data() as Order);
   } catch {
     return getLocalOrders();
+  }
+}
+
+// Updates Shiprocket info on both Firestore AND localStorage.
+// Strips out any `undefined` values first, since Firestore's setDoc()
+// throws if any field value is undefined (found in field ...).
+export async function updateOrderShiprocketInfo(
+  orderId: string,
+  shiprocketData: { orderId?: number; shipmentId?: number; status?: string }
+): Promise<void> {
+  // Remove undefined values — Firestore rejects them outright.
+  const cleanData: Record<string, any> = {};
+  Object.entries(shiprocketData).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanData[key] = value;
+    }
+  });
+
+  // Update localStorage copy
+  try {
+    const existing = getLocalOrders();
+    const updated = existing.map((o) =>
+      o.orderId === orderId
+        ? { ...o, shiprocket: { ...o.shiprocket, ...cleanData } }
+        : o
+    );
+    localStorage.setItem("nt_orders", JSON.stringify(updated));
+  } catch (e) {
+    console.error("Failed to update local order with Shiprocket info:", e);
+  }
+
+  // Update Firestore copy
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    await setDoc(
+      doc(db, "users", user.uid, "orders", orderId),
+      { shiprocket: cleanData },
+      { merge: true }
+    );
+  } catch (e) {
+    console.error("Failed to update order with Shiprocket info:", e);
   }
 }

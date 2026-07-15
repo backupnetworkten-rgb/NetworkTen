@@ -27,7 +27,7 @@ import {
   getCart, onCartChange, cartTotal, clearCart, CartItem,
 } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
-import { saveLastOrder, generateOrderId } from "@/lib/orderStore";
+import { saveLastOrder, generateOrderId, updateOrderShiprocketInfo } from "@/lib/orderStore";
 import { auth } from "@/lib/firebase";
 import { Address } from "@/types/user";
 import { subscribeToCurrentUser } from "@/services/userService";
@@ -302,8 +302,8 @@ export default function CheckoutPage() {
     }
   };
 
-  // ── FIX: finalizeOrder is now async and actually awaits the Firestore write.
-  // Any failure is caught, logged, and shown to the user instead of being silent.
+  // ── finalizeOrder: saves order to Firestore, then pushes it to Shiprocket
+  // in the background (non-blocking) and stores the shipment info back on the order.
   const finalizeOrder = async (paymentId?: string) => {
     const addr = savedAddresses.find((a) => a.id === selectedAddr) || savedAddresses[0];
 
@@ -319,42 +319,74 @@ export default function CheckoutPage() {
     const deliveryEnd   = new Date(placedAt);
     deliveryEnd.setDate(deliveryEnd.getDate() + 6);
 
+    const orderId = generateOrderId();
+
+    const orderPayload = {
+      orderId,
+      placedAt: placedAt.toISOString(),
+      items: items.map((i) => ({
+        id: i.id, name: i.name, brand: i.brand,
+        image: i.image, salePrice: i.salePrice, quantity: i.quantity,
+      })),
+      subtotal: cartSubtotal,
+      discount,
+      shipping,
+      grandTotal,
+      totalQty,
+      paymentMethod: payMethod,
+      paymentId: paymentId || null,
+      address: {
+        name:  addr.name,
+        line1: addr.line1,
+        line2: addr.line2,
+        phone: addr.phone,
+        tag:   addr.tag,
+        city:  addr.city,
+        state: addr.state,
+        pin:   addr.pin,
+      },
+      estimatedDeliveryStart: deliveryStart.toISOString(),
+      estimatedDeliveryEnd:   deliveryEnd.toISOString(),
+      billing: {
+        isB2BInvoice,
+        gstNumber:    isB2BInvoice ? gstinTrimmed : "",
+        companyName:  isB2BInvoice ? companyName.trim() : "",
+        gstRate:      GST_RATE,
+        taxableValue,
+        gstAmount,
+      },
+    };
+
     try {
-      await saveLastOrder({
-        orderId: generateOrderId(),
-        placedAt: placedAt.toISOString(),
-        items: items.map((i) => ({
-          id: i.id, name: i.name, brand: i.brand,
-          image: i.image, salePrice: i.salePrice, quantity: i.quantity,
-        })),
-        subtotal: cartSubtotal,
-        discount,
-        shipping,
-        grandTotal,
-        totalQty,
-        paymentMethod: payMethod,
-        paymentId: paymentId || null,
-        address: {
-          name:  addr.name,
-          line1: addr.line1,
-          line2: addr.line2,
-          phone: addr.phone,
-          tag:   addr.tag,
-        },
-        estimatedDeliveryStart: deliveryStart.toISOString(),
-        estimatedDeliveryEnd:   deliveryEnd.toISOString(),
-        billing: {
-          isB2BInvoice,
-          gstNumber:    isB2BInvoice ? gstinTrimmed : "",
-          companyName:  isB2BInvoice ? companyName.trim() : "",
-          gstRate:      GST_RATE,
-          taxableValue,
-          gstAmount,
-        },
-      });
+      await saveLastOrder(orderPayload);
 
       clearCart();
       router.push("/order-success");
+
+      // Push to Shiprocket in the background — doesn't block the redirect.
+      fetch("/api/shiprocket/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      })
+        .then(async (res) => {
+          const data = await res.json();
+          // TEMP: log the full response so we can confirm exact field names
+          console.log("Shiprocket FULL response:", JSON.stringify(data, null, 2));
+
+          if (res.ok) {
+            await updateOrderShiprocketInfo(orderId, {
+              orderId: data.order_id,
+              shipmentId: data.shipment_id,
+              status: data.status,
+            });
+          } else {
+            console.error("Shiprocket order creation failed:", data);
+          }
+        })
+        .catch((err) => {
+          console.error("Shiprocket push failed:", err);
+        });
     } catch (err) {
       console.error("Order save failed:", err);
       showSnack(
@@ -381,13 +413,11 @@ export default function CheckoutPage() {
 
     setPlacingOrder(true);
 
-    // Cash on Delivery — no payment gateway involved, save order directly.
     if (payMethod === "cod") {
-      await finalizeOrder(); // ── FIX: await added
+      await finalizeOrder();
       return;
     }
 
-    // Online payment (UPI / cards / wallets) via Razorpay.
     try {
       if (!window.Razorpay) {
         showSnack("Payment gateway is still loading. Please try again in a second.", "error");
@@ -425,7 +455,7 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyData.success) {
-              await finalizeOrder(response.razorpay_payment_id); // ── FIX: await added
+              await finalizeOrder(response.razorpay_payment_id);
             } else {
               showSnack("Payment verification failed. If money was deducted, it will be refunded automatically.", "error");
               setPlacingOrder(false);
