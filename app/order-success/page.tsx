@@ -14,6 +14,9 @@ import PrintOutlinedIcon             from "@mui/icons-material/PrintOutlined";
 import ReceiptLongOutlinedIcon       from "@mui/icons-material/ReceiptLongOutlined";
 import StorefrontOutlinedIcon        from "@mui/icons-material/StorefrontOutlined";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import PhoneOutlinedIcon             from "@mui/icons-material/PhoneOutlined";
+import EmailOutlinedIcon             from "@mui/icons-material/EmailOutlined";
+import LanguageOutlinedIcon          from "@mui/icons-material/LanguageOutlined";
 import { proxyImage } from "@/lib/proxyImage";
 import { fetchUserOrders, getLocalOrders, type Order } from "@/lib/orderStore";
 import { generateInvoice } from "@/lib/generateInvoice";
@@ -50,6 +53,18 @@ const C = {
 const sans  = "'Inter', system-ui, sans-serif";
 const serif = "'Fraunces', 'Georgia', serif";
 
+// ─── Company / seller details for the invoice letterhead ───
+// TODO: swap in your real registered business details.
+const COMPANY = {
+  legalName: "Network Ten",
+  addressLine1: "Part 1, E3/37D Uttam Nagar",
+  addressLine2: "Chanakya Place, New Delhi – 110059",
+  addressLine3: "Delhi, India",
+  phone:   "+91 8687878755",
+  email:   "info@networkten.in",
+  website: "www.networkten.in",
+};
+
 if (typeof document !== "undefined" && !document.getElementById("order-success-font")) {
   const s = document.createElement("style");
   s.id = "order-success-font";
@@ -72,8 +87,37 @@ if (typeof document !== "undefined" && !document.getElementById("order-success-f
     .order-success-ring { animation: ringPop 0.55s cubic-bezier(.2,1.4,.4,1) both; }
     .order-success-check { animation: checkDraw 0.45s 0.35s ease forwards; stroke-dasharray: 36; stroke-dashoffset: 36; }
     .order-success-echo { animation: ringEcho 1.4s ease-out 0.1s 1; }
+
+    /* ─── Print-only receipt styling ───────────────────────────── */
     @media print {
+      /* Hide everything that isn't the receipt itself */
       .no-print { display: none !important; }
+
+      /* Reset page chrome */
+      html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
+      @page { size: A4; margin: 14mm; }
+
+      /* Make only the receipt block visible and take over the page */
+      body * { visibility: hidden; }
+      .print-receipt, .print-receipt * { visibility: visible; }
+      .print-receipt {
+        position: absolute; top: 0; left: 0; width: 100%;
+        margin: 0 !important; padding: 0 !important;
+      }
+
+      /* Flatten card chrome for print — no shadows/rounded cards, just clean sections */
+      .print-receipt .print-card {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        border: none !important;
+        margin-bottom: 14pt !important;
+      }
+      .print-receipt .print-card + .print-card {
+        border-top: 1px solid ${C.border} !important;
+        padding-top: 14pt !important;
+      }
+      .print-receipt img { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-receipt * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
   `;
   document.head.appendChild(s);
@@ -142,6 +186,28 @@ const TRUST = [
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
+// Small reusable logo mark used on the invoice letterhead (swap for your real <img> logo if you have one)
+// Replace this entire function:
+function CompanyLogoMark({ size = 42 }: { size?: number }) {
+  return (
+    <Box
+      component="img"
+      src="/images/logo.png"          // ← path to your logo in /public
+      alt={COMPANY.legalName}
+      sx={{
+        width: size,
+        height: size,
+        borderRadius: "10px",
+        objectFit: "contain",
+        flexShrink: 0,
+        background: C.surface,     // white/neutral backing in case logo has transparency
+        border: `1px solid ${C.border}`,
+        p: 0.5,
+      }}
+    />
+  );
+}
+
 export default function OrderSuccessPage() {
   const router = useRouter();
   const [order,   setOrder]   = useState<Order | null>(null);
@@ -173,6 +239,8 @@ export default function OrderSuccessPage() {
   if (!mounted) return null;
 
   const paymentId = order?.paymentId;
+  const billing: any = (order as any)?.billing;
+  const isB2BInvoice = !!billing?.isB2BInvoice;
 
   const copyToClipboard = async (value: string, message: string) => {
     try {
@@ -224,7 +292,7 @@ export default function OrderSuccessPage() {
   if (loading) {
     return (
       <>
-        <Navbar />
+        <Box className="no-print"><Navbar /></Box>
         {StepBar}
         <Box sx={{
           background: C.paper, minHeight: "78vh",
@@ -238,7 +306,7 @@ export default function OrderSuccessPage() {
             </Typography>
           </Box>
         </Box>
-        <Footer />
+        <Box className="no-print"><Footer /></Box>
       </>
     );
   }
@@ -249,7 +317,7 @@ export default function OrderSuccessPage() {
   if (!order) {
     return (
       <>
-        <Navbar />
+        <Box className="no-print"><Navbar /></Box>
         {StepBar}
         <Box sx={{ background: C.paper, minHeight: "78vh", display: "flex", alignItems: "center", py: { xs: 6, md: 10 }, fontFamily: sans }}>
           <Container maxWidth="sm">
@@ -282,7 +350,7 @@ export default function OrderSuccessPage() {
             </Box>
           </Container>
         </Box>
-        <Footer />
+        <Box className="no-print"><Footer /></Box>
       </>
     );
   }
@@ -292,14 +360,14 @@ export default function OrderSuccessPage() {
   // ══════════════════════════════════════════════════════════════════════
   return (
     <>
-      <Navbar />
+      <Box className="no-print"><Navbar /></Box>
       {StepBar}
 
       <Box sx={{ background: C.paper, minHeight: "100vh", pb: 8, fontFamily: sans }}>
         <Container maxWidth="lg">
 
-          {/* ── Hero success card ───────────────────────────────────── */}
-          <Box sx={{ ...sectionSx, textAlign: "center", px: { xs: 3, md: 6 }, py: { xs: 5, md: 6 }, mt: 3.5, mb: 2.5 }}>
+          {/* ── Hero success card — screen only, not part of the printed receipt ── */}
+          <Box className="no-print" sx={{ ...sectionSx, textAlign: "center", px: { xs: 3, md: 6 }, py: { xs: 5, md: 6 }, mt: 3.5, mb: 2.5 }}>
 
             {/* Animated checkmark */}
             <Box sx={{ position: "relative", width: 84, height: 84, mx: "auto", mb: 3 }}>
@@ -364,11 +432,127 @@ export default function OrderSuccessPage() {
             </Box>
           </Box>
 
-          {/* ── Main grid ──────────────────────────────────────────── */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 360px" }, gap: 2.75 }}>
+          {/* ══════════════════════════════════════════════════════════
+              PRINTABLE RECEIPT — only this block is shown when printing.
+              Everything below (letterhead, items, address, payment, totals)
+              is the actual receipt content. No navbar/footer/buttons/hero.
+             ══════════════════════════════════════════════════════════ */}
+          <Box className="print-receipt">
 
-            {/* LEFT — Items ordered */}
-            <Box sx={sectionSx}>
+            {/* ── Invoice letterhead card ─────────────────────────────── */}
+            <Box className="print-card" sx={{ ...sectionSx, mb: 2.75 }}>
+              {/* Letterhead: logo + company details ←→ INVOICE + meta */}
+              <Box sx={{
+                display: "flex", flexWrap: "wrap", justifyContent: "space-between",
+                gap: 3, px: { xs: 3, md: 4.5 }, py: { xs: 3, md: 3.6 },
+                background: `linear-gradient(180deg, ${C.surfaceWarm} 0%, ${C.surface} 100%)`,
+                borderBottom: `1px solid ${C.borderLight}`,
+              }}>
+                {/* Seller / company block */}
+                <Box sx={{ display: "flex", gap: 1.8, minWidth: 260 }}>
+                  <CompanyLogoMark />
+                  <Box>
+                    <Typography sx={{ fontSize: "16px", fontWeight: 700, color: C.ink, fontFamily: serif, letterSpacing: "-0.2px", lineHeight: 1.2 }}>
+                      {COMPANY.name}
+                    </Typography>
+                    <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, mt: 0.4, lineHeight: 1.6 }}>
+                      {COMPANY.legalName}<br />
+                      {COMPANY.addressLine1}<br />
+                      {COMPANY.addressLine2}
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.6, mt: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <PhoneOutlinedIcon sx={{ fontSize: 12, color: C.textMuted }} />
+                        <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans }}>{COMPANY.phone}</Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <EmailOutlinedIcon sx={{ fontSize: 12, color: C.textMuted }} />
+                        <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans }}>{COMPANY.email}</Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <LanguageOutlinedIcon sx={{ fontSize: 12, color: C.textMuted }} />
+                        <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans }}>{COMPANY.website}</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Invoice meta block */}
+                <Box sx={{ textAlign: { xs: "left", sm: "right" }, minWidth: 220 }}>
+                  <Typography sx={{
+                    fontSize: "20px", fontWeight: 800, color: C.ink, fontFamily: sans,
+                    letterSpacing: "2px", textTransform: "uppercase", lineHeight: 1,
+                  }}>
+                    Invoice
+                  </Typography>
+                  <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mt: 0.8 }}>
+                    Invoice No.
+                  </Typography>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans, mb: 0.8 }}>
+                    {order.orderId}
+                  </Typography>
+                  <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans }}>
+                    Invoice Date
+                  </Typography>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans }}>
+                    {formatDate(order.placedAt)}
+                  </Typography>
+                  <Box className="no-print" sx={{
+                    display: "inline-flex", alignItems: "center", gap: 0.5, mt: 1.2,
+                    background: C.greenLight, border: `1px solid ${C.greenBorder}`,
+                    borderRadius: "20px", px: 1.3, py: 0.45,
+                  }}>
+                    <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
+                    <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
+                      {order.paymentMethod === "upi" ? "Paid" : "Confirmed"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Billed to / GSTIN strip */}
+              <Box sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: isB2BInvoice ? "1fr 1fr" : "1fr" },
+                gap: 2.5, px: { xs: 3, md: 4.5 }, py: { xs: 2.6, md: 2.8 },
+              }}>
+                <Box>
+                  <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".6px", fontFamily: sans, mb: 0.8 }}>
+                    Billed To
+                  </Typography>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans, mb: 0.3 }}>
+                    {order.address.name}
+                  </Typography>
+                  <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.7, fontFamily: sans }}>
+                    {order.address.line1}
+                    {order.address.line2 ? <>, {order.address.line2}</> : null}<br />
+                    {order.address.city}{order.address.state ? `, ${order.address.state}` : ""} – {order.address.pin}<br />
+                    {order.address.phone}
+                  </Typography>
+                </Box>
+
+                {isB2BInvoice && (
+                  <Box sx={{
+                    borderLeft: { xs: "none", sm: `1px dashed ${C.border}` },
+                    pl: { xs: 0, sm: 2.5 },
+                  }}>
+                    <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.textMuted, textTransform: "uppercase", letterSpacing: ".6px", fontFamily: sans, mb: 0.8 }}>
+                      GST Details
+                    </Typography>
+                    <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans, mb: 0.3 }}>
+                      {billing.companyName || "—"}
+                    </Typography>
+                    <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.7, fontFamily: sans }}>
+                      GSTIN: {billing.gstNumber}<br />
+                      Seller GSTIN: {COMPANY.gstin}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+
+            {/* ── Items ordered ────────────────────────────────────────── */}
+            <Box className="print-card" sx={sectionSx}>
               <Box sx={headerSx}>
                 <Box sx={headerIconWrapSx}>
                   <ShoppingBagOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
@@ -387,7 +571,7 @@ export default function OrderSuccessPage() {
                       borderBottom: idx < order.items.length - 1 ? `1px solid ${C.borderLight}` : "none",
                     }}
                   >
-                    <Box sx={{
+                    <Box className="no-print" sx={{
                       width: 66, height: 66, borderRadius: "11px",
                       background: C.surfaceSunk, border: `1px solid ${C.border}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
@@ -420,58 +604,15 @@ export default function OrderSuccessPage() {
                   </Box>
                 ))}
               </Box>
-
-              {/* Action buttons */}
-              <Box className="no-print" sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, px: "24px", py: "22px", borderTop: `1px solid ${C.borderLight}`, background: C.surfaceWarm }}>
-                <Button
-                  startIcon={<StorefrontOutlinedIcon sx={{ fontSize: 16 }} />}
-                  onClick={() => router.push("/products")}
-                  sx={{
-                    flex: { xs: "1 1 100%", sm: "0 1 auto" },
-                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
-                    fontFamily: sans, textTransform: "none",
-                    background: C.ink, color: "#fff", px: 2.6,
-                    boxShadow: "0 6px 18px rgba(28,26,22,0.2)",
-                    "&:hover": { background: "#000" },
-                  }}
-                >
-                  Continue Shopping
-                </Button>
-                <Button
-                  startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}
-                  onClick={handleDownloadInvoice}
-                  sx={{
-                    flex: { xs: "1 1 100%", sm: "0 1 auto" },
-                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
-                    fontFamily: sans, textTransform: "none",
-                    background: C.navy, color: "#fff", px: 2.6,
-                    boxShadow: "0 6px 18px rgba(24,38,68,0.25)",
-                    "&:hover": { background: "#101c34" },
-                  }}
-                >
-                  Download Invoice
-                </Button>
-                <Button
-                  startIcon={<PrintOutlinedIcon sx={{ fontSize: 16 }} />}
-                  onClick={() => window.print()}
-                  sx={{
-                    flex: { xs: "1 1 100%", sm: "0 1 auto" },
-                    height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
-                    fontFamily: sans, textTransform: "none",
-                    border: `1.5px solid ${C.border}`, color: C.ink, px: 2.6,
-                    "&:hover": { borderColor: C.ink, background: C.surfaceSunk },
-                  }}
-                >
-                  Print Receipt
-                </Button>
-              </Box>
+              {/* Bottom padding to replace the (now removed on print) action-button bar */}
+              <Box sx={{ height: { xs: 8, md: 12 } }} />
             </Box>
 
-            {/* RIGHT — Delivery + payment + totals */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.2 }}>
+            {/* ── Delivery + payment + totals ─────────────────────────── */}
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2.2, mt: 2.75 }}>
 
               {/* Delivery address */}
-              <Box sx={sectionSx}>
+              <Box className="print-card" sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={headerIconWrapSx}>
                     <LocalShippingOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
@@ -505,7 +646,7 @@ export default function OrderSuccessPage() {
               </Box>
 
               {/* Payment method — with Razorpay transaction ID */}
-              <Box sx={sectionSx}>
+              <Box className="print-card" sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={headerIconWrapSx}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -554,58 +695,110 @@ export default function OrderSuccessPage() {
                           {paymentId}
                         </Typography>
                       </Box>
-                      <ContentCopyRoundedIcon sx={{ fontSize: 14, color: C.textMuted, flexShrink: 0, ml: 1 }} />
+                      <ContentCopyRoundedIcon className="no-print" sx={{ fontSize: 14, color: C.textMuted, flexShrink: 0, ml: 1 }} />
                     </Box>
                   )}
                 </Box>
               </Box>
+            </Box>
 
-              {/* Totals */}
-              <Box sx={sectionSx}>
-                <Box sx={headerSx}>
-                  <Box sx={headerIconWrapSx}>
-                    <ShoppingBagOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
-                  </Box>
-                  <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
-                    Order total
-                  </Typography>
+            {/* Totals */}
+            <Box className="print-card" sx={{ ...sectionSx, mt: 2.2 }}>
+              <Box sx={headerSx}>
+                <Box sx={headerIconWrapSx}>
+                  <ShoppingBagOutlinedIcon sx={{ fontSize: 15, color: C.navy }} />
                 </Box>
-                <Box sx={{ px: "21px", py: "19px" }}>
-                  {[
-                    { label: `Subtotal (${order.totalQty} item${order.totalQty !== 1 ? "s" : ""})`, value: `₹${order.subtotal.toLocaleString("en-IN")}`, color: C.ink },
-                    ...(order.discount > 0 ? [{ label: "Coupon discount", value: `−₹${order.discount.toLocaleString("en-IN")}`, color: C.green }] : []),
-                    { label: "Delivery", value: order.shipping === 0 ? "FREE" : `₹${order.shipping}`, color: order.shipping === 0 ? C.green : C.ink },
-                    { label: "Tax", value: "Included", color: C.ink },
-                  ].map((row, i) => (
-                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.2 }}>
-                      <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>{row.label}</Typography>
-                      <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
-                    </Box>
-                  ))}
-
-                  <Divider sx={{ borderColor: C.borderLight, my: 1.7 }} />
-
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans }}>Total paid</Typography>
-                    <Typography sx={{ fontSize: "22px", fontWeight: 600, color: C.ink, letterSpacing: "-.5px", fontFamily: serif }}>
-                      ₹{order.grandTotal.toLocaleString("en-IN")}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              {/* Reassurance */}
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.6, py: 0.5 }}>
-                <LockOutlinedIcon sx={{ fontSize: 12, color: C.textMuted }} />
-                <Typography sx={{ fontSize: "10.5px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>
-                  100% secure · SSL encrypted
+                <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
+                  Order total
                 </Typography>
               </Box>
+              <Box sx={{ px: "21px", py: "19px" }}>
+                {[
+                  { label: `Subtotal (${order.totalQty} item${order.totalQty !== 1 ? "s" : ""})`, value: `₹${order.subtotal.toLocaleString("en-IN")}`, color: C.ink },
+                  ...(order.discount > 0 ? [{ label: "Coupon discount", value: `−₹${order.discount.toLocaleString("en-IN")}`, color: C.green }] : []),
+                  { label: "Delivery", value: order.shipping === 0 ? "FREE" : `₹${order.shipping}`, color: order.shipping === 0 ? C.green : C.ink },
+                  {
+                    label: "GST (18%)",
+                    value: billing?.gstAmount != null ? `Included · ₹${billing.gstAmount.toLocaleString("en-IN")}` : "Included",
+                    color: C.ink,
+                  },
+                ].map((row, i) => (
+                  <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.2 }}>
+                    <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>{row.label}</Typography>
+                    <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
+                  </Box>
+                ))}
+
+                <Divider sx={{ borderColor: C.borderLight, my: 1.7 }} />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans }}>Total paid</Typography>
+                  <Typography sx={{ fontSize: "22px", fontWeight: 600, color: C.ink, letterSpacing: "-.5px", fontFamily: serif }}>
+                    ₹{order.grandTotal.toLocaleString("en-IN")}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
+
+            {/* Print-only footer note */}
+            <Typography sx={{
+              display: "none",
+              "@media print": { display: "block" },
+              fontSize: "9.5px", color: C.textMuted, fontFamily: sans,
+              textAlign: "center", mt: 3,
+            }}>
+              This is a system-generated receipt and does not require a signature. · {COMPANY.name} · {COMPANY.email}
+            </Typography>
+          </Box>
+          {/* ── End printable receipt ──────────────────────────────────── */}
+
+          {/* ── Action buttons — screen only ────────────────────────────── */}
+          <Box className="no-print" sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, mt: 2.75 }}>
+            <Button
+              startIcon={<StorefrontOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => router.push("/products")}
+              sx={{
+                flex: { xs: "1 1 100%", sm: "0 1 auto" },
+                height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
+                fontFamily: sans, textTransform: "none",
+                background: C.ink, color: "#fff", px: 2.6,
+                boxShadow: "0 6px 18px rgba(28,26,22,0.2)",
+                "&:hover": { background: "#000" },
+              }}
+            >
+              Continue Shopping
+            </Button>
+            <Button
+              startIcon={<ReceiptLongOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={handleDownloadInvoice}
+              sx={{
+                flex: { xs: "1 1 100%", sm: "0 1 auto" },
+                height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
+                fontFamily: sans, textTransform: "none",
+                background: C.navy, color: "#fff", px: 2.6,
+                boxShadow: "0 6px 18px rgba(24,38,68,0.25)",
+                "&:hover": { background: "#101c34" },
+              }}
+            >
+              Download Invoice
+            </Button>
+            <Button
+              startIcon={<PrintOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={() => window.print()}
+              sx={{
+                flex: { xs: "1 1 100%", sm: "0 1 auto" },
+                height: 46, borderRadius: "11px", fontWeight: 700, fontSize: "13px",
+                fontFamily: sans, textTransform: "none",
+                border: `1.5px solid ${C.border}`, color: C.ink, px: 2.6,
+                "&:hover": { borderColor: C.ink, background: C.surfaceSunk },
+              }}
+            >
+              Print Receipt
+            </Button>
           </Box>
 
-          {/* ── Trust strip ─────────────────────────────────────────── */}
-          <Box sx={{ ...sectionSx, display: "flex", mt: 2.75 }}>
+          {/* ── Trust strip — screen only ───────────────────────────────── */}
+          <Box className="no-print" sx={{ ...sectionSx, display: "flex", mt: 2.75 }}>
             {TRUST.map((t, i) => (
               <Box key={i} sx={{
                 flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
@@ -630,7 +823,7 @@ export default function OrderSuccessPage() {
         </Container>
       </Box>
 
-      <Footer />
+      <Box className="no-print"><Footer /></Box>
 
       <Snackbar
         open={snackbar}

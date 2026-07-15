@@ -23,6 +23,7 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import SaveOutlinedIcon              from "@mui/icons-material/SaveOutlined";
 import ArrowBackRoundedIcon          from "@mui/icons-material/ArrowBackRounded";
 import ShoppingCartOutlinedIcon      from "@mui/icons-material/ShoppingCartOutlined";
+import VerifiedUserOutlinedIcon      from "@mui/icons-material/VerifiedUserOutlined";
 import {
   getCart, onCartChange, cartTotal, clearCart, CartItem,
 } from "@/lib/cartStore";
@@ -62,6 +63,8 @@ const C = {
   greenBorder: "#bbf7d0",
   gold:        "#b8873f",
   goldLight:   "#faf5eb",
+  goldBorder:  "#ecdcb8",
+  goldDeep:    "#8a6323",
 };
 
 const GST_RATE = 0.18;
@@ -226,19 +229,13 @@ export default function CheckoutPage() {
 
   const netGoodsValue = cartSubtotal - discount;
 
-  let taxableValue = 0;
-  let gstAmount = 0;
-  let grandTotal = 0;
-
-  if (isB2BInvoice) {
-    taxableValue = netGoodsValue;
-    gstAmount    = Math.round(taxableValue * GST_RATE);
-    grandTotal   = taxableValue + gstAmount + shipping;
-  } else {
-    taxableValue = Math.round(netGoodsValue / (1 + GST_RATE));
-    gstAmount    = netGoodsValue - taxableValue;
-    grandTotal   = netGoodsValue + shipping;
-  }
+  // GST is always included in the listed price. Adding a GSTIN does NOT
+  // change the amount the customer pays — it only causes the GST portion
+  // to be itemised on the invoice and the GSTIN/company name to be
+  // recorded against the order for B2B billing purposes.
+  const taxableValue = Math.round(netGoodsValue / (1 + GST_RATE));
+  const gstAmount     = netGoodsValue - taxableValue;
+  const grandTotal    = netGoodsValue + shipping;
 
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
 
@@ -569,7 +566,7 @@ export default function CheckoutPage() {
 
             <Box sx={{
               display: "flex", alignItems: "center", gap: 0.7,
-              background: C.goldLight, border: `1px solid #ecdcb8`,
+              background: C.goldLight, border: `1px solid ${C.goldBorder}`,
               borderRadius: "20px", px: 1.6, py: 0.6,
             }}>
               <LockOutlinedIcon sx={{ fontSize: 13, color: C.gold }} />
@@ -913,14 +910,31 @@ export default function CheckoutPage() {
                 <Box sx={headerSx}>
                   <Box sx={{
                     width: 30, height: 30, borderRadius: "9px",
-                    background: C.blueLight, display: "flex",
+                    background: C.goldLight, display: "flex",
                     alignItems: "center", justifyContent: "center",
                   }}>
-                    <ReceiptLongOutlinedIcon sx={{ fontSize: 16, color: C.blue }} />
+                    <ReceiptLongOutlinedIcon sx={{ fontSize: 16, color: C.gold }} />
                   </Box>
-                  <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
-                    GST &amp; billing details (optional)
-                  </Typography>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                      GST &amp; billing details
+                    </Typography>
+                    <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mt: 0.1 }}>
+                      Optional — for a company tax invoice
+                    </Typography>
+                  </Box>
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      display: "flex", alignItems: "center", gap: 0.5,
+                      background: C.greenLight, border: `1px solid ${C.greenBorder}`,
+                      borderRadius: "20px", px: 1.2, py: 0.5,
+                    }}>
+                      <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
+                      <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
+                        GSTIN verified
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
                 <Box sx={{ p: "22px 24px" }}>
                   <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, mb: 1.5 }}>
@@ -932,7 +946,7 @@ export default function CheckoutPage() {
                       onChange={(e) => { setGstNumber(e.target.value.toUpperCase()); setGstErr(""); }}
                       onBlur={handleGstBlur}
                       error={!!gstErr}
-                      helperText={gstErr || (isB2BInvoice ? "18% GST will be added on the taxable value." : " ")}
+                      helperText={gstErr || " "}
                       sx={inputSx}
                     />
                     <TextField
@@ -944,11 +958,42 @@ export default function CheckoutPage() {
                       sx={inputSx}
                     />
                   </Box>
+
+                  <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mb: isB2BInvoice ? 1.5 : 0 }}>
+                    Adding a GSTIN doesn't change your total — it only itemises GST on your invoice and records
+                    it against your company.
+                  </Typography>
+
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+                      border: `1px solid ${C.goldBorder}`,
+                      borderRadius: "11px", p: "14px 16px",
+                      display: "flex", gap: 1.3, alignItems: "flex-start",
+                    }}>
+                      <Box sx={{
+                        width: 30, height: 30, borderRadius: "8px", flexShrink: 0,
+                        background: C.gold, display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                      }}>
+                        <VerifiedUserOutlinedIcon sx={{ fontSize: 15, color: "#fff" }} />
+                      </Box>
+                      <Box>
+                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.goldDeep, fontFamily: sans, mb: 0.3 }}>
+                          Tax invoice will be issued to {companyName || "your company"}
+                        </Typography>
+                        <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.6 }}>
+                          GSTIN: <b>{gstinTrimmed}</b> · Taxable value ₹{taxableValue.toLocaleString("en-IN")} + GST ₹{gstAmount.toLocaleString("en-IN")}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+
                   <TextField
                     fullWidth multiline minRows={2}
                     size="small" label="Order note (optional)"
                     placeholder="Any special instructions for your order…"
-                    sx={inputSx}
+                    sx={{ ...inputSx, mt: isB2BInvoice ? 2 : 0.5 }}
                   />
                 </Box>
               </Box>
@@ -972,9 +1017,24 @@ export default function CheckoutPage() {
                   }}>
                     <ShoppingBagOutlinedIcon sx={{ fontSize: 17, color: "#fff" }} />
                   </Box>
-                  <Typography sx={{ fontSize: "14.5px", fontWeight: 800, color: "#fff", fontFamily: sans, letterSpacing: "-0.2px" }}>
-                    Order summary
-                  </Typography>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: "14.5px", fontWeight: 800, color: "#fff", fontFamily: sans, letterSpacing: "-0.2px" }}>
+                      Order summary
+                    </Typography>
+                  </Box>
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      display: "flex", alignItems: "center", gap: 0.5,
+                      background: "rgba(255,255,255,0.14)",
+                      border: "1px solid rgba(255,255,255,0.28)",
+                      borderRadius: "20px", px: 1.1, py: 0.4,
+                    }}>
+                      <ReceiptLongOutlinedIcon sx={{ fontSize: 11, color: "#fff" }} />
+                      <Typography sx={{ fontSize: "9.5px", fontWeight: 700, color: "#fff", fontFamily: sans, letterSpacing: ".3px" }}>
+                        TAX INVOICE
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
                 <Box sx={{ px: 2.6, py: 1.6, borderBottom: `1px solid ${C.borderLight}` }}>
@@ -1078,57 +1138,30 @@ export default function CheckoutPage() {
                 </Box>
 
                 <Box sx={{ px: 2.6, py: 2.2 }}>
-                  {isB2BInvoice ? (
-                    <>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
-                        <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>
-                          Taxable value ({totalQty} item{totalQty !== 1 ? "s" : ""})
-                        </Typography>
-                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
-                          ₹{taxableValue.toLocaleString("en-IN")}
-                        </Typography>
-                      </Box>
-                      {discount > 0 && (
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
-                          <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>Coupon discount</Typography>
-                          <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.green, fontFamily: sans }}>
-                            −₹{discount.toLocaleString("en-IN")}
-                          </Typography>
-                        </Box>
-                      )}
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
-                        <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>GST (18%)</Typography>
-                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
-                          ₹{gstAmount.toLocaleString("en-IN")}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
-                        <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>Delivery</Typography>
-                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: shipping === 0 ? C.green : C.heading, fontFamily: sans }}>
-                          {shipping === 0 ? "FREE" : `₹${shipping}`}
-                        </Typography>
-                      </Box>
-                      <Box sx={{
-                        background: C.goldLight, border: `1px solid #ecdcb8`,
-                        borderRadius: "8px", px: 1.4, py: 0.9, mt: 1, mb: 0.5,
-                      }}>
-                        <Typography sx={{ fontSize: "10.5px", color: C.gold, fontWeight: 600, fontFamily: sans, lineHeight: 1.5 }}>
-                          GST invoice will be issued to <b>{companyName || "your company"}</b> (GSTIN: {gstinTrimmed}).
-                        </Typography>
-                      </Box>
-                    </>
-                  ) : (
-                    [
-                      { label: `Subtotal (${totalQty} item${totalQty !== 1 ? "s" : ""})`, value: `₹${cartSubtotal.toLocaleString("en-IN")}`, color: C.heading },
-                      ...(discount > 0 ? [{ label: "Coupon discount", value: `−₹${discount.toLocaleString("en-IN")}`, color: C.green }] : []),
-                      { label: "Delivery", value: shipping === 0 ? "FREE" : `₹${shipping}`, color: shipping === 0 ? C.green : C.heading },
-                      { label: "Tax", value: "Included", color: C.heading },
-                    ].map((row, i) => (
-                      <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
-                        <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>{row.label}</Typography>
-                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
-                      </Box>
-                    ))
+                  {[
+                    { label: `Subtotal (${totalQty} item${totalQty !== 1 ? "s" : ""})`, value: `₹${cartSubtotal.toLocaleString("en-IN")}`, color: C.heading },
+                    ...(discount > 0 ? [{ label: "Coupon discount", value: `−₹${discount.toLocaleString("en-IN")}`, color: C.green }] : []),
+                    { label: "Delivery", value: shipping === 0 ? "FREE" : `₹${shipping}`, color: shipping === 0 ? C.green : C.heading },
+                    { label: "GST (18%)", value: `Included · ₹${gstAmount.toLocaleString("en-IN")}`, color: C.heading },
+                  ].map((row, i) => (
+                    <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
+                      <Typography sx={{ fontSize: "12px", color: C.textMuted, fontWeight: 500, fontFamily: sans }}>{row.label}</Typography>
+                      <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
+                    </Box>
+                  ))}
+
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+                      border: `1px solid ${C.goldBorder}`,
+                      borderRadius: "9px", px: 1.4, py: 1, mt: 1, mb: 0.5,
+                      display: "flex", gap: 0.9, alignItems: "flex-start",
+                    }}>
+                      <ReceiptLongOutlinedIcon sx={{ fontSize: 13, color: C.gold, mt: 0.2, flexShrink: 0 }} />
+                      <Typography sx={{ fontSize: "10.5px", color: C.goldDeep, fontWeight: 600, fontFamily: sans, lineHeight: 1.55 }}>
+                        Tax invoice for <b>{companyName || "your company"}</b> · GSTIN {gstinTrimmed}. Taxable value ₹{taxableValue.toLocaleString("en-IN")} + GST ₹{gstAmount.toLocaleString("en-IN")}.
+                      </Typography>
+                    </Box>
                   )}
 
                   <Divider sx={{ borderColor: C.borderLight, my: 1.6 }} />
@@ -1140,7 +1173,7 @@ export default function CheckoutPage() {
                     </Typography>
                   </Box>
                   <Typography sx={{ fontSize: "10px", color: C.textMuted, textAlign: "right", mb: 2.2, fontFamily: sans }}>
-                    {isB2BInvoice ? "GST invoice · taxable value + 18% GST" : "Inclusive of all taxes & charges"}
+                    Inclusive of all taxes &amp; charges{isB2BInvoice ? " · tax invoice will be issued" : ""}
                   </Typography>
 
                   <Button
