@@ -542,10 +542,6 @@ export default function OrderSuccessPage() {
                     <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans, mb: 0.3 }}>
                       {billing.companyName || "—"}
                     </Typography>
-                    <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.7, fontFamily: sans }}>
-                      GSTIN: {billing.gstNumber}<br />
-                      Seller GSTIN: {COMPANY.gstin}
-                    </Typography>
                   </Box>
                 )}
               </Box>
