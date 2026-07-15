@@ -453,12 +453,12 @@ export default function OrderSuccessPage() {
                   <CompanyLogoMark />
                   <Box>
                     <Typography sx={{ fontSize: "16px", fontWeight: 700, color: C.ink, fontFamily: serif, letterSpacing: "-0.2px", lineHeight: 1.2 }}>
-                      {COMPANY.name}
+                      {COMPANY.legalName}
                     </Typography>
                     <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, mt: 0.4, lineHeight: 1.6 }}>
-                      {COMPANY.legalName}<br />
                       {COMPANY.addressLine1}<br />
-                      {COMPANY.addressLine2}
+                      {COMPANY.addressLine2}<br />
+                      {COMPANY.addressLine3}
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.6, mt: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
