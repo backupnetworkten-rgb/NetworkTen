@@ -12,10 +12,12 @@ const LINE  = "#E7E0D0";
 // ─── Company / seller details for the invoice letterhead ───
 // Keep this in sync with the COMPANY constant on the order-success page.
 const COMPANY = {
+  name:      "Network Ten",
   legalName: "Network Ten",
   addressLine1: "Part 1, E3/37D Uttam Nagar",
   addressLine2: "Chanakya Place, New Delhi – 110059",
   addressLine3: "Delhi, India",
+  gstin:   "07AAAAA0000A1Z5",
   phone:   "+91 8687878755",
   email:   "info@networkten.in",
   website: "www.networkten.in",

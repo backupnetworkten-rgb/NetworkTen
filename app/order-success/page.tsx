@@ -24,7 +24,7 @@ import { generateInvoice } from "@/lib/generateInvoice";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 
-// ─── Premium design tokens — matched to the redesigned checkout page ───
+// Premium design tokens - matched to the redesigned checkout page
 const C = {
   paper:       "#F8F5EF",
   surface:     "#FFFFFF",
@@ -53,16 +53,19 @@ const C = {
 const sans  = "'Inter', system-ui, sans-serif";
 const serif = "'Fraunces', 'Georgia', serif";
 
-// ─── Company / seller details for the invoice letterhead ───
-// TODO: swap in your real registered business details.
+// Company / seller details for the invoice letterhead
+// Kept in sync with the COMPANY object in lib/generateInvoice.ts —
+// update both places together if the business details ever change.
 const COMPANY = {
-  legalName: "Network Ten",
+  name:         "Network Ten",
+  legalName:    "Network Ten",
   addressLine1: "Part 1, E3/37D Uttam Nagar",
   addressLine2: "Chanakya Place, New Delhi – 110059",
   addressLine3: "Delhi, India",
-  phone:   "+91 8687878755",
-  email:   "info@networkten.in",
-  website: "www.networkten.in",
+  gstin:        "07AAAAA0000A1Z5",
+  phone:        "+91 8687878755",
+  email:        "info@networkten.in",
+  website:      "www.networkten.in",
 };
 
 if (typeof document !== "undefined" && !document.getElementById("order-success-font")) {
@@ -88,16 +91,13 @@ if (typeof document !== "undefined" && !document.getElementById("order-success-f
     .order-success-check { animation: checkDraw 0.45s 0.35s ease forwards; stroke-dasharray: 36; stroke-dashoffset: 36; }
     .order-success-echo { animation: ringEcho 1.4s ease-out 0.1s 1; }
 
-    /* ─── Print-only receipt styling ───────────────────────────── */
+    /* Print-only receipt styling */
     @media print {
-      /* Hide everything that isn't the receipt itself */
       .no-print { display: none !important; }
 
-      /* Reset page chrome */
       html, body { background: #ffffff !important; margin: 0 !important; padding: 0 !important; }
       @page { size: A4; margin: 14mm; }
 
-      /* Make only the receipt block visible and take over the page */
       body * { visibility: hidden; }
       .print-receipt, .print-receipt * { visibility: visible; }
       .print-receipt {
@@ -105,7 +105,6 @@ if (typeof document !== "undefined" && !document.getElementById("order-success-f
         margin: 0 !important; padding: 0 !important;
       }
 
-      /* Flatten card chrome for print — no shadows/rounded cards, just clean sections */
       .print-receipt .print-card {
         box-shadow: none !important;
         border-radius: 0 !important;
@@ -186,21 +185,20 @@ const TRUST = [
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-// Small reusable logo mark used on the invoice letterhead (swap for your real <img> logo if you have one)
-// Replace this entire function:
+// Company logo used on the invoice letterhead
 function CompanyLogoMark({ size = 42 }: { size?: number }) {
   return (
     <Box
       component="img"
-      src="/images/logo.png"          // ← path to your logo in /public
-      alt={COMPANY.legalName}
+      src="/images/logo.png"
+      alt={COMPANY.name}
       sx={{
         width: size,
         height: size,
         borderRadius: "10px",
         objectFit: "contain",
         flexShrink: 0,
-        background: C.surface,     // white/neutral backing in case logo has transparency
+        background: C.surface,
         border: `1px solid ${C.border}`,
         p: 0.5,
       }}
@@ -225,8 +223,6 @@ export default function OrderSuccessPage() {
         const orders = await fetchUserOrders();
         if (active) setOrder(orders[0] ?? null);
       } catch {
-        // fetchUserOrders already falls back to local storage internally,
-        // but guard against any unexpected throw
         if (active) setOrder(getLocalOrders()[0] ?? null);
       } finally {
         if (active) setLoading(false);
@@ -248,14 +244,14 @@ export default function OrderSuccessPage() {
       setSnackbarMsg(message);
       setSnackbar(true);
     } catch {
-      /* clipboard unavailable — ignore silently */
+      /* clipboard unavailable - ignore silently */
     }
   };
 
-  const handleDownloadInvoice = () => {
+  const handleDownloadInvoice = async () => {
     if (!order) return;
     try {
-      generateInvoice(order);
+      await generateInvoice(order);
     } catch (err) {
       console.error("Invoice generation failed:", err);
       setSnackbarMsg("Could not generate invoice. Please try again.");
@@ -263,7 +259,7 @@ export default function OrderSuccessPage() {
     }
   };
 
-  // ── Step bar (all 3 steps done) ──────────────────────────────────────────
+  // Step bar (all 3 steps done)
   const StepBar = (
     <Box className="no-print" sx={{ background: C.surface, borderBottom: `1px solid ${C.border}`, px: 4 }}>
       <Box sx={{ display: "flex", alignItems: "center", maxWidth: 960, mx: "auto", height: 56 }}>
@@ -286,9 +282,7 @@ export default function OrderSuccessPage() {
     </Box>
   );
 
-  // ══════════════════════════════════════════════════════════════════════
-  // LOADING STATE — fetching from Firestore / local storage
-  // ══════════════════════════════════════════════════════════════════════
+  // LOADING STATE - fetching from Firestore / local storage
   if (loading) {
     return (
       <>
@@ -311,9 +305,7 @@ export default function OrderSuccessPage() {
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════
-  // FALLBACK — no order found (direct visit / storage cleared / new user)
-  // ══════════════════════════════════════════════════════════════════════
+  // FALLBACK - no order found (direct visit / storage cleared / new user)
   if (!order) {
     return (
       <>
@@ -355,9 +347,7 @@ export default function OrderSuccessPage() {
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════
   // SUCCESS STATE
-  // ══════════════════════════════════════════════════════════════════════
   return (
     <>
       <Box className="no-print"><Navbar /></Box>
@@ -366,10 +356,9 @@ export default function OrderSuccessPage() {
       <Box sx={{ background: C.paper, minHeight: "100vh", pb: 8, fontFamily: sans }}>
         <Container maxWidth="lg">
 
-          {/* ── Hero success card — screen only, not part of the printed receipt ── */}
+          {/* Hero success card - screen only, not part of the printed receipt */}
           <Box className="no-print" sx={{ ...sectionSx, textAlign: "center", px: { xs: 3, md: 6 }, py: { xs: 5, md: 6 }, mt: 3.5, mb: 2.5 }}>
 
-            {/* Animated checkmark */}
             <Box sx={{ position: "relative", width: 84, height: 84, mx: "auto", mb: 3 }}>
               <Box className="order-success-echo" sx={{
                 position: "absolute", inset: 0, borderRadius: "50%",
@@ -398,7 +387,6 @@ export default function OrderSuccessPage() {
               Thank you for shopping with us. A confirmation has been sent to your registered email.
             </Typography>
 
-            {/* Order ID + delivery estimate pills */}
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, justifyContent: "center" }}>
               <Box
                 onClick={() => copyToClipboard(order.orderId, "Order ID copied to clipboard!")}
@@ -432,33 +420,27 @@ export default function OrderSuccessPage() {
             </Box>
           </Box>
 
-          {/* ══════════════════════════════════════════════════════════
-              PRINTABLE RECEIPT — only this block is shown when printing.
-              Everything below (letterhead, items, address, payment, totals)
-              is the actual receipt content. No navbar/footer/buttons/hero.
-             ══════════════════════════════════════════════════════════ */}
+          {/* PRINTABLE RECEIPT - only this block is shown when printing. */}
           <Box className="print-receipt">
 
-            {/* ── Invoice letterhead card ─────────────────────────────── */}
+            {/* Invoice letterhead card */}
             <Box className="print-card" sx={{ ...sectionSx, mb: 2.75 }}>
-              {/* Letterhead: logo + company details ←→ INVOICE + meta */}
               <Box sx={{
                 display: "flex", flexWrap: "wrap", justifyContent: "space-between",
                 gap: 3, px: { xs: 3, md: 4.5 }, py: { xs: 3, md: 3.6 },
                 background: `linear-gradient(180deg, ${C.surfaceWarm} 0%, ${C.surface} 100%)`,
                 borderBottom: `1px solid ${C.borderLight}`,
               }}>
-                {/* Seller / company block */}
                 <Box sx={{ display: "flex", gap: 1.8, minWidth: 260 }}>
                   <CompanyLogoMark />
                   <Box>
                     <Typography sx={{ fontSize: "16px", fontWeight: 700, color: C.ink, fontFamily: serif, letterSpacing: "-0.2px", lineHeight: 1.2 }}>
-                      {COMPANY.legalName}
+                      {COMPANY.name}
                     </Typography>
                     <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, mt: 0.4, lineHeight: 1.6 }}>
+                      {COMPANY.legalName}<br />
                       {COMPANY.addressLine1}<br />
-                      {COMPANY.addressLine2}<br />
-                      {COMPANY.addressLine3}
+                      {COMPANY.addressLine2}
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.6, mt: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -477,7 +459,6 @@ export default function OrderSuccessPage() {
                   </Box>
                 </Box>
 
-                {/* Invoice meta block */}
                 <Box sx={{ textAlign: { xs: "left", sm: "right" }, minWidth: 220 }}>
                   <Typography sx={{
                     fontSize: "20px", fontWeight: 800, color: C.ink, fontFamily: sans,
@@ -510,7 +491,6 @@ export default function OrderSuccessPage() {
                 </Box>
               </Box>
 
-              {/* Billed to / GSTIN strip */}
               <Box sx={{
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", sm: isB2BInvoice ? "1fr 1fr" : "1fr" },
@@ -542,12 +522,16 @@ export default function OrderSuccessPage() {
                     <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.ink, fontFamily: sans, mb: 0.3 }}>
                       {billing.companyName || "—"}
                     </Typography>
+                    <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.7, fontFamily: sans }}>
+                      GSTIN: {billing.gstNumber}<br />
+                      Seller GSTIN: {COMPANY.gstin}
+                    </Typography>
                   </Box>
                 )}
               </Box>
             </Box>
 
-            {/* ── Items ordered ────────────────────────────────────────── */}
+            {/* Items ordered */}
             <Box className="print-card" sx={sectionSx}>
               <Box sx={headerSx}>
                 <Box sx={headerIconWrapSx}>
@@ -600,14 +584,12 @@ export default function OrderSuccessPage() {
                   </Box>
                 ))}
               </Box>
-              {/* Bottom padding to replace the (now removed on print) action-button bar */}
               <Box sx={{ height: { xs: 8, md: 12 } }} />
             </Box>
 
-            {/* ── Delivery + payment + totals ─────────────────────────── */}
+            {/* Delivery + payment */}
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2.2, mt: 2.75 }}>
 
-              {/* Delivery address */}
               <Box className="print-card" sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={headerIconWrapSx}>
@@ -641,7 +623,6 @@ export default function OrderSuccessPage() {
                 </Box>
               </Box>
 
-              {/* Payment method — with Razorpay transaction ID */}
               <Box className="print-card" sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={headerIconWrapSx}>
@@ -671,7 +652,6 @@ export default function OrderSuccessPage() {
                     </Box>
                   </Box>
 
-                  {/* Transaction ID — only present for online payments verified via Razorpay */}
                   {paymentId && (
                     <Box
                       onClick={() => copyToClipboard(paymentId, "Transaction ID copied to clipboard!")}
@@ -736,7 +716,6 @@ export default function OrderSuccessPage() {
               </Box>
             </Box>
 
-            {/* Print-only footer note */}
             <Typography sx={{
               display: "none",
               "@media print": { display: "block" },
@@ -746,9 +725,9 @@ export default function OrderSuccessPage() {
               This is a system-generated receipt and does not require a signature. · {COMPANY.name} · {COMPANY.email}
             </Typography>
           </Box>
-          {/* ── End printable receipt ──────────────────────────────────── */}
+          {/* End printable receipt */}
 
-          {/* ── Action buttons — screen only ────────────────────────────── */}
+          {/* Action buttons - screen only */}
           <Box className="no-print" sx={{ display: "flex", flexWrap: "wrap", gap: 1.2, mt: 2.75 }}>
             <Button
               startIcon={<StorefrontOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -793,7 +772,7 @@ export default function OrderSuccessPage() {
             </Button>
           </Box>
 
-          {/* ── Trust strip — screen only ───────────────────────────────── */}
+          {/* Trust strip - screen only */}
           <Box className="no-print" sx={{ ...sectionSx, display: "flex", mt: 2.75 }}>
             {TRUST.map((t, i) => (
               <Box key={i} sx={{
