@@ -229,10 +229,6 @@ export default function CheckoutPage() {
 
   const netGoodsValue = cartSubtotal - discount;
 
-  // GST is always included in the listed price. Adding a GSTIN does NOT
-  // change the amount the customer pays — it only causes the GST portion
-  // to be itemised on the invoice and the GSTIN/company name to be
-  // recorded against the order for B2B billing purposes.
   const taxableValue = Math.round(netGoodsValue / (1 + GST_RATE));
   const gstAmount     = netGoodsValue - taxableValue;
   const grandTotal    = netGoodsValue + shipping;
@@ -299,8 +295,9 @@ export default function CheckoutPage() {
     }
   };
 
-  // ── finalizeOrder: saves order to Firestore, then pushes it to Shiprocket
-  // in the background (non-blocking) and stores the shipment info back on the order.
+  // ── finalizeOrder: saves order to Firestore, sends confirmation emails,
+  // then pushes it to Shiprocket in the background (non-blocking) and
+  // stores the shipment info back on the order.
   const finalizeOrder = async (paymentId?: string) => {
     const addr = savedAddresses.find((a) => a.id === selectedAddr) || savedAddresses[0];
 
@@ -360,6 +357,31 @@ export default function CheckoutPage() {
       clearCart();
       router.push("/order-success");
 
+      // Send order confirmation emails (customer + owner) in the background —
+      // doesn't block the redirect. Logging added so we can trace failures
+      // in the server terminal.
+      const customerEmailToSend = auth.currentUser?.email ?? null;
+      console.log(">>> Calling /api/orders/notify | customerEmail:", customerEmailToSend);
+
+      fetch("/api/orders/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          order: orderPayload,
+          customerEmail: customerEmailToSend,
+        }),
+      })
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          console.log(">>> /api/orders/notify response:", res.status, data);
+          if (!res.ok || data.success === false) {
+            console.error(">>> Email notify did not succeed:", data);
+          }
+        })
+        .catch((err) => {
+          console.error(">>> Order notify request failed to even reach server:", err);
+        });
+
       // Push to Shiprocket in the background — doesn't block the redirect.
       fetch("/api/shiprocket/create-order", {
         method: "POST",
@@ -368,7 +390,6 @@ export default function CheckoutPage() {
       })
         .then(async (res) => {
           const data = await res.json();
-          // TEMP: log the full response so we can confirm exact field names
           console.log("Shiprocket FULL response:", JSON.stringify(data, null, 2));
 
           if (res.ok) {
