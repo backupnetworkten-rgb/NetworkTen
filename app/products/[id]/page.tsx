@@ -96,11 +96,11 @@ const BADGES = [
     ),
   },
   {
-    label: "Official", sub: "2 Yrs Warranty", bg: "#eef3ff",
+    label: "Official", sub: "1 Yr Warranty", bg: "#eef3ff",
     icon: (
       <svg width="26" height="30" viewBox="0 0 26 30" fill="none">
         <path d="M13 1L1 6v9c0 6 4.5 11.5 12 13 7.5-1.5 12-7 12-13V6L13 1z" fill="#1a5fb4"/>
-        <text x="13" y="17" textAnchor="middle" fontSize="8" fontWeight="800" fill="#fff" fontFamily="Arial">2 YR</text>
+        <text x="13" y="17" textAnchor="middle" fontSize="8" fontWeight="800" fill="#fff" fontFamily="Arial">1 YR</text>
       </svg>
     ),
   },
@@ -119,13 +119,11 @@ const BADGES = [
     ),
   },
   {
-    label: "Easy Returns", sub: "7 Days", bg: "#fff7ed",
+    label: "Genuine Product", sub: "100% Authentic", bg: "#fdf2f8",
     icon: (
-      <svg width="30" height="26" viewBox="0 0 30 26" fill="none">
-        <rect x="4" y="6" width="16" height="14" rx="2" fill="#d97706"/>
-        <path d="M7 11h10M7 15h7" stroke="#fef3c7" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M21 2c3.5 2 5 5.5 5 8.5s-1.5 6.5-5 8.5" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" fill="none"/>
-        <path d="M23 3l4-2.5-1.5 5.5z" fill="#f59e0b"/>
+      <svg width="26" height="28" viewBox="0 0 26 28" fill="none">
+        <path d="M13 1L1 6v8c0 6.5 5 12 12 13 7-1 12-6.5 12-13V6L13 1z" fill="#db2777"/>
+        <path d="M9 13l3 3 6-6" stroke="#fce7f3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       </svg>
     ),
   },
@@ -800,21 +798,12 @@ router.push(
                       {
                         icon: (
                           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <circle cx="9" cy="9" r="8" stroke="#2563eb" strokeWidth="1.5"/>
-                            <path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="#2563eb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M9 2l1.2 2.4 2.7.3-2 1.9.5 2.7L9 8l-2.4 1.3.5-2.7-2-1.9 2.7-.3L9 2z" stroke="#2563eb" strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
+                            <path d="M4 12h10M4 15h6" stroke="#2563eb" strokeWidth="1.6" strokeLinecap="round"/>
                           </svg>
                         ),
-                        label: "100% refund",
-                        desc: "on non-delivery or defects",
-                      },
-                      {
-                        icon: (
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <path d="M15 9A6 6 0 1 1 3.5 6M3 3v3h3" stroke="#2563eb" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        ),
-                        label: "7-day easy returns",
-                        desc: "no questions asked",
+                        label: "On-time dispatch",
+                        desc: "orders shipped within 24 hrs",
                       },
                       {
                         icon: (
