@@ -141,6 +141,71 @@ const BADGES = [
   },
 ];
 
+// ─── Warranty & Terms ──────────────────────────────────────────────────────────
+const TERMS = [
+  {
+    label: "Discrepancy window",
+    desc: "Report quality/quantity issues within 7 days of invoice date",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="7" stroke="#1e3a8a" strokeWidth="1.5"/>
+        <path d="M9 5v4l2.5 2.5" stroke="#1e3a8a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    label: "Manufacturer warranty",
+    desc: "Honoured by principal companies and their authorised service centers",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 1.5L2 4.5v4.7c0 4.2 3 8 7 9.3 4-1.3 7-5.1 7-9.3V4.5L9 1.5z" stroke="#1e3a8a" strokeWidth="1.4" fill="none"/>
+        <path d="M6 9l2 2 4-4" stroke="#1e3a8a" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    label: "Jurisdiction",
+    desc: "All disputes are subject to Delhi jurisdiction only",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 2v14M4 6h10M4 6L2 10h4L4 6zM14 6l-2 4h4l-2-4z" stroke="#1e3a8a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <rect x="5" y="16" width="8" height="1.4" rx="0.7" fill="#1e3a8a"/>
+      </svg>
+    ),
+  },
+  {
+    label: "No returns after sale",
+    desc: "Once sold, goods cannot be returned or exchanged",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="3" y="5" width="12" height="10" rx="1.5" stroke="#1e3a8a" strokeWidth="1.4" fill="none"/>
+        <path d="M6.5 5V4a2.5 2.5 0 015 0v1" stroke="#1e3a8a" strokeWidth="1.4"/>
+        <path d="M6.5 9l5 4M11.5 9l-5 4" stroke="#1e3a8a" strokeWidth="1.4" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    label: "Warranty exclusions",
+    desc: "No warranty for burns, physical damage, or liquid spills",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M9 1.5c1 2 3 3 3 6a3 3 0 11-6 0c0-1 .5-1.6 1-2.2C7.5 6.4 7 7.6 7 8.3" stroke="#1e3a8a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <path d="M9 12.5v3" stroke="#1e3a8a" strokeWidth="1.4" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    label: "Pricing",
+    desc: "Prices are subject to change based on market conditions",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 14L8 8l3 3 4-6" stroke="#1e3a8a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <path d="M12 5h3v3" stroke="#1e3a8a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+];
+
 const calcUnit = (base: number, pct: number) => Math.round(base * (1 - pct / 100));
 
 export default function ProductDetailPage() {
@@ -730,7 +795,7 @@ router.push(
                   </Button>
                 </Box>
 
-                {/* ══ Razorpay Money Back Promise — Premium Card ══ */}
+                {/* ══ Warranty & Terms — Premium Card ══ */}
                 <Box sx={{
                   borderRadius: "14px",
                   overflow: "hidden",
@@ -742,91 +807,46 @@ router.push(
                   <Box sx={{
                     background: "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%)",
                     px: 2.5, py: 2,
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    display: "flex", alignItems: "center", gap: 1.5,
                   }}>
-                    {/* Left: shield + title */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1.5
-                      }}>
-                      <Box sx={{
-                        width: 38, height: 38, borderRadius: "10px",
-                        background: "rgba(255,255,255,0.15)",
-                        backdropFilter: "blur(6px)",
-                        border: "1px solid rgba(255,255,255,0.25)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                      }}>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M10 1.5L2 4.5V10C2 14.1 5.5 17.5 10 19c4.5-1.5 8-4.9 8-9V4.5L10 1.5z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.6)" strokeWidth="1"/>
-                          <path d="M10 1.5L2 4.5V10C2 14.1 5.5 17.5 10 19c4.5-1.5 8-4.9 8-9V4.5L10 1.5z" fill="white" fillOpacity="0.12"/>
-                          <path d="M7 10l2 2 4-4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </Box>
-                      <Box>
-                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#fff", fontFamily: sans, lineHeight: 1.2, letterSpacing: "-0.2px" }}>
-                          Money Back Promise
-                        </Typography>
-                        <Typography sx={{ fontSize: "10.5px", color: "rgba(255,255,255,0.65)", fontFamily: sans, fontWeight: 400, mt: 0.2 }}>
-                          Buyer protection on every order
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    {/* Right: Razorpay badge */}
                     <Box sx={{
-                      background: "rgba(255,255,255,0.12)",
-                      border: "1px solid rgba(255,255,255,0.22)",
-                      borderRadius: "8px", px: 1.2, py: 0.7,
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 0.2,
+                      width: 38, height: 38, borderRadius: "10px",
+                      background: "rgba(255,255,255,0.15)",
+                      backdropFilter: "blur(6px)",
+                      border: "1px solid rgba(255,255,255,0.25)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                     }}>
-                      <Typography sx={{ fontSize: "7px", color: "rgba(255,255,255,0.55)", fontFamily: sans, letterSpacing: "0.8px", textTransform: "uppercase", fontWeight: 500 }}>
-                        powered by
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 1.5L2 4.5V10C2 14.1 5.5 17.5 10 19c4.5-1.5 8-4.9 8-9V4.5L10 1.5z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.6)" strokeWidth="1"/>
+                        <path d="M10 1.5L2 4.5V10C2 14.1 5.5 17.5 10 19c4.5-1.5 8-4.9 8-9V4.5L10 1.5z" fill="white" fillOpacity="0.12"/>
+                        <path d="M7 10l2 2 4-4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Box>
+                    <Box>
+                      <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#fff", fontFamily: sans, lineHeight: 1.2, letterSpacing: "-0.2px" }}>
+                        Warranty & Terms
                       </Typography>
-                      <Typography sx={{ fontSize: "11px", fontWeight: 800, color: "#fff", fontFamily: sans, letterSpacing: "0.5px" }}>
-                        Razorpay
+                      <Typography sx={{ fontSize: "10.5px", color: "rgba(255,255,255,0.65)", fontFamily: sans, fontWeight: 400, mt: 0.2 }}>
+                        Please read before placing your order
                       </Typography>
                     </Box>
                   </Box>
 
-                  {/* Promise rows */}
+                  {/* Terms rows */}
                   <Box sx={{ background: "#fff" }}>
-                    {[
-                      {
-                        icon: (
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <path d="M9 2l1.2 2.4 2.7.3-2 1.9.5 2.7L9 8l-2.4 1.3.5-2.7-2-1.9 2.7-.3L9 2z" stroke="#2563eb" strokeWidth="1.4" strokeLinejoin="round" fill="none"/>
-                            <path d="M4 12h10M4 15h6" stroke="#2563eb" strokeWidth="1.6" strokeLinecap="round"/>
-                          </svg>
-                        ),
-                        label: "On-time dispatch",
-                        desc: "orders shipped within 24 hrs",
-                      },
-                      {
-                        icon: (
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <rect x="3" y="8" width="12" height="8" rx="2" stroke="#2563eb" strokeWidth="1.5"/>
-                            <path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round"/>
-                            <circle cx="9" cy="12" r="1.2" fill="#2563eb"/>
-                          </svg>
-                        ),
-                        label: "Secure & encrypted",
-                        desc: "payments via Razorpay",
-                      },
-                    ].map((item, i, arr) => (
+                    {TERMS.map((item, i, arr) => (
                       <Box key={i} sx={{
-                        display: "flex", alignItems: "center", gap: 2,
-                        px: 2.5, py: 1.6,
+                        display: "flex", alignItems: "flex-start", gap: 2,
+                        px: 2.5, py: 1.4,
                         borderBottom: i < arr.length - 1 ? `1px solid ${C.borderLight}` : "none",
                         transition: "background 0.12s",
                         "&:hover": { background: "#fafbff" },
                       }}>
                         {/* Icon bubble */}
                         <Box sx={{
-                          width: 36, height: 36, borderRadius: "10px", flexShrink: 0,
+                          width: 32, height: 32, borderRadius: "9px", flexShrink: 0, mt: 0.2,
                           background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
                           border: "1px solid #bfdbfe",
                           display: "flex", alignItems: "center", justifyContent: "center",
@@ -836,10 +856,10 @@ router.push(
                         </Box>
                         {/* Text */}
                         <Box>
-                          <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#1e3a8a", fontFamily: sans, lineHeight: 1.3 }}>
+                          <Typography sx={{ fontSize: "12.5px", fontWeight: 700, color: "#1e3a8a", fontFamily: sans, lineHeight: 1.3 }}>
                             {item.label}
                           </Typography>
-                          <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.4, mt: 0.2 }}>
+                          <Typography sx={{ fontSize: "11px", color: C.textSub, fontFamily: sans, lineHeight: 1.5, mt: 0.2 }}>
                             {item.desc}
                           </Typography>
                         </Box>

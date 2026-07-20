@@ -157,6 +157,16 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [items,          setItems]          = useState<CartItem[]>([]);
   const [mounted,        setMounted]        = useState(false);
+
+  // ── AUTH GUARD STATE ──
+  // isCheckingAuth: true until Firebase tells us whether a user is logged in.
+  // isAuthed: whether a user is currently logged in.
+  // While isCheckingAuth is true we show a spinner (not the checkout form),
+  // and if it resolves to "no user" we redirect to /login and never render
+  // the checkout content at all.
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthed,       setIsAuthed]       = useState(false);
+
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddr,   setSelectedAddr]   = useState("");
   const [showNewAddr,    setShowNewAddr]    = useState(false);
@@ -189,6 +199,9 @@ export default function CheckoutPage() {
 
     const unsubAuth = auth.onAuthStateChanged((user) => {
       if (user) {
+        setIsAuthed(true);
+        setIsCheckingAuth(false);
+
         unsubUser = subscribeToCurrentUser((userData) => {
           const addresses = userData?.addresses ?? [];
           setSavedAddresses(addresses);
@@ -197,8 +210,15 @@ export default function CheckoutPage() {
           }
         });
       } else {
+        // No user logged in — send them to the login page first, and
+        // remember to bring them back to checkout once they log in.
         setSavedAddresses([]);
         setSelectedAddr("");
+        setIsAuthed(false);
+        setIsCheckingAuth(false);
+
+        localStorage.setItem("redirectAfterLogin", "/checkout");
+        router.push("/login");
       }
     });
 
@@ -207,7 +227,7 @@ export default function CheckoutPage() {
       unsubUser?.();
       unsubAuth();
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (document.getElementById("razorpay-checkout-js")) return;
@@ -219,6 +239,31 @@ export default function CheckoutPage() {
   }, []);
 
   if (!mounted) return null;
+
+  // While we're still resolving auth state, show a spinner instead of the
+  // checkout form (prevents a flash of checkout content before the redirect
+  // to /login kicks in for logged-out users).
+  if (isCheckingAuth) {
+    return (
+      <>
+        <Navbar />
+        <Box sx={{
+          minHeight: "60vh", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 2, background: C.pageBg,
+        }}>
+          <CircularProgress size={28} sx={{ color: C.heading }} />
+          <Typography sx={{ fontSize: "13px", color: C.textSub, fontFamily: sans }}>
+            Checking your session…
+          </Typography>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
+
+  // Not logged in — redirect is already in flight (see the effect above).
+  // Render nothing so checkout content never flashes on screen.
+  if (!isAuthed) return null;
 
   const gstinTrimmed = gstNumber.trim().toUpperCase();
   const isB2BInvoice = gstinTrimmed.length > 0 && isValidGstin(gstinTrimmed);
