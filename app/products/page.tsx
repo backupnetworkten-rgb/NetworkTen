@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Header from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import {
@@ -19,13 +19,17 @@ import {
   InputAdornment,
   Snackbar,
   Alert,
+  IconButton,
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import SortRoundedIcon from "@mui/icons-material/SortRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { getProducts } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
@@ -47,6 +51,17 @@ const filterSx = {
   "& .MuiInputLabel-root.Mui-focused": { color: "#102048" },
 };
 
+const CART_BAR_DURATION = 10000; // 10 seconds
+
+type CartBarProduct = {
+  id: string;
+  name: string;
+  brand: string;
+  image: string;
+  salePrice: number;
+  price: number;
+};
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +70,15 @@ export default function ProductsPage() {
   const [sort, setSort] = useState("latest");
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
   const router = useRouter();
+
+  // ── "Added to cart" premium bottom popup bar ──
+  const [cartBarMounted, setCartBarMounted] = useState(false);
+  const [cartBarVisible, setCartBarVisible] = useState(false);
+  const [cartBarProduct, setCartBarProduct] = useState<CartBarProduct | null>(null);
+  const [cartBarProgress, setCartBarProgress] = useState(false); // controls the countdown bar width
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unmountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRAF = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -69,6 +93,41 @@ export default function ProductsPage() {
     };
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      if (unmountTimer.current) clearTimeout(unmountTimer.current);
+      if (progressRAF.current) cancelAnimationFrame(progressRAF.current);
+    };
+  }, []);
+
+  const showCartBar = (product: CartBarProduct) => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    if (unmountTimer.current) clearTimeout(unmountTimer.current);
+
+    setCartBarProduct(product);
+    setCartBarMounted(true);
+    setCartBarProgress(false);
+
+    // Next tick: slide in + start the countdown bar animating from 100% -> 0%
+    requestAnimationFrame(() => {
+      setCartBarVisible(true);
+      requestAnimationFrame(() => setCartBarProgress(true));
+    });
+
+    hideTimer.current = setTimeout(() => {
+      setCartBarVisible(false);
+      unmountTimer.current = setTimeout(() => setCartBarMounted(false), 400);
+    }, CART_BAR_DURATION);
+  };
+
+  const dismissCartBar = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    if (unmountTimer.current) clearTimeout(unmountTimer.current);
+    setCartBarVisible(false);
+    unmountTimer.current = setTimeout(() => setCartBarMounted(false), 400);
+  };
 
   const filteredProducts = products
     .filter((item: any) => category === "All" || item.category === category)
@@ -95,6 +154,14 @@ export default function ProductsPage() {
       stock: product.stock,
     });
     setSnackbar({ open: true, message: `${product.name} added to cart!`, severity: "success" });
+    showCartBar({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.image,
+      salePrice: product.salePrice,
+      price: product.price,
+    });
   };
 
   return (
@@ -105,7 +172,8 @@ export default function ProductsPage() {
           background: "linear-gradient(180deg,#f5f8fd 0%,#eef3fb 100%)",
           minHeight: "100vh",
           pt: 5,
-          pb: 10,
+          pb: cartBarMounted ? 16 : 10,
+          transition: "padding-bottom 0.3s",
         }}
       >
         <Container maxWidth="xl">
@@ -514,6 +582,193 @@ export default function ProductsPage() {
 
         </Container>
       </Box>
+
+      {/* ══════════════════════════════════════════════════════════════
+          PREMIUM "ADDED TO CART" STICKY BOTTOM BAR
+      ══════════════════════════════════════════════════════════════ */}
+      {cartBarMounted && cartBarProduct && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2000,
+            transform: cartBarVisible ? "translateY(0)" : "translateY(110%)",
+            transition: "transform 0.4s cubic-bezier(.16,1,.3,1)",
+          }}
+        >
+          {/* Countdown progress line */}
+          <Box sx={{ height: "3px", background: "rgba(16,32,72,0.15)", overflow: "hidden" }}>
+            <Box
+              sx={{
+                height: "100%",
+                background: "linear-gradient(90deg, #8BC53F, #6fa62f)",
+                width: cartBarProgress ? "0%" : "100%",
+                transition: cartBarProgress
+                  ? `width ${CART_BAR_DURATION}ms linear`
+                  : "none",
+              }}
+            />
+          </Box>
+
+          <Box
+            sx={{
+              background: "linear-gradient(135deg, #0c1938 0%, #102048 55%, #16305f 100%)",
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 -12px 40px rgba(4,10,30,0.35)",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            <Container maxWidth="xl">
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: { xs: 1.5, sm: 2.5 },
+                  py: { xs: 1.5, sm: 1.8 },
+                  px: { xs: 0.5, md: 0 },
+                }}
+              >
+                {/* ── Left: thumbnail + confirmation + product info ── */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.4, sm: 1.8 }, minWidth: 0, flex: 1 }}>
+                  {/* Product thumbnail with success badge */}
+                  <Box sx={{ position: "relative", flexShrink: 0 }}>
+                    <Box
+                      sx={{
+                        width: { xs: 46, sm: 54 },
+                        height: { xs: 46, sm: 54 },
+                        borderRadius: "12px",
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        p: "6px",
+                      }}
+                    >
+                      <img
+                        src={proxyImage(cartBarProduct.image || "")}
+                        alt={cartBarProduct.name}
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: -4,
+                        right: -4,
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: "#8BC53F",
+                        border: "2px solid #102048",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 2px 8px rgba(139,197,63,0.5)",
+                      }}
+                    >
+                      <CheckRoundedIcon sx={{ fontSize: 13, color: "#fff" }} />
+                    </Box>
+                  </Box>
+
+                  {/* Text block */}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        color: "#8BC53F",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                        mb: "2px",
+                        display: { xs: "none", sm: "block" },
+                      }}
+                    >
+                      Added to cart
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "12.5px", sm: "13.5px" },
+                        fontWeight: 700,
+                        color: "#fff",
+                        lineHeight: 1.35,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: { xs: 150, sm: 320, md: 460 },
+                      }}
+                    >
+                      {cartBarProduct.name}
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.8, mt: "2px" }}>
+                      <Typography sx={{ fontSize: "13px", fontWeight: 800, color: "#fff" }}>
+                        ₹{cartBarProduct.salePrice.toLocaleString("en-IN")}
+                      </Typography>
+                      {cartBarProduct.price > cartBarProduct.salePrice && (
+                        <Typography
+                          sx={{
+                            fontSize: "11px",
+                            color: "rgba(255,255,255,0.45)",
+                            textDecoration: "line-through",
+                            display: { xs: "none", sm: "inline" },
+                          }}
+                        >
+                          ₹{cartBarProduct.price.toLocaleString("en-IN")}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* ── Right: actions ── */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.8, sm: 1.2 }, flexShrink: 0 }}>
+                  <Button
+                    onClick={() => router.push("/cart")}
+                    endIcon={<ArrowForwardRoundedIcon sx={{ fontSize: "16px !important" }} />}
+                    sx={{
+                      height: { xs: 40, sm: 44 },
+                      borderRadius: "11px",
+                      fontWeight: 800,
+                      fontSize: { xs: "12.5px", sm: "13.5px" },
+                      textTransform: "none",
+                      background: "linear-gradient(135deg, #ffffff, #f3f5f9)",
+                      color: "#102048",
+                      px: { xs: 2, sm: 2.8 },
+                      boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+                      whiteSpace: "nowrap",
+                      "&:hover": {
+                        background: "#ffffff",
+                        boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
+                      },
+                    }}
+                  >
+                    View Cart
+                  </Button>
+                  <IconButton
+                    onClick={dismissCartBar}
+                    aria-label="Dismiss"
+                    sx={{
+                      width: { xs: 36, sm: 40 },
+                      height: { xs: 36, sm: 40 },
+                      color: "rgba(255,255,255,0.55)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "10px",
+                      "&:hover": { color: "#fff", background: "rgba(255,255,255,0.08)" },
+                    }}
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Container>
+          </Box>
+        </Box>
+      )}
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={2500}
