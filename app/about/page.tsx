@@ -524,13 +524,14 @@ export default function AboutPage() {
         </Container>
       </Box>
 
-      {/* PILLARS */}
-      <PillarsSection />
+      {/* INSTALLATION, MAINTENANCE & SUPPORT — now right after the video/about section */}
+      <InstallationSupportSection />
 
       {/* PARTNERS SECTION */}
       <PartnersSection />
 
-      <InstallationSupportSection />
+      {/* PILLARS — moved below Partners */}
+      <PillarsSection />
 
       {/* PROJECTS / YOUTUBE */}
       <Box
