@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Table,
@@ -12,10 +12,12 @@ import {
   IconButton,
   Tooltip,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
+import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import { ServiceReport } from "@/types/serviceReport";
 
 interface Props {
@@ -40,6 +42,18 @@ export default function ServiceReportList({
   onDelete,
   onDownload,
 }: Props) {
+  const [copiedMsg, setCopiedMsg] = useState(false);
+
+  const handleCopyLink = async (r: ServiceReport) => {
+    const link = `${window.location.origin}/service-report/fill/${r.shareToken}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedMsg(true);
+    } catch {
+      /* ignore */
+    }
+  };
+
   if (reports.length === 0) {
     return (
       <Box sx={{ textAlign: "center", py: 6 }}>
@@ -52,7 +66,7 @@ export default function ServiceReportList({
 
   return (
     <Box sx={{ overflowX: "auto" }}>
-      <Table sx={{ minWidth: 900 }}>
+      <Table sx={{ minWidth: 950 }}>
         <TableHead>
           <TableRow sx={{ "& th": { fontWeight: 800, color: "#08142e", borderBottom: "2px solid #eef2f7" } }}>
             <TableCell>CSR No.</TableCell>
@@ -72,29 +86,49 @@ export default function ServiceReportList({
               <TableCell>{r.customerName}</TableCell>
               <TableCell>{r.engineerNames}</TableCell>
               <TableCell>
-                <Chip
-                  label={r.statusAfterService}
-                  size="small"
-                  sx={{ fontWeight: 600, background: "rgba(139,197,63,0.12)", color: "#4b7a1f" }}
-                />
+                {r.status === "completed" ? (
+                  <Chip
+                    label="Completed"
+                    size="small"
+                    sx={{ fontWeight: 600, background: "rgba(139,197,63,0.12)", color: "#4b7a1f" }}
+                  />
+                ) : (
+                  <Chip
+                    label="Pending Completion"
+                    size="small"
+                    sx={{ fontWeight: 600, background: "rgba(240,162,2,0.12)", color: "#8a5c00" }}
+                  />
+                )}
               </TableCell>
               <TableCell>
-                <Chip
-                  label={r.customerRating}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    color: "#fff",
-                    background: ratingColor[r.customerRating] || "#667085",
-                  }}
-                />
+                {r.status === "completed" ? (
+                  <Chip
+                    label={r.customerRating}
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      color: "#fff",
+                      background: ratingColor[r.customerRating] || "#667085",
+                    }}
+                  />
+                ) : (
+                  <Typography sx={{ fontSize: "12px", color: "#98a2b3" }}>—</Typography>
+                )}
               </TableCell>
               <TableCell align="right">
-                <Tooltip title="Download PDF">
-                  <IconButton onClick={() => onDownload(r)} sx={{ color: "#08142e" }}>
-                    <PictureAsPdfRoundedIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                {r.status === "completed" ? (
+                  <Tooltip title="Download PDF">
+                    <IconButton onClick={() => onDownload(r)} sx={{ color: "#08142e" }}>
+                      <PictureAsPdfRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Copy fill-in link">
+                    <IconButton onClick={() => handleCopyLink(r)} sx={{ color: "#3F6FE0" }}>
+                      <LinkRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {canManage && (
                   <>
                     <Tooltip title="Edit">
@@ -114,6 +148,12 @@ export default function ServiceReportList({
           ))}
         </TableBody>
       </Table>
+      <Snackbar
+        open={copiedMsg}
+        autoHideDuration={2000}
+        onClose={() => setCopiedMsg(false)}
+        message="Link copied to clipboard"
+      />
     </Box>
   );
 }

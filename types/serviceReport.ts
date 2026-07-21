@@ -1,23 +1,22 @@
 export type NatureOfCall = "Warranty" | "AMC" | "Paid Call" | "Installation";
-
 export type EquipmentStatus = "Working" | "Dead";
-
 export type StatusAfterService =
   | "Complete"
   | "Incomplete"
   | "Pending for spares"
   | "Under Observation"
   | "Working solution provided";
-
-export type CustomerRating =
-  | "Extremely Satisfied"
-  | "Satisfied"
-  | "Dissatisfied"
-  | "Annoyed";
+export type CustomerRating = "Extremely Satisfied" | "Satisfied" | "Dissatisfied" | "Annoyed";
+export type ReportStatus = "pending" | "completed";
 
 export interface ServiceReport {
   id?: string;
 
+  // ---- workflow control ----
+  status: ReportStatus;
+  shareToken: string;
+
+  // ================= PART A — filled by logged-in staff =================
   csrNo: string;
   date: string; // yyyy-mm-dd
 
@@ -33,9 +32,7 @@ export interface ServiceReport {
   natureOfProblem: string;
   detailProblemReported: string;
 
-  equipmentStatus: EquipmentStatus;
   equipmentType: string;
-
   make: string;
   model: string;
   serialNo: string;
@@ -45,14 +42,17 @@ export interface ServiceReport {
   engineerEmail: string;
 
   locationOfInstallation: string;
+
+  eventDateTime: string;
+
+  // ================= PART B — filled via public link =================
+  equipmentStatus: EquipmentStatus;
   equipmentsDetails: string;
 
   engineerRemarks: string;
   statusAfterService: StatusAfterService;
-
   defectsFoundOnInspection: string;
 
-  eventDateTime: string;
   startOfService: string;
   endOfService: string;
 
@@ -67,7 +67,7 @@ export interface ServiceReport {
   signatureDate: string;
   signaturePlace: string;
 
-  /** Base64 PNG data URL of the customer's drawn signature (e.g. "data:image/png;base64,...") */
+  /** Base64 PNG data URL of the customer's drawn signature */
   customerSignature: string;
 
   createdAt?: any;
@@ -99,6 +99,9 @@ export const CUSTOMER_RATING_OPTIONS: CustomerRating[] = [
 ];
 
 export const emptyServiceReport: ServiceReport = {
+  status: "pending",
+  shareToken: "",
+
   csrNo: "",
   date: new Date().toISOString().slice(0, 10),
   customerName: "",
@@ -110,7 +113,6 @@ export const emptyServiceReport: ServiceReport = {
   instructionFrom: "",
   natureOfProblem: "",
   detailProblemReported: "",
-  equipmentStatus: "Working",
   equipmentType: "",
   make: "",
   model: "",
@@ -119,11 +121,13 @@ export const emptyServiceReport: ServiceReport = {
   engineerMobile: "",
   engineerEmail: "",
   locationOfInstallation: "",
+  eventDateTime: new Date().toISOString().slice(0, 10),
+
+  equipmentStatus: "Working",
   equipmentsDetails: "",
   engineerRemarks: "",
   statusAfterService: "Complete",
   defectsFoundOnInspection: "",
-  eventDateTime: new Date().toISOString().slice(0, 10),
   startOfService: "",
   endOfService: "",
   customerRating: "Satisfied",
