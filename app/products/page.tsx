@@ -20,6 +20,10 @@ import {
   Snackbar,
   Alert,
   IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
@@ -30,6 +34,7 @@ import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import SortRoundedIcon from "@mui/icons-material/SortRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import { getProducts } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
@@ -38,9 +43,9 @@ import { useRouter } from "next/navigation";
 
 const filterSx = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: "14px",
+    borderRadius: "12px",
     background: "#fff",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: 500,
     "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#102048" },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -52,6 +57,19 @@ const filterSx = {
 };
 
 const CART_BAR_DURATION = 10000; // 10 seconds
+const PAGE_SIZE = 16; // show this many before "View All"
+
+const CATEGORIES = [
+  "All",
+  "Network Product",
+  "CCTV Camera",
+  "Video Conferencing Device",
+  "Access Control",
+  "Solar Camera",
+  "Mini Desktop",
+  "All in One Desktop",
+  "Display Monitor (Touch / Non Touch)",
+];
 
 type CartBarProduct = {
   id: string;
@@ -68,6 +86,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("latest");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" as "success" | "error" });
   const router = useRouter();
 
@@ -75,7 +94,7 @@ export default function ProductsPage() {
   const [cartBarMounted, setCartBarMounted] = useState(false);
   const [cartBarVisible, setCartBarVisible] = useState(false);
   const [cartBarProduct, setCartBarProduct] = useState<CartBarProduct | null>(null);
-  const [cartBarProgress, setCartBarProgress] = useState(false); // controls the countdown bar width
+  const [cartBarProgress, setCartBarProgress] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const unmountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressRAF = useRef<number | null>(null);
@@ -102,6 +121,11 @@ export default function ProductsPage() {
     };
   }, []);
 
+  // Reset "View All" expansion whenever filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, category, sort]);
+
   const showCartBar = (product: CartBarProduct) => {
     if (hideTimer.current) clearTimeout(hideTimer.current);
     if (unmountTimer.current) clearTimeout(unmountTimer.current);
@@ -110,7 +134,6 @@ export default function ProductsPage() {
     setCartBarMounted(true);
     setCartBarProgress(false);
 
-    // Next tick: slide in + start the countdown bar animating from 100% -> 0%
     requestAnimationFrame(() => {
       setCartBarVisible(true);
       requestAnimationFrame(() => setCartBarProgress(true));
@@ -139,6 +162,17 @@ export default function ProductsPage() {
       if (sort === "high") return b.salePrice - a.salePrice;
       return (b.createdAt || 0) - (a.createdAt || 0);
     });
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMore = filteredProducts.length > visibleCount;
+
+  // Count products per category (based on search only, so counts stay meaningful)
+  const categoryCounts: Record<string, number> = { All: products.filter((p: any) => p.name?.toLowerCase().includes(search.toLowerCase())).length };
+  CATEGORIES.slice(1).forEach((cat) => {
+    categoryCounts[cat] = products.filter(
+      (p: any) => p.category === cat && p.name?.toLowerCase().includes(search.toLowerCase())
+    ).length;
+  });
 
   // ── Add to cart handler ──────────────────────────────────────────────
   const handleAddToCart = (product: any) => {
@@ -171,15 +205,14 @@ export default function ProductsPage() {
         sx={{
           background: "linear-gradient(180deg,#f5f8fd 0%,#eef3fb 100%)",
           minHeight: "100vh",
-          pt: 5,
-          pb: cartBarMounted ? 16 : 10,
+          pt: 4,
+          pb: cartBarMounted ? 14 : 8,
           transition: "padding-bottom 0.3s",
         }}
       >
         <Container maxWidth="xl">
-
           {/* HERO */}
-          <Box sx={{ textAlign: "center", maxWidth: "700px", mx: "auto", mb: 6 }}>
+          <Box sx={{ textAlign: "center", maxWidth: "700px", mx: "auto", mb: 4 }}>
             <Box
               sx={{
                 display: "inline-flex",
@@ -189,13 +222,11 @@ export default function ProductsPage() {
                 border: "1px solid #c9e89a",
                 borderRadius: "50px",
                 px: 2,
-                py: 0.6,
-                mb: 2,
+                py: 0.5,
+                mb: 1.5,
               }}
             >
-              <Box
-                sx={{ width: 6, height: 6, borderRadius: "50%", background: "#8BC53F" }}
-              />
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", background: "#8BC53F" }} />
               <Typography
                 sx={{
                   fontSize: "11px",
@@ -211,375 +242,387 @@ export default function ProductsPage() {
 
             <Typography
               sx={{
-                fontSize: { xs: "32px", md: "48px" },
+                fontSize: { xs: "26px", md: "36px" },
                 fontWeight: 900,
                 color: "#102048",
                 lineHeight: 1.1,
-                mb: 2,
+                mb: 1,
               }}
             >
-              Products{" "}
-              <Box component="span" sx={{ color: "#8BC53F" }}>
-              </Box>
+              Products
             </Typography>
 
-            <Typography sx={{ color: "#667085", fontSize: "15px", lineHeight: 1.8 }}>
+            <Typography sx={{ color: "#667085", fontSize: "14px", lineHeight: 1.6 }}>
               Premium networking, security and enterprise technology for modern businesses.
             </Typography>
+          </Box>
 
-            {!loading && (
-              <Chip
-                label={`${filteredProducts.length} of ${products.length} Products`}
+          {/* MAIN LAYOUT: SIDEBAR + CONTENT */}
+          <Grid container spacing={2.5}>
+            {/* ── LEFT VERTICAL SIDEBAR ── */}
+            <Grid size={{ xs: 12, md: 3 }}>
+              <Box
                 sx={{
-                  mt: 2.5,
-                  borderRadius: "50px",
-                  fontWeight: 800,
-                  fontSize: "12px",
-                  background: "#102048",
-                  color: "#fff",
-                }}
-              />
-            )}
-          </Box>
-
-          {/* FILTERS */}
-          <Box
-            sx={{
-              mb: 5,
-              background: "#fff",
-              borderRadius: "24px",
-              p: 2.5,
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "2fr 1fr 1fr" },
-              gap: 2,
-              border: "1px solid rgba(16,32,72,.07)",
-              boxShadow: "0 16px 48px rgba(16,32,72,.07)",
-            }}
-          >
-            <TextField
-              fullWidth
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <SearchRoundedIcon sx={{ mr: 1, color: "#98A2B3" }} />
-                  ),
-                },
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  height: "54px",
-                  borderRadius: "14px",
                   background: "#fff",
-                },
-              }}
-            />
-
-            <TextField
-              select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              sx={filterSx}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <TuneRoundedIcon sx={{ color: "#102048" }} />
-                    </InputAdornment>
-                  ),
-                }
-              }}
-            >
-              <MenuItem value="All">All Categories</MenuItem>
-              <MenuItem value="Network Product">Network Product</MenuItem>
-              <MenuItem value="CCTV Camera">CCTV Camera</MenuItem>
-              <MenuItem value="Video Conferencing Device">Video Conferencing Device</MenuItem>
-              <MenuItem value="Access Control">Access Control</MenuItem>
-              <MenuItem value="Solar Camera">Solar Camera</MenuItem>
-              <MenuItem value="Mini Desktop">Mini Desktop</MenuItem>
-              <MenuItem value="All in One Desktop">All in One Desktop</MenuItem>
-              <MenuItem value="Display Monitor (Touch / Non Touch)">Display Monitor (Touch / Non Touch)</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              sx={filterSx}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SortRoundedIcon sx={{ color: "#102048" }} />
-                    </InputAdornment>
-                  ),
-                }
-              }}
-            >
-              <MenuItem value="latest">Latest First</MenuItem>
-              <MenuItem value="low">Price: Low to High</MenuItem>
-              <MenuItem value="high">Price: High to Low</MenuItem>
-            </TextField>
-          </Box>
-
-          {/* CONTENT */}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 12 }}>
-              <CircularProgress sx={{ color: "#102048" }} />
-            </Box>
-          ) : filteredProducts.length === 0 ? (
-            <Box
-              sx={{
-                textAlign: "center",
-                py: 12
-              }}>
-              <Typography sx={{ fontSize: "48px", mb: 2 }}>🔍</Typography>
-              <Typography
-                sx={{ fontWeight: 900, fontSize: "22px", color: "#102048", mb: 1 }}
+                  borderRadius: "18px",
+                  border: "1px solid rgba(16,32,72,.07)",
+                  boxShadow: "0 12px 36px rgba(16,32,72,.06)",
+                  p: 2,
+                  position: { md: "sticky" },
+                  top: { md: 90 },
+                }}
               >
-                No Products Found
-              </Typography>
-              <Typography sx={{ color: "#98A2B3", fontSize: "14px" }}>
-                Try adjusting your search or filter criteria
-              </Typography>
-            </Box>
-          ) : (
-            <Grid container spacing={2.5}>
-              {filteredProducts.map((product: any) => {
-                const discount =
-                  product.price > product.salePrice
-                    ? Math.round(
-                        ((product.price - product.salePrice) / product.price) * 100
-                      )
-                    : 0;
+                {/* Search */}
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchRoundedIcon sx={{ fontSize: 18, color: "#98A2B3" }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  sx={{
+                    mb: 2,
+                    "& .MuiOutlinedInput-root": {
+                      height: "42px",
+                      borderRadius: "10px",
+                      background: "#f7f9fc",
+                      fontSize: "13px",
+                    },
+                  }}
+                />
 
-                return (
-                  <Grid
-                    key={product.id}
-                    size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
-                  >
-                    <Card
-                      sx={{
-                        height: "100%",
-                        borderRadius: "20px",
-                        overflow: "hidden",
-                        background: "#fff",
-                        border: "1px solid rgba(16,32,72,.06)",
-                        boxShadow: "0 4px 20px rgba(0,0,0,.05)",
-                        transition: "all .3s ease",
-                        display: "flex",
-                        flexDirection: "column",
-                        "&:hover": {
-                          transform: "translateY(-8px)",
-                          boxShadow: "0 20px 48px rgba(16,32,72,.12)",
-                        },
-                      }}
-                    >
-                      {/* Image */}
-                      <Box
-                        sx={{ position: "relative", overflow: "hidden", cursor: "pointer" }}
-                        onClick={() => router.push(`/products/${product.id}`)}
-                      >
-                        <CardMedia
-                          component="img"
-                          height="210"
-                          image={proxyImage(product.image || "")}
-                          alt={product.name}
-                          sx={{
-                            objectFit: "cover",
-                            transition: "transform .4s ease",
-                            "&:hover": { transform: "scale(1.05)" },
-                          }}
-                        />
+                {/* Sort */}
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  sx={{ ...filterSx, mb: 2.5 }}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SortRoundedIcon sx={{ fontSize: 16, color: "#102048" }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                >
+                  <MenuItem value="latest">Latest First</MenuItem>
+                  <MenuItem value="low">Price: Low to High</MenuItem>
+                  <MenuItem value="high">Price: High to Low</MenuItem>
+                </TextField>
 
-                        {discount > 0 && (
-                          <Box
-                            sx={{
-                              position: "absolute",
-                              top: 12,
-                              left: 12,
-                              background: "#8BC53F",
-                              px: 1.2,
-                              py: 0.5,
-                              borderRadius: "30px",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 0.5,
-                              color: "#fff",
-                              fontWeight: 800,
-                              fontSize: "11px",
-                              boxShadow: "0 4px 12px rgba(139,197,63,0.4)",
-                            }}
-                          >
-                            <LocalOfferRoundedIcon sx={{ fontSize: 12 }} />
-                            {discount}% OFF
-                          </Box>
-                        )}
+                <Divider sx={{ mb: 1.5 }} />
 
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 12,
-                            right: 12,
-                            background: "rgba(255,255,255,0.9)",
-                            backdropFilter: "blur(8px)",
-                            px: 1,
-                            py: 0.4,
-                            borderRadius: "10px",
-                            fontSize: "10px",
-                            fontWeight: 800,
-                            color: product.stock > 0 ? "#16a34a" : "#ef4444",
-                          }}
-                        >
-                          {product.stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
-                        </Box>
-                      </Box>
+                {/* Category heading */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1, px: 0.5 }}>
+                  <TuneRoundedIcon sx={{ fontSize: 16, color: "#102048" }} />
+                  <Typography sx={{ fontSize: "12px", fontWeight: 800, color: "#102048", letterSpacing: "0.4px" }}>
+                    CATEGORIES
+                  </Typography>
+                </Box>
 
-                      <CardContent
+                {/* Vertical category list */}
+                <List disablePadding>
+                  {CATEGORIES.map((cat) => {
+                    const active = category === cat;
+                    return (
+                      <ListItemButton
+                        key={cat}
+                        selected={active}
+                        onClick={() => setCategory(cat)}
                         sx={{
-                          p: 2.5,
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
+                          borderRadius: "10px",
+                          mb: 0.5,
+                          py: 0.7,
+                          px: 1.2,
+                          "&.Mui-selected": {
+                            background: "#102048",
+                            "&:hover": { background: "#0d1a3a" },
+                          },
                         }}
                       >
-                        <Typography
-                          sx={{
-                            fontSize: "11px",
-                            color: "#8BC53F",
-                            fontWeight: 800,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.8px",
-                            mb: 0.5,
-                          }}
-                        >
-                          {product.brand}
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            fontWeight: 900,
-                            fontSize: "16px",
-                            color: "#102048",
-                            mb: 0.5,
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {product.name}
-                        </Typography>
-
-                        <Chip
-                          label={product.category}
-                          size="small"
-                          sx={{
-                            width: "fit-content",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            background: "#f0f4fa",
-                            color: "#102048",
-                            borderRadius: "8px",
-                            mb: 2,
+                        <ListItemText
+                          primary={cat}
+                          slotProps={{
+                            primary: {
+                              sx: {
+                                fontSize: "12.5px",
+                                fontWeight: active ? 700 : 500,
+                                color: active ? "#fff" : "#344054",
+                                lineHeight: 1.3,
+                              },
+                            },
                           }}
                         />
+                        <Chip
+                          label={categoryCounts[cat] ?? 0}
+                          size="small"
+                          sx={{
+                            height: 18,
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            background: active ? "rgba(255,255,255,0.15)" : "#f0f4fa",
+                            color: active ? "#fff" : "#667085",
+                          }}
+                        />
+                      </ListItemButton>
+                    );
+                  })}
+                </List>
+              </Box>
+            </Grid>
 
-                        <Box sx={{ mt: "auto" }}>
-                          <Box
+            {/* ── RIGHT CONTENT ── */}
+            <Grid size={{ xs: 12, md: 9 }}>
+              {!loading && (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, px: 0.5 }}>
+                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#667085" }}>
+                    Showing {visibleProducts.length} of {filteredProducts.length} products
+                  </Typography>
+                  <Chip
+                    label={`${filteredProducts.length} Total`}
+                    sx={{
+                      borderRadius: "50px",
+                      fontWeight: 800,
+                      fontSize: "11px",
+                      background: "#102048",
+                      color: "#fff",
+                    }}
+                  />
+                </Box>
+              )}
+
+              {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+                  <CircularProgress sx={{ color: "#102048" }} />
+                </Box>
+              ) : filteredProducts.length === 0 ? (
+                <Box sx={{ textAlign: "center", py: 10 }}>
+                  <Typography sx={{ fontSize: "40px", mb: 1.5 }}>🔍</Typography>
+                  <Typography sx={{ fontWeight: 900, fontSize: "20px", color: "#102048", mb: 1 }}>
+                    No Products Found
+                  </Typography>
+                  <Typography sx={{ color: "#98A2B3", fontSize: "13px" }}>
+                    Try adjusting your search or filter criteria
+                  </Typography>
+                </Box>
+              ) : (
+                <>
+                  <Grid container spacing={1.75}>
+                    {visibleProducts.map((product: any) => {
+                      const discount =
+                        product.price > product.salePrice
+                          ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+                          : 0;
+
+                      return (
+                        <Grid key={product.id} size={{ xs: 6, sm: 4, md: 4, lg: 3 }}>
+                          <Card
                             sx={{
+                              height: "100%",
+                              borderRadius: "14px",
+                              overflow: "hidden",
+                              background: "#fff",
+                              border: "1px solid rgba(16,32,72,.06)",
+                              boxShadow: "0 3px 14px rgba(0,0,0,.04)",
+                              transition: "all .25s ease",
                               display: "flex",
-                              alignItems: "baseline",
-                              gap: 1,
-                              mb: 2,
+                              flexDirection: "column",
+                              "&:hover": {
+                                transform: "translateY(-4px)",
+                                boxShadow: "0 14px 32px rgba(16,32,72,.1)",
+                              },
                             }}
                           >
-                            <Typography
-                              sx={{
-                                fontSize: "24px",
-                                fontWeight: 900,
-                                color: "#102048",
-                                lineHeight: 1,
-                              }}
+                            {/* Image */}
+                            <Box
+                              sx={{ position: "relative", overflow: "hidden", cursor: "pointer" }}
+                              onClick={() => router.push(`/products/${product.id}`)}
                             >
-                              ₹{product.salePrice?.toLocaleString("en-IN")}
-                            </Typography>
-
-                            {product.price > product.salePrice && (
-                              <Typography
+                              <CardMedia
+                                component="img"
+                                height="140"
+                                image={proxyImage(product.image || "")}
+                                alt={product.name}
                                 sx={{
-                                  fontSize: "13px",
-                                  textDecoration: "line-through",
-                                  color: "#98A2B3",
+                                  objectFit: "cover",
+                                  transition: "transform .35s ease",
+                                  "&:hover": { transform: "scale(1.05)" },
+                                }}
+                              />
+
+                              {discount > 0 && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    top: 8,
+                                    left: 8,
+                                    background: "#8BC53F",
+                                    px: 1,
+                                    py: 0.3,
+                                    borderRadius: "30px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.4,
+                                    color: "#fff",
+                                    fontWeight: 800,
+                                    fontSize: "10px",
+                                    boxShadow: "0 3px 10px rgba(139,197,63,0.4)",
+                                  }}
+                                >
+                                  <LocalOfferRoundedIcon sx={{ fontSize: 10 }} />
+                                  {discount}%
+                                </Box>
+                              )}
+
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: 8,
+                                  right: 8,
+                                  background: "rgba(255,255,255,0.9)",
+                                  backdropFilter: "blur(8px)",
+                                  px: 0.8,
+                                  py: 0.3,
+                                  borderRadius: "8px",
+                                  fontSize: "9px",
+                                  fontWeight: 800,
+                                  color: product.stock > 0 ? "#16a34a" : "#ef4444",
                                 }}
                               >
-                                ₹{product.price?.toLocaleString("en-IN")}
+                                {product.stock > 0 ? "IN STOCK" : "OUT"}
+                              </Box>
+                            </Box>
+
+                            <CardContent sx={{ p: 1.5, flex: 1, display: "flex", flexDirection: "column" }}>
+                              <Typography
+                                sx={{
+                                  fontSize: "10px",
+                                  color: "#8BC53F",
+                                  fontWeight: 800,
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.6px",
+                                  mb: 0.3,
+                                }}
+                              >
+                                {product.brand}
                               </Typography>
-                            )}
-                          </Box>
 
-                          <Box
-                            sx={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr",
-                              gap: 1,
-                            }}
-                          >
-                            <Button
-                              variant="outlined"
-                              startIcon={<VisibilityRoundedIcon />}
-                              onClick={() => router.push(`/products/${product.id}`)}
-                              sx={{
-                                height: 42,
-                                borderRadius: "12px",
-                                fontWeight: 700,
-                                textTransform: "none",
-                                fontSize: "13px",
-                                borderColor: "rgba(16,32,72,.2)",
-                                color: "#102048",
-                                "&:hover": {
-                                  borderColor: "#102048",
-                                  background: "rgba(16,32,72,.04)",
-                                },
-                              }}
-                            >
-                              View
-                            </Button>
+                              <Typography
+                                sx={{
+                                  fontWeight: 800,
+                                  fontSize: "13px",
+                                  color: "#102048",
+                                  mb: 0.8,
+                                  lineHeight: 1.25,
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {product.name}
+                              </Typography>
 
-                            <Button
-                              variant="contained"
-                              startIcon={<ShoppingCartRoundedIcon />}
-                              disabled={product.stock === 0}
-                              onClick={() => handleAddToCart(product)}
-                              sx={{
-                                height: 42,
-                                borderRadius: "12px",
-                                background: "linear-gradient(135deg,#102048,#1e3a6e)",
-                                fontWeight: 700,
-                                textTransform: "none",
-                                fontSize: "13px",
-                                boxShadow: "0 4px 14px rgba(16,32,72,.25)",
-                                "&:hover": {
-                                  background: "linear-gradient(135deg,#0d1a3a,#152e5a)",
-                                },
-                                "&:disabled": {
-                                  background: "#e5e8ef",
-                                  color: "#98A2B3",
-                                  boxShadow: "none",
-                                },
-                              }}
-                            >
-                              Add
-                            </Button>
-                          </Box>
-                        </Box>
-                      </CardContent>
-                    </Card>
+                              <Box sx={{ mt: "auto" }}>
+                                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.7, mb: 1 }}>
+                                  <Typography sx={{ fontSize: "16px", fontWeight: 900, color: "#102048", lineHeight: 1 }}>
+                                    ₹{product.salePrice?.toLocaleString("en-IN")}
+                                  </Typography>
+                                  {product.price > product.salePrice && (
+                                    <Typography sx={{ fontSize: "11px", textDecoration: "line-through", color: "#98A2B3" }}>
+                                      ₹{product.price?.toLocaleString("en-IN")}
+                                    </Typography>
+                                  )}
+                                </Box>
+
+                                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0.7 }}>
+                                  <Button
+                                    variant="outlined"
+                                    onClick={() => router.push(`/products/${product.id}`)}
+                                    sx={{
+                                      minWidth: 0,
+                                      height: 34,
+                                      borderRadius: "9px",
+                                      fontWeight: 700,
+                                      textTransform: "none",
+                                      fontSize: "11px",
+                                      borderColor: "rgba(16,32,72,.2)",
+                                      color: "#102048",
+                                      "&:hover": { borderColor: "#102048", background: "rgba(16,32,72,.04)" },
+                                    }}
+                                  >
+                                    <VisibilityRoundedIcon sx={{ fontSize: 14, mr: 0.4 }} />
+                                    View
+                                  </Button>
+
+                                  <Button
+                                    variant="contained"
+                                    disabled={product.stock === 0}
+                                    onClick={() => handleAddToCart(product)}
+                                    sx={{
+                                      minWidth: 0,
+                                      height: 34,
+                                      borderRadius: "9px",
+                                      background: "linear-gradient(135deg,#102048,#1e3a6e)",
+                                      fontWeight: 700,
+                                      textTransform: "none",
+                                      fontSize: "11px",
+                                      boxShadow: "0 3px 10px rgba(16,32,72,.25)",
+                                      "&:hover": { background: "linear-gradient(135deg,#0d1a3a,#152e5a)" },
+                                      "&:disabled": { background: "#e5e8ef", color: "#98A2B3", boxShadow: "none" },
+                                    }}
+                                  >
+                                    <ShoppingCartRoundedIcon sx={{ fontSize: 14, mr: 0.4 }} />
+                                    Add
+                                  </Button>
+                                </Box>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      );
+                    })}
                   </Grid>
-                );
-              })}
-            </Grid>
-          )}
 
+                  {/* ── VIEW ALL ── */}
+                  {hasMore && (
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                      <Button
+                        onClick={() => setVisibleCount(filteredProducts.length)}
+                        endIcon={<ExpandMoreRoundedIcon />}
+                        sx={{
+                          height: 46,
+                          px: 3.5,
+                          borderRadius: "12px",
+                          fontWeight: 800,
+                          fontSize: "13px",
+                          textTransform: "none",
+                          background: "#fff",
+                          color: "#102048",
+                          border: "1.5px solid #102048",
+                          "&:hover": { background: "#102048", color: "#fff" },
+                        }}
+                      >
+                        View All ({filteredProducts.length - visibleCount} more)
+                      </Button>
+                    </Box>
+                  )}
+                </>
+              )}
+            </Grid>
+          </Grid>
         </Container>
       </Box>
 
@@ -598,16 +641,13 @@ export default function ProductsPage() {
             transition: "transform 0.4s cubic-bezier(.16,1,.3,1)",
           }}
         >
-          {/* Countdown progress line */}
           <Box sx={{ height: "3px", background: "rgba(16,32,72,0.15)", overflow: "hidden" }}>
             <Box
               sx={{
                 height: "100%",
                 background: "linear-gradient(90deg, #8BC53F, #6fa62f)",
                 width: cartBarProgress ? "0%" : "100%",
-                transition: cartBarProgress
-                  ? `width ${CART_BAR_DURATION}ms linear`
-                  : "none",
+                transition: cartBarProgress ? `width ${CART_BAR_DURATION}ms linear` : "none",
               }}
             />
           </Box>
@@ -631,9 +671,7 @@ export default function ProductsPage() {
                   px: { xs: 0.5, md: 0 },
                 }}
               >
-                {/* ── Left: thumbnail + confirmation + product info ── */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.4, sm: 1.8 }, minWidth: 0, flex: 1 }}>
-                  {/* Product thumbnail with success badge */}
                   <Box sx={{ position: "relative", flexShrink: 0 }}>
                     <Box
                       sx={{
@@ -675,7 +713,6 @@ export default function ProductsPage() {
                     </Box>
                   </Box>
 
-                  {/* Text block */}
                   <Box sx={{ minWidth: 0 }}>
                     <Typography
                       sx={{
@@ -724,7 +761,6 @@ export default function ProductsPage() {
                   </Box>
                 </Box>
 
-                {/* ── Right: actions ── */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.8, sm: 1.2 }, flexShrink: 0 }}>
                   <Button
                     onClick={() => router.push("/cart")}
@@ -740,10 +776,7 @@ export default function ProductsPage() {
                       px: { xs: 2, sm: 2.8 },
                       boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
                       whiteSpace: "nowrap",
-                      "&:hover": {
-                        background: "#ffffff",
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
-                      },
+                      "&:hover": { background: "#ffffff", boxShadow: "0 6px 18px rgba(0,0,0,0.3)" },
                     }}
                   >
                     View Cart

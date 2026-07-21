@@ -267,7 +267,7 @@ export default function Footer() {
                   icon:
                     <InstagramIcon />,
                   link:
-                    "https://instagram.com/network.ten",
+                    "https://www.instagram.com/network.ten/",
                 },
 
                 {
