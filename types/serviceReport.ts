@@ -21,8 +21,10 @@ export interface ServiceReport {
   date: string; // yyyy-mm-dd
 
   customerName: string;
+  /** @deprecated no longer collected in the form, kept for backward compatibility with the PDF */
   address: string;
   city: string;
+  /** @deprecated no longer collected in the form, kept for backward compatibility with the PDF */
   state: string;
   zipCode: string;
 
@@ -33,12 +35,16 @@ export interface ServiceReport {
   detailProblemReported: string;
 
   equipmentType: string;
+  /** @deprecated no longer collected in the form, kept for backward compatibility with the PDF */
   make: string;
   model: string;
   serialNo: string;
+  /** New — replaces "Make" in the intake form */
+  productDetails: string;
 
   engineerNames: string;
   engineerMobile: string;
+  /** @deprecated no longer collected in the form, kept for backward compatibility with the PDF */
   engineerEmail: string;
 
   locationOfInstallation: string;
@@ -117,7 +123,8 @@ export const emptyServiceReport: ServiceReport = {
   make: "",
   model: "",
   serialNo: "",
-  engineerNames: "",
+  productDetails: "",
+  engineerNames: "Kamal",
   engineerMobile: "",
   engineerEmail: "",
   locationOfInstallation: "",

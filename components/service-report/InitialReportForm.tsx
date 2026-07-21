@@ -196,7 +196,7 @@ export default function InitialReportForm({
           </Grid>
         </Section>
 
-        {/* Customer Details */}
+        {/* Customer Details — Address & State removed */}
         <Section title="Customer Details" icon={<PersonIcon fontSize="small" />} accentColor={ACCENTS.customer}>
           <Grid size={12}>
             <TextField
@@ -207,16 +207,7 @@ export default function InitialReportForm({
               onChange={handleChange("customerName")}
             />
           </Grid>
-          <Grid size={12}>
-            <TextField
-              label="Address"
-              fullWidth
-              sx={fieldSx}
-              value={form.address}
-              onChange={handleChange("address")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               label="City"
               fullWidth
@@ -225,16 +216,7 @@ export default function InitialReportForm({
               onChange={handleChange("city")}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              label="State"
-              fullWidth
-              sx={fieldSx}
-              value={form.state}
-              onChange={handleChange("state")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Zip Code"
               fullWidth
@@ -254,33 +236,24 @@ export default function InitialReportForm({
           </Grid>
         </Section>
 
-        {/* Engineer Details */}
+        {/* Engineer Details — only Name + Mobile, name defaults to Kamal */}
         <Section title="Engineer Details" icon={<EngineeringIcon fontSize="small" />} accentColor={ACCENTS.engineer}>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
-              label="Engineer Name(s)"
+              label="Engineer Name"
               fullWidth
               sx={fieldSx}
               value={form.engineerNames}
               onChange={handleChange("engineerNames")}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Mobile No."
               fullWidth
               sx={fieldSx}
               value={form.engineerMobile}
               onChange={handleChange("engineerMobile")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              label="Engineer Email"
-              fullWidth
-              sx={fieldSx}
-              value={form.engineerEmail}
-              onChange={handleChange("engineerEmail")}
             />
           </Grid>
         </Section>
@@ -334,9 +307,9 @@ export default function InitialReportForm({
           </Grid>
         </Section>
 
-        {/* Equipment (as reported at intake) */}
+        {/* Equipment — Make removed, Product Details added */}
         <Section title="Equipment (as reported)" icon={<Inventory2Icon fontSize="small" />} accentColor={ACCENTS.equipment}>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Equipment Type"
               fullWidth
@@ -345,16 +318,7 @@ export default function InitialReportForm({
               onChange={handleChange("equipmentType")}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              label="Make"
-              fullWidth
-              sx={fieldSx}
-              value={form.make}
-              onChange={handleChange("make")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               label="Model"
               fullWidth
@@ -370,6 +334,17 @@ export default function InitialReportForm({
               sx={fieldSx}
               value={form.serialNo}
               onChange={handleChange("serialNo")}
+            />
+          </Grid>
+          <Grid size={12}>
+            <TextField
+              label="Product Details"
+              fullWidth
+              multiline
+              minRows={2}
+              sx={fieldSx}
+              value={form.productDetails}
+              onChange={handleChange("productDetails")}
             />
           </Grid>
         </Section>
