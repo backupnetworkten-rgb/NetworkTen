@@ -501,7 +501,7 @@ text:
 icon:
 <LocationOnRoundedIcon />,
 text:
-"Chanakya Place, Uttam Nagar, New Delhi"
+"Chanakya Place, Part 1, New Delhi - 110059"
 }
 
 ].map((item,index)=>(

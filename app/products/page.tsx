@@ -38,6 +38,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import { getProducts } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
+import RatingStars from "@/components/review/RatingStars";
 
 import { useRouter } from "next/navigation";
 
@@ -524,7 +525,7 @@ export default function ProductsPage() {
                                   fontWeight: 800,
                                   fontSize: "13px",
                                   color: "#102048",
-                                  mb: 0.8,
+                                  mb: 0.5,
                                   lineHeight: 1.25,
                                   display: "-webkit-box",
                                   WebkitLineClamp: 2,
@@ -534,6 +535,11 @@ export default function ProductsPage() {
                               >
                                 {product.name}
                               </Typography>
+
+                              {/* Rating summary */}
+                              <Box sx={{ mb: 0.9 }}>
+                                <RatingStars rating={product.rating} reviewCount={product.reviewCount} size={13} />
+                              </Box>
 
                               <Box sx={{ mt: "auto" }}>
                                 <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.7, mb: 1 }}>

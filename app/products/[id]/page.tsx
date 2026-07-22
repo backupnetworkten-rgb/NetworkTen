@@ -23,6 +23,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { getProductById, getProducts } from "@/services/productService";
 import { addToCart } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
+import RatingStars from "@/components/review/RatingStars";
+import CustomerReviews from "@/components/review/CustomerReviews";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -236,6 +238,14 @@ export default function ProductDetailPage() {
       finally { setLoading(false); }
     })();
   }, [id]);
+
+  // Re-fetch just the product doc (used after a new review updates rating/reviewCount)
+  const refreshProduct = async () => {
+    try {
+      const data: any = await getProductById(id as string);
+      if (data) setProduct(data);
+    } catch (e) { console.error(e); }
+  };
 
   const discount = product?.price > product?.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
@@ -592,10 +602,15 @@ router.push(
                 {/* Product name */}
                 <Typography sx={{
                   fontSize: { xs: "18px", md: "21px" }, fontWeight: 700, color: C.heading,
-                  lineHeight: 1.3, mb: 2, fontFamily: sans, letterSpacing: "-0.4px",
+                  lineHeight: 1.3, mb: 1, fontFamily: sans, letterSpacing: "-0.4px",
                 }}>
                   {product.name}
                 </Typography>
+
+                {/* Rating summary */}
+                <Box sx={{ mb: 2 }}>
+                  <RatingStars rating={product.rating} reviewCount={product.reviewCount} size={17} />
+                </Box>
 
                 <Box sx={{ height: "1px", background: C.border, mb: 2.5 }} />
 
@@ -959,7 +974,7 @@ router.push(
 
           {/* ── YOU MAY ALSO LIKE ────────────────────────────────────────── */}
           {related.length > 0 && (
-            <Box sx={{ background: C.surface, borderRadius: "14px", border: `1px solid ${C.border}`, p: "24px" }}>
+            <Box sx={{ background: C.surface, borderRadius: "14px", border: `1px solid ${C.border}`, p: "24px", mb: 2 }}>
               <Box
                 sx={{
                   display: "flex",
@@ -1069,6 +1084,18 @@ router.push(
               </Box>
             </Box>
           )}
+
+          {/* ── CUSTOMER REVIEWS (now below "You may also like") ─────────── */}
+          <Box>
+            <CustomerReviews
+              productId={product.id}
+              productName={product.name}
+              productImage={allImgs[0]}
+              rating={product.rating}
+              reviewCount={product.reviewCount}
+              onReviewAdded={refreshProduct}
+            />
+          </Box>
 
         </Container>
       </Box>
