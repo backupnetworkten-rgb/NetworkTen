@@ -25,6 +25,7 @@ import { addToCart } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
 import RatingStars from "@/components/review/RatingStars";
 import CustomerReviews from "@/components/review/CustomerReviews";
+import InstagramFeed from "@/components/instagram/InstagramFeed";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -1096,6 +1097,12 @@ router.push(
               onReviewAdded={refreshProduct}
             />
           </Box>
+
+          {/* ── INSTAGRAM FEED ─────────── */}
+          <InstagramFeed
+            handle="network.ten"
+            widgetSrc="https://snapwidget.com/embed/YOUR_WIDGET_ID"
+          />
 
         </Container>
       </Box>

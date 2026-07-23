@@ -38,7 +38,20 @@ function generateCsrNo(existing: string[] = []): string {
   const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const existingSet = new Set(existing.filter(Boolean));
 
-  let seq = 1;
+  // Find the highest sequence number used so far, across ALL reports —
+  // not just ones created today. This keeps the counter global so it
+  // continues 0001, 0002, 0003... regardless of date or which user
+  // created the previous report.
+  let maxSeq = 0;
+  existing.forEach((csr) => {
+    const match = csr?.match(/-(\d{4})$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxSeq) maxSeq = num;
+    }
+  });
+
+  let seq = maxSeq + 1;
   let candidate = `CSR-${datePart}-${String(seq).padStart(4, "0")}`;
   while (existingSet.has(candidate)) {
     seq += 1;
