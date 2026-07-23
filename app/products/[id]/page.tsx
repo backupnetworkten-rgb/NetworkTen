@@ -1101,7 +1101,7 @@ router.push(
           {/* ── INSTAGRAM FEED ─────────── */}
           <InstagramFeed
             handle="network.ten"
-            widgetSrc="https://snapwidget.com/embed/YOUR_WIDGET_ID"
+            widgetSrc="https://snapwidget.com/embed/1127570"
           />
 
         </Container>
