@@ -82,10 +82,9 @@ export default function InstagramFeed({ handle, widgetSrc, height = 420 }: Insta
 
       {/* SnapWidget embed */}
       <Box sx={{ borderRadius: "10px", overflow: "hidden" }}>
-        <iframe
+ <iframe
   src={widgetSrc}
   className="snapwidget-widget"
-  allowtransparency="true"
   frameBorder="0"
   scrolling="no"
   style={{ border: "none", overflow: "hidden", width: "100%", display: "block" }}
