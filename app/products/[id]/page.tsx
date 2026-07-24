@@ -20,12 +20,14 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
 import { getProductById, getProducts } from "@/services/productService";
 import { addToCart } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
 import RatingStars from "@/components/review/RatingStars";
 import CustomerReviews from "@/components/review/CustomerReviews";
 import InstagramFeed from "@/components/instagram/InstagramFeed";
+import PdfCoverPreview from "@/components/product/PdfCoverPreview";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -211,6 +213,15 @@ const TERMS = [
 
 const calcUnit = (base: number, pct: number) => Math.round(base * (1 - pct / 100));
 
+// ─── Video URL helper ──────────────────────────────────────────────────────────
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
+
 export default function ProductDetailPage() {
   const { id }      = useParams();
   const router      = useRouter();
@@ -221,7 +232,7 @@ export default function ProductDetailPage() {
   const [loading,   setLoading]   = useState(true);
   const [selBulk,   setSelBulk]   = useState(0);
   const [activeImg, setActiveImg] = useState(0);
-  const [activeTab, setActiveTab] = useState<"description" | "specifications">("description");
+  const [activeTab, setActiveTab] = useState<"description" | "specifications" | "datasheet">("description");
   const [snackbar,  setSnackbar]  = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
   useEffect(() => {
@@ -231,6 +242,7 @@ export default function ProductDetailPage() {
         const data: any = await getProductById(id as string);
         setProduct(data);
         setActiveImg(0);
+        setActiveTab("description");
         if (data) {
           const all = await getProducts();
           setRelated(all.filter((p: any) => p.category === data.category && p.id !== id).slice(0, 12));
@@ -240,7 +252,6 @@ export default function ProductDetailPage() {
     })();
   }, [id]);
 
-  // Re-fetch just the product doc (used after a new review updates rating/reviewCount)
   const refreshProduct = async () => {
     try {
       const data: any = await getProductById(id as string);
@@ -256,6 +267,16 @@ export default function ProductDetailPage() {
   const allImgs: string[] = product?.images?.length > 0
     ? product.images : product?.image ? [product.image] : [];
 
+  const mediaItems: { type: "image" | "video"; src: string }[] = [
+    ...allImgs.map((src) => ({ type: "image" as const, src })),
+    ...(product?.video ? [{ type: "video" as const, src: product.video }] : []),
+  ];
+
+  const datasheetViewUrl = product?.datasheet
+    ? `/api/datasheet?url=${encodeURIComponent(product.datasheet)}&mode=inline` : "";
+  const datasheetDownloadUrl = product?.datasheet
+    ? `/api/datasheet?url=${encodeURIComponent(product.datasheet)}&mode=download` : "";
+
   const getShareUrl  = () => typeof window !== "undefined" ? window.location.href : "";
   const getShareText = () => `Check out ${product?.name} at Rs. ${perUnit.toLocaleString("en-IN")}`;
 
@@ -269,56 +290,28 @@ export default function ProductDetailPage() {
     setSnackbar({ open: true, message: "Added to cart!", severity: "success" });
   };
 
-  const buyNow=()=>{
+  const buyNow = () => {
+    const user = localStorage.getItem("user");
 
-const user=
-localStorage.getItem(
-"user"
-);
+    if (!user) {
+      localStorage.setItem("redirectAfterLogin", "/checkout");
+      router.push("/login");
+      return;
+    }
 
-if(!user){
+    addToCart({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.image,
+      price: product.price,
+      salePrice: product.salePrice,
+      quantity: BULK[selBulk].qty,
+      stock: product.stock,
+    });
 
-localStorage.setItem(
-"redirectAfterLogin",
-"/checkout"
-);
-
-router.push(
-"/login"
-);
-
-return;
-
-}
-
-addToCart({
-
-id:product.id,
-
-name:product.name,
-
-brand:product.brand,
-
-image:product.image,
-
-price:product.price,
-
-salePrice:
-product.salePrice,
-
-quantity:
-BULK[selBulk].qty,
-
-stock:
-product.stock
-
-});
-
-router.push(
-"/checkout"
-);
-
-};
+    router.push("/checkout");
+  };
 
   const scrollCarousel = (d: "left" | "right") =>
     carouselRef.current?.scrollBy({ left: d === "left" ? -220 : 220, behavior: "smooth" });
@@ -370,13 +363,17 @@ router.push(
   );
 
   const descText = product.description ? String(product.description).trim() : "";
-  const tabs = ["description", ...(product.specifications?.length > 0 ? ["specifications"] : [])];
+  const tabs = [
+    "description",
+    ...(product.specifications?.length > 0 ? ["specifications"] : []),
+    ...(product.datasheet ? ["datasheet"] : []),
+  ];
 
   return (
     <>
       <Header />
-      <Box sx={{ background: C.pageBg, minHeight: "100vh", pt: 2.5, pb: 10, fontFamily: sans }}>
-        <Container maxWidth="lg">
+      <Box sx={{ background: C.pageBg, minHeight: "100vh", pt: 2.5, pb: 10, fontFamily: sans, overflowX: "hidden" }}>
+        <Container maxWidth="lg" sx={{ overflow: "hidden" }}>
 
           {/* ── BREADCRUMB ───────────────────────────────────────────────── */}
           <Box
@@ -409,77 +406,101 @@ router.push(
             background: C.surface, borderRadius: "18px",
             border: `1px solid ${C.border}`,
             boxShadow: "0 2px 20px rgba(0,0,0,0.07)",
-            overflow: "hidden", mb: 2,
+            overflow: "hidden", mb: 2, width: "100%",
           }}>
 
-            {/* ══════════ LEFT — Image + Description ══════════ */}
+            {/* ══════════ LEFT — Image/Video + Description ══════════ */}
             <Box sx={{
               width: { xs: "100%", md: "50%" },
               flexShrink: 0,
+              minWidth: 0,
               borderRight: { md: `1px solid ${C.border}` },
               display: "flex", flexDirection: "column",
               background: C.surface,
             }}>
-              {/* Image viewer */}
-              <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, flex: "0 0 auto" }}>
+              {/* Image / Video viewer */}
+              <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, flex: "0 0 auto", width: "100%", overflow: "hidden" }}>
 
                 {/* Desktop thumbnail strip */}
-                {allImgs.length > 1 && (
+                {mediaItems.length > 1 && (
                   <Box sx={{
                     display: { xs: "none", sm: "flex" }, flexDirection: "column", gap: "6px",
                     p: "12px 8px", borderRight: `1px solid ${C.border}`,
-                    overflowY: "auto", maxHeight: 520, background: C.surface,
+                    overflowY: "auto", maxHeight: 520, background: C.surface, flexShrink: 0,
                     "&::-webkit-scrollbar": { width: 2 },
                     "&::-webkit-scrollbar-thumb": { background: C.border },
                   }}>
-                    {allImgs.map((img, i) => (
+                    {mediaItems.map((m, i) => (
                       <Box key={i} onClick={() => setActiveImg(i)} sx={{
                         width: 60, height: 60, flexShrink: 0,
                         borderRadius: "8px", overflow: "hidden", cursor: "pointer",
                         border: "2px solid",
                         borderColor: activeImg === i ? C.heading : C.border,
-                        background: C.surfaceGray,
+                        background: m.type === "video" ? "#000" : C.surfaceGray,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        p: "4px", transition: "border-color 0.15s",
+                        p: m.type === "video" ? 0 : "4px", transition: "border-color 0.15s",
                         "&:hover": { borderColor: C.heading },
                       }}>
-                        <img src={proxyImage(img)} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        {m.type === "image" ? (
+                          <img src={proxyImage(m.src)} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        ) : (
+                          <PlayCircleRoundedIcon sx={{ color: "#fff", fontSize: 26 }} />
+                        )}
                       </Box>
                     ))}
                   </Box>
                 )}
 
-                {/* Main image */}
-                <Box sx={{ flex: 1, position: "relative", background: "#fff" }}>
-                  {allImgs.length > 1 && (
+                {/* Main viewer */}
+                <Box sx={{ flex: 1, minWidth: 0, position: "relative", background: "#fff" }}>
+                  {mediaItems.length > 1 && (
                     <Box sx={{
                       position: "absolute", top: 10, right: 10, zIndex: 5,
                       background: "rgba(0,0,0,0.5)", color: "#fff",
                       fontSize: "11px", fontWeight: 600, fontFamily: sans,
                       px: 1.4, py: 0.4, borderRadius: "20px",
                     }}>
-                      {activeImg + 1} / {allImgs.length}
+                      {activeImg + 1} / {mediaItems.length}
                     </Box>
                   )}
 
-                  <Box sx={{ position: "relative", paddingTop: "100%", background: "#fff" }}>
+                  <Box sx={{ position: "relative", paddingTop: "100%", background: "#fff", width: "100%" }}>
                     <Box sx={{
                       position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       overflow: "hidden",
+                      background: mediaItems[activeImg]?.type === "video" ? "#000" : "#fff",
                     }}>
-                      <img
-                        key={allImgs[activeImg]}
-                        src={proxyImage(allImgs[activeImg] || "")}
-                        alt={product.name}
-                        style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-                      />
+                      {mediaItems[activeImg]?.type === "video" ? (
+                        getYouTubeEmbedUrl(mediaItems[activeImg].src) ? (
+                          <iframe
+                            src={getYouTubeEmbedUrl(mediaItems[activeImg].src) as string}
+                            title="Product video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+                          />
+                        ) : (
+                          <video
+                            controls
+                            src={mediaItems[activeImg].src}
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", background: "#000" }}
+                          />
+                        )
+                      ) : (
+                        <img
+                          key={mediaItems[activeImg]?.src}
+                          src={proxyImage(mediaItems[activeImg]?.src || "")}
+                          alt={product.name}
+                          style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+                        />
+                      )}
                     </Box>
 
-                    {allImgs.length > 1 && (
+                    {mediaItems.length > 1 && (
                       <>
                         <IconButton
-                          onClick={() => setActiveImg((p) => (p - 1 + allImgs.length) % allImgs.length)}
+                          onClick={() => setActiveImg((p) => (p - 1 + mediaItems.length) % mediaItems.length)}
                           sx={{
                             position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
                             background: "rgba(255,255,255,0.95)", width: 34, height: 34,
@@ -489,7 +510,7 @@ router.push(
                           <ChevronLeftRoundedIcon sx={{ fontSize: 17, color: C.heading }} />
                         </IconButton>
                         <IconButton
-                          onClick={() => setActiveImg((p) => (p + 1) % allImgs.length)}
+                          onClick={() => setActiveImg((p) => (p + 1) % mediaItems.length)}
                           sx={{
                             position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
                             background: "rgba(255,255,255,0.95)", width: 34, height: 34,
@@ -503,22 +524,27 @@ router.push(
                   </Box>
 
                   {/* Mobile thumbnails */}
-                  {allImgs.length > 1 && (
+                  {mediaItems.length > 1 && (
                     <Box sx={{
                       display: { xs: "flex", sm: "none" }, gap: "6px",
                       p: "10px 12px", borderTop: `1px solid ${C.border}`,
                       overflowX: "auto", background: C.surface,
                       "&::-webkit-scrollbar": { height: 0 },
                     }}>
-                      {allImgs.map((img, i) => (
+                      {mediaItems.map((m, i) => (
                         <Box key={i} onClick={() => setActiveImg(i)} sx={{
                           width: 52, height: 52, flexShrink: 0, borderRadius: "6px",
                           overflow: "hidden", cursor: "pointer",
                           border: `2px solid ${activeImg === i ? C.heading : C.border}`,
-                          background: C.surfaceGray,
-                          display: "flex", alignItems: "center", justifyContent: "center", p: "3px",
+                          background: m.type === "video" ? "#000" : C.surfaceGray,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          p: m.type === "video" ? 0 : "3px",
                         }}>
-                          <img src={proxyImage(img)} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          {m.type === "image" ? (
+                            <img src={proxyImage(m.src)} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                          ) : (
+                            <PlayCircleRoundedIcon sx={{ color: "#fff", fontSize: 20 }} />
+                          )}
                         </Box>
                       ))}
                     </Box>
@@ -526,15 +552,16 @@ router.push(
                 </Box>
               </Box>
 
-              {/* ── Description / Specs tabs ── */}
-              <Box sx={{ borderTop: `1px solid ${C.border}`, flex: 1, display: "flex", flexDirection: "column" }}>
-                <Box sx={{ display: "flex", background: C.surface, flexShrink: 0 }}>
+              {/* ── Description / Specs / Datasheet tabs ── */}
+              <Box sx={{ borderTop: `1px solid ${C.border}`, flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+                <Box sx={{ display: "flex", background: C.surface, flexShrink: 0, overflowX: "auto" }}>
                   {tabs.map((tab) => (
                     <Box key={tab} onClick={() => setActiveTab(tab as any)} sx={{
                       px: 3, py: 1.6, cursor: "pointer",
                       borderBottom: "2.5px solid",
                       borderColor: activeTab === tab ? C.heading : "transparent",
                       transition: "border-color 0.15s",
+                      whiteSpace: "nowrap",
                     }}>
                       <Typography sx={{
                         fontSize: "13.5px", fontWeight: activeTab === tab ? 700 : 500,
@@ -580,11 +607,117 @@ router.push(
                     ))}
                   </Box>
                 )}
+
+                {/* ═════════════════════════════════════════════════════════
+                    DATASHEET TAB — now fills the full available panel height
+                    (matches the Description/Specifications tabs' flex:1
+                    behaviour) instead of shrink-wrapping into a tiny
+                    centered card. Sticky header + sticky action bar, with
+                    a large premium document preview filling the middle.
+                   ═════════════════════════════════════════════════════════ */}
+                {activeTab === "datasheet" && product.datasheet && (
+                  <Box sx={{
+                    flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0,
+                    background: "linear-gradient(180deg, #fafbfd 0%, #f4f5f8 100%)",
+                  }}>
+                    {/* Header bar */}
+                    <Box sx={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      px: "22px", py: "14px", flexShrink: 0,
+                      borderBottom: `1px solid ${C.border}`, background: C.surface,
+                    }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.3 }}>
+                        <Box sx={{
+                          width: 34, height: 34, borderRadius: "9px", background: C.blueLight,
+                          border: `1px solid ${C.blueBorder}`, display: "flex",
+                          alignItems: "center", justifyContent: "center", flexShrink: 0,
+                        }}>
+                          <svg width="16" height="18" viewBox="0 0 24 28" fill="none">
+                            <path d="M2 1h13l7 7v18a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1z" fill={C.blue} opacity="0.12"/>
+                            <path d="M2 1h13l7 7v18a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1z" stroke={C.blue} strokeWidth="1.4" fill="none"/>
+                            <path d="M15 1v6a1 1 0 001 1h6" stroke={C.blue} strokeWidth="1.4" fill="none"/>
+                          </svg>
+                        </Box>
+                        <Box>
+                          <Typography sx={{ fontSize: "13.5px", fontWeight: 700, color: C.heading, fontFamily: sans, lineHeight: 1.3 }}>
+                            Product Datasheet
+                          </Typography>
+                          <Typography sx={{ fontSize: "10.5px", color: C.textMuted, fontFamily: sans }}>
+                            Official specification document
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{
+                        background: C.redLight, border: `1px solid ${C.redBorder}`,
+                        borderRadius: "6px", px: 1.1, py: 0.4,
+                      }}>
+                        <Typography sx={{ fontSize: "10px", fontWeight: 800, color: C.red, fontFamily: sans, letterSpacing: "0.5px" }}>
+                          PDF
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Preview — grows to fill remaining space */}
+                    <Box sx={{
+                      flex: 1, minHeight: 0, display: "flex",
+                      alignItems: "center", justifyContent: "center",
+                      p: "24px", overflow: "hidden",
+                    }}>
+                      <Box sx={{
+                        height: "100%", maxHeight: 460, display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        borderRadius: "14px", overflow: "hidden",
+                        background: "#fff",
+                        border: `1px solid ${C.border}`,
+                        boxShadow: "0 16px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05)",
+                        p: "14px",
+                      }}>
+                        <PdfCoverPreview url={datasheetViewUrl} maxWidth={340} />
+                      </Box>
+                    </Box>
+
+                    {/* Action bar — pinned at bottom */}
+                    <Box sx={{
+                      display: "flex", gap: 1.2, px: "22px", py: "16px", flexShrink: 0,
+                      borderTop: `1px solid ${C.border}`, background: C.surface,
+                    }}>
+                      <Button
+                        component="a"
+                        href={datasheetViewUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          textTransform: "none", fontWeight: 600, fontSize: "13px", fontFamily: sans,
+                          borderRadius: "10px", borderColor: C.border, color: C.heading, height: 44,
+                          background: "#fff",
+                          "&:hover": { borderColor: C.heading, background: "#f5f5f5" },
+                        }}
+                      >
+                        Open Full Screen
+                      </Button>
+                      <Button
+                        component="a"
+                        href={datasheetDownloadUrl}
+                        variant="contained"
+                        fullWidth
+                        sx={{
+                          textTransform: "none", fontWeight: 700, fontSize: "13px", fontFamily: sans,
+                          borderRadius: "10px", background: C.heading, height: 44,
+                          "&:hover": { background: "#222" },
+                        }}
+                      >
+                        Download PDF
+                      </Button>
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </Box>
 
             {/* ══════════ RIGHT — Info + Purchase ══════════ */}
-            <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
               <Box sx={{ p: { xs: "22px 18px", md: "28px 30px" }, display: "flex", flexDirection: "column", height: "100%" }}>
 
                 {/* Brand + SKU */}

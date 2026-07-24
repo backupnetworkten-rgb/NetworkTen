@@ -13,6 +13,10 @@ import BrokenImageRoundedIcon from "@mui/icons-material/BrokenImageRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
+import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { addProduct } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
@@ -52,6 +56,17 @@ const SectionHeader = ({ icon, title, sub, color = "linear-gradient(135deg,#1020
   </Box>
 );
 
+// Detects a YouTube URL and converts it to an embeddable URL. Anything else
+// (direct .mp4/.webm links, other hosted video files) falls back to a native
+// <video> tag.
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+};
+
 interface ImageEntry { url: string; loaded: boolean; error: boolean; input: string; }
 interface SpecEntry { key: string; value: string; }
 
@@ -61,6 +76,7 @@ export default function AdminProductsPage() {
   const [product, setProduct] = useState({
     name: "", description: "", price: "", salePrice: "",
     category: "Network Product", brand: "", stock: "",
+    datasheet: "", video: "",
   });
 
   // Multiple images
@@ -121,6 +137,7 @@ export default function AdminProductsPage() {
       : 0;
 
   const primaryImage = images[0];
+  const videoEmbedUrl = getYouTubeEmbedUrl(product.video);
 
   const handleSubmit = async () => {
     if (!product.name.trim()) { alert("Please enter a Product Name"); return; }
@@ -144,7 +161,7 @@ export default function AdminProductsPage() {
         createdAt: Date.now(),
       });
       alert("Product Added Successfully");
-      setProduct({ name: "", description: "", price: "", salePrice: "", category: "Network Product", brand: "", stock: "" });
+      setProduct({ name: "", description: "", price: "", salePrice: "", category: "Network Product", brand: "", stock: "", datasheet: "", video: "" });
       setImages([{ url: "", loaded: false, error: false, input: "" }]);
       setSpecs([{ key: "", value: "" }]);
     } catch (error) {
@@ -385,6 +402,112 @@ export default function AdminProductsPage() {
             </Button>
           </Paper>
 
+          {/* ── DATASHEET & VIDEO ── */}
+          <Paper elevation={0} sx={cardSx}>
+            <SectionHeader
+              icon={<DescriptionRoundedIcon sx={{ color: "#fff", fontSize: 18 }} />}
+              title="Datasheet & Video"
+              sub="Add a datasheet link (PDF) and a product video link (YouTube or direct video URL)"
+              color="linear-gradient(135deg,#f59e0b,#d97706)"
+            />
+            <Grid container spacing={2.5}>
+              {/* Datasheet */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Datasheet URL"
+                  name="datasheet"
+                  value={product.datasheet}
+                  onChange={handleChange}
+                  placeholder="https://example.com/datasheet.pdf"
+                  helperText="Shown as a 'Datasheet' tab on the product page, with View & Download buttons"
+                  sx={inputSx}
+                />
+                {product.datasheet && (
+                  <Fade in>
+                    <Box sx={{ mt: 1.5, borderRadius: "14px", overflow: "hidden", border: "1px solid #e8edf5" }}>
+                      <Box sx={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        px: 2, py: 1, background: "#fff7ed", borderBottom: "1px solid #fde3c4",
+                      }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <PictureAsPdfRoundedIcon sx={{ fontSize: 18, color: "#d97706" }} />
+                          <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "#92400e" }}>
+                            Datasheet Preview
+                          </Typography>
+                        </Box>
+                        <Button
+                          component="a"
+                          href={product.datasheet}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          size="small"
+                          endIcon={<OpenInNewRoundedIcon sx={{ fontSize: 14 }} />}
+                          sx={{ textTransform: "none", fontSize: "11px", fontWeight: 700, color: "#d97706" }}
+                        >
+                          Open
+                        </Button>
+                      </Box>
+                      <Box sx={{ height: 260, background: "#525659" }}>
+                        <iframe
+                          src={product.datasheet}
+                          title="Datasheet preview"
+                          style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                        />
+                      </Box>
+                    </Box>
+                  </Fade>
+                )}
+              </Grid>
+
+              {/* Video */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Video URL"
+                  name="video"
+                  value={product.video}
+                  onChange={handleChange}
+                  placeholder="https://youtube.com/watch?v=... or direct .mp4 URL"
+                  helperText="Shown right below the product images on the product page"
+                  sx={inputSx}
+                />
+                {product.video && (
+                  <Fade in>
+                    <Box sx={{ mt: 1.5, borderRadius: "14px", overflow: "hidden", border: "1px solid #e8edf5" }}>
+                      <Box sx={{
+                        display: "flex", alignItems: "center", gap: 1,
+                        px: 2, py: 1, background: "#fff7ed", borderBottom: "1px solid #fde3c4",
+                      }}>
+                        <PlayCircleRoundedIcon sx={{ fontSize: 18, color: "#d97706" }} />
+                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "#92400e" }}>
+                          Video Preview
+                        </Typography>
+                      </Box>
+                      <Box sx={{ position: "relative", width: "100%", paddingTop: "56.25%", background: "#000" }}>
+                        {videoEmbedUrl ? (
+                          <iframe
+                            src={videoEmbedUrl}
+                            title="Product video preview"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+                          />
+                        ) : (
+                          <video
+                            controls
+                            src={product.video}
+                            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", background: "#000" }}
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  </Fade>
+                )}
+              </Grid>
+            </Grid>
+          </Paper>
+
           {/* ── SPECIFICATIONS ── */}
           <Paper elevation={0} sx={cardSx}>
             <SectionHeader
@@ -492,6 +615,15 @@ export default function AdminProductsPage() {
                 <Box sx={{ position: "absolute", top: 10, right: 10, background: "rgba(255,255,255,0.92)", backdropFilter: "blur(6px)", color: Number(product.stock) > 0 ? "#16a34a" : "#ef4444", fontWeight: 800, fontSize: "10px", px: 1, py: 0.3, borderRadius: "8px" }}>
                   {Number(product.stock) > 0 ? "IN STOCK" : "OUT OF STOCK"}
                 </Box>
+                {product.video && (
+                  <Box sx={{
+                    position: "absolute", bottom: 10, left: 10, background: "rgba(16,32,72,0.85)",
+                    color: "#fff", fontWeight: 700, fontSize: "10px", px: 1.1, py: 0.4, borderRadius: "20px",
+                    display: "flex", alignItems: "center", gap: 0.5,
+                  }}>
+                    <PlayCircleRoundedIcon sx={{ fontSize: 13 }} /> Video attached
+                  </Box>
+                )}
               </Box>
 
               {/* Thumbnail strip */}

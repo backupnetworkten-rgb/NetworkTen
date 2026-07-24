@@ -15,6 +15,8 @@ export interface Product {
   image: string;
   images?: string[];
   specifications?: ProductSpecification[];
+  datasheet?: string;
+  video?: string;
   featured: boolean;
   status: string;
   createdAt: number;
