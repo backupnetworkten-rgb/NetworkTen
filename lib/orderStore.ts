@@ -35,6 +35,7 @@ export interface Order {
   paymentMethod: string;
   paymentId?: string | null;
   billing?: OrderBilling;
+  note?: string; // NEW: optional customer order note
   address: {
     name: string;
     line1: string;
@@ -117,7 +118,6 @@ export async function updateOrderShiprocketInfo(
   orderId: string,
   shiprocketData: { orderId?: number; shipmentId?: number; status?: string }
 ): Promise<void> {
-  // Remove undefined values — Firestore rejects them outright.
   const cleanData: Record<string, any> = {};
   Object.entries(shiprocketData).forEach(([key, value]) => {
     if (value !== undefined) {
@@ -125,7 +125,6 @@ export async function updateOrderShiprocketInfo(
     }
   });
 
-  // Update localStorage copy
   try {
     const existing = getLocalOrders();
     const updated = existing.map((o) =>
@@ -138,7 +137,6 @@ export async function updateOrderShiprocketInfo(
     console.error("Failed to update local order with Shiprocket info:", e);
   }
 
-  // Update Firestore copy
   const user = auth.currentUser;
   if (!user) return;
   try {

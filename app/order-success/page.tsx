@@ -17,6 +17,7 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import PhoneOutlinedIcon             from "@mui/icons-material/PhoneOutlined";
 import EmailOutlinedIcon             from "@mui/icons-material/EmailOutlined";
 import LanguageOutlinedIcon          from "@mui/icons-material/LanguageOutlined";
+import EditNoteRoundedIcon           from "@mui/icons-material/EditNoteRounded";
 import { proxyImage } from "@/lib/proxyImage";
 import { fetchUserOrders, getLocalOrders, type Order } from "@/lib/orderStore";
 import { generateInvoice } from "@/lib/generateInvoice";
@@ -53,9 +54,6 @@ const C = {
 const sans  = "'Inter', system-ui, sans-serif";
 const serif = "'Fraunces', 'Georgia', serif";
 
-// Company / seller details for the invoice letterhead
-// Kept in sync with the COMPANY object in lib/generateInvoice.ts —
-// update both places together if the business details ever change.
 const COMPANY = {
   name:         "Network Ten",
   legalName:    "Network Ten",
@@ -91,7 +89,6 @@ if (typeof document !== "undefined" && !document.getElementById("order-success-f
     .order-success-check { animation: checkDraw 0.45s 0.35s ease forwards; stroke-dasharray: 36; stroke-dashoffset: 36; }
     .order-success-echo { animation: ringEcho 1.4s ease-out 0.1s 1; }
 
-    /* Print-only receipt styling */
     @media print {
       .no-print { display: none !important; }
 
@@ -185,7 +182,6 @@ const TRUST = [
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-// Company logo used on the invoice letterhead
 function CompanyLogoMark({ size = 42 }: { size?: number }) {
   return (
     <Box
@@ -237,6 +233,7 @@ export default function OrderSuccessPage() {
   const paymentId = order?.paymentId;
   const billing: any = (order as any)?.billing;
   const isB2BInvoice = !!billing?.isB2BInvoice;
+  const orderNote = order?.note?.trim(); // NEW
 
   const copyToClipboard = async (value: string, message: string) => {
     try {
@@ -259,7 +256,6 @@ export default function OrderSuccessPage() {
     }
   };
 
-  // Step bar (all 3 steps done)
   const StepBar = (
     <Box className="no-print" sx={{ background: C.surface, borderBottom: `1px solid ${C.border}`, px: 4 }}>
       <Box sx={{ display: "flex", alignItems: "center", maxWidth: 960, mx: "auto", height: 56 }}>
@@ -282,7 +278,6 @@ export default function OrderSuccessPage() {
     </Box>
   );
 
-  // LOADING STATE - fetching from Firestore / local storage
   if (loading) {
     return (
       <>
@@ -305,7 +300,6 @@ export default function OrderSuccessPage() {
     );
   }
 
-  // FALLBACK - no order found (direct visit / storage cleared / new user)
   if (!order) {
     return (
       <>
@@ -677,6 +671,25 @@ export default function OrderSuccessPage() {
                 </Box>
               </Box>
             </Box>
+
+            {/* NEW: Order note — only shows when the customer actually left one */}
+            {orderNote && (
+              <Box className="print-card" sx={{ ...sectionSx, mt: 2.2 }}>
+                <Box sx={headerSx}>
+                  <Box sx={headerIconWrapSx}>
+                    <EditNoteRoundedIcon sx={{ fontSize: 15, color: C.navy }} />
+                  </Box>
+                  <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: C.ink, fontFamily: serif }}>
+                    Order note
+                  </Typography>
+                </Box>
+                <Box sx={{ p: "19px 21px" }}>
+                  <Typography sx={{ fontSize: "12.5px", color: C.textSub, lineHeight: 1.75, fontFamily: sans, whiteSpace: "pre-wrap" }}>
+                    {orderNote}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
 
             {/* Totals */}
             <Box className="print-card" sx={{ ...sectionSx, mt: 2.2 }}>

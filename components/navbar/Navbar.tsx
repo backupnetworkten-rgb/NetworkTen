@@ -7,6 +7,7 @@ import {
   AppBar, Toolbar, Box, Button, IconButton, Drawer, List,
   ListItem, ListItemButton, ListItemText, Badge, InputBase,
   useMediaQuery, Menu, MenuItem, Typography, Collapse, Paper, Fade,
+  TextField,
 } from "@mui/material";
 import MenuIcon                      from "@mui/icons-material/Menu";
 import ShoppingCartIcon              from "@mui/icons-material/ShoppingCart";
@@ -21,6 +22,7 @@ import RemoveRoundedIcon             from "@mui/icons-material/RemoveRounded";
 import DeleteOutlineRoundedIcon      from "@mui/icons-material/DeleteOutlineRounded";
 import ShoppingBagOutlinedIcon       from "@mui/icons-material/ShoppingBagOutlined";
 import ArrowForwardRoundedIcon       from "@mui/icons-material/ArrowForwardRounded";
+import EditNoteRoundedIcon           from "@mui/icons-material/EditNoteRounded";
 import { useTheme }                  from "@mui/material/styles";
 import Image                         from "next/image";
 import {
@@ -88,6 +90,10 @@ const aboutItems = [
   { label: "Careers",  sub: "Join our growing team",       path: "/careers" },
 ];
 
+// Same localStorage key used on the /cart and /checkout pages — this is how
+// the note field here stays in sync with the note typed anywhere else.
+const ORDER_NOTE_KEY = "nt_order_note";
+
 export default function Navbar() {
   const router = useRouter();
 
@@ -100,6 +106,7 @@ export default function Navbar() {
   const [cartItems,       setCartItems]       = useState<CartItem[]>([]);
   const [user,            setUser]            = useState<any>(null);
   const [userAnchor,      setUserAnchor]      = useState<null | HTMLElement>(null);
+  const [note,            setNote]            = useState(""); // NEW: order note
 
   // Solutions mega-menu state
   const [solutionsOpen, setSolutionsOpen] = useState(false);
@@ -119,9 +126,31 @@ export default function Navbar() {
     setCartItems(getCart());
     const saved = localStorage.getItem("user");
     if (saved) setUser(JSON.parse(saved));
+
+    // NEW: restore any note already saved from the cart/checkout pages
+    try {
+      const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
+      setNote(savedNote);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
+
     const unsub = onCartChange(() => setCartItems(getCart()));
     return unsub;
   }, []);
+
+  // NEW: whenever the cart drawer is opened, re-read the note in case it was
+  // typed/edited on the /cart page since this Navbar last loaded it.
+  useEffect(() => {
+    if (cartOpen) {
+      try {
+        const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
+        setNote(savedNote);
+      } catch {
+        /* localStorage unavailable — ignore */
+      }
+    }
+  }, [cartOpen]);
 
   // Autofocus the mobile search field when it opens
   useEffect(() => {
@@ -178,6 +207,17 @@ export default function Navbar() {
 
   const toggleMobileSearch = () => {
     setMobileSearchOpen((prev) => !prev);
+  };
+
+  // NEW: keep localStorage in sync as the user types the note in the drawer
+  const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setNote(value);
+    try {
+      localStorage.setItem(ORDER_NOTE_KEY, value);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
   };
 
   return (
@@ -1125,6 +1165,36 @@ export default function Navbar() {
         {/* Footer */}
         {cartItems.length > 0 && (
           <Box sx={{ px: 2.5, pb: 3, pt: 2, background: "#fff", borderTop: "1px solid #eef2f7", flexShrink: 0 }}>
+
+            {/* NEW: Order note — synced with /cart and /checkout via localStorage */}
+            <Box sx={{ mb: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mb: 0.9 }}>
+                <EditNoteRoundedIcon sx={{ fontSize: 16, color: "#102048" }} />
+                <Typography sx={{ fontSize: "12.5px", fontWeight: 700, color: "#102048" }}>
+                  Add a note (optional)
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                multiline
+                minRows={2}
+                size="small"
+                placeholder="E.g. deliver after 6 PM, gift wrap, etc."
+                value={note}
+                onChange={handleNoteChange}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    fontSize: "13px",
+                    background: "#fafafa",
+                    "& fieldset": { borderColor: "#e0e0e0" },
+                    "&:hover fieldset": { borderColor: "#102048" },
+                    "&.Mui-focused fieldset": { borderColor: "#102048" },
+                  },
+                }}
+              />
+            </Box>
+
             <Typography sx={{ fontSize: "11px", color: "#999", mb: 2 }}>
               Tax included,{" "}
               <span style={{ textDecoration: "underline", cursor: "pointer" }}>shipping</span>

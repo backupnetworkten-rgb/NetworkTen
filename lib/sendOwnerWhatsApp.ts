@@ -57,6 +57,8 @@ export async function sendOwnerWhatsApp(order: Order) {
     .map((i) => `- ${i.name} (${i.brand}) x${i.quantity}`)
     .join("\n");
 
+  const orderNote = order.note?.trim(); // NEW
+
   const message =
     `🛒 *New Order Received*\n` +
     `Order ID: ${order.orderId}\n` +
@@ -65,6 +67,7 @@ export async function sendOwnerWhatsApp(order: Order) {
     `${itemsSummary}\n\n` +
     `Total: ₹${order.grandTotal.toLocaleString("en-IN")}\n` +
     `Payment: ${order.paymentMethod.toUpperCase()}${order.paymentId ? " (" + order.paymentId + ")" : ""}\n\n` +
+    (orderNote ? `📝 *Note:* ${orderNote}\n\n` : "") + // NEW
     `Ship to:\n${order.address.line1}${order.address.line2 ? ", " + order.address.line2 : ""}\n` +
     `${order.address.city}, ${order.address.state} - ${order.address.pin}`;
 
@@ -90,12 +93,15 @@ export async function sendCustomerWhatsApp(order: Order) {
     month: "short",
   });
 
+  const orderNote = order.note?.trim(); // NEW
+
   const message =
     `Hi ${order.address.name}, thanks for your order! 🎉\n\n` +
     `*Order ID:* ${order.orderId}\n` +
     `${itemsSummary}\n\n` +
     `*Total paid:* ₹${order.grandTotal.toLocaleString("en-IN")}\n` +
     `*Payment method:* ${order.paymentMethod.toUpperCase()}\n\n` +
+    (orderNote ? `*Your note:* ${orderNote}\n\n` : "") + // NEW
     `Estimated delivery: ${deliveryStart} – ${deliveryEnd}\n\n` +
     `We'll notify you once it ships. Thank you for shopping with Network Ten!`;
 

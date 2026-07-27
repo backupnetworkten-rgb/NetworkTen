@@ -21,6 +21,7 @@ import LocalOfferOutlinedIcon        from "@mui/icons-material/LocalOfferOutline
 import CheckCircleRoundedIcon        from "@mui/icons-material/CheckCircleRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import LockOutlinedIcon              from "@mui/icons-material/LockOutlined";
+import EditNoteRoundedIcon           from "@mui/icons-material/EditNoteRounded";
 import {
   getCart, onCartChange, cartTotal,
   updateQuantity, removeFromCart, clearCart, CartItem,
@@ -118,17 +119,32 @@ const EMPTY_PERKS = [
   { icon: <AssignmentReturnOutlinedIcon sx={{ fontSize: 16 }} />, label: "7-Day Returns",  sub: "Hassle-free",   color: "#d97706", bg: "#fff7ed"   },
 ];
 
+// Shared localStorage key for the order note — read/written on both the
+// cart page and the checkout page so the note carries across the
+// navigation from /cart -> /checkout.
+const ORDER_NOTE_KEY = "nt_order_note";
+
 export default function CartPage() {
   const router = useRouter();
   const [items,   setItems]   = useState<CartItem[]>([]);
   const [coupon,  setCoupon]  = useState("");
   const [applied, setApplied] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [note,    setNote]    = useState(""); // NEW: order note
 
   useEffect(() => {
     setMounted(true);
     setItems(getCart());
     const unsub = onCartChange(() => setItems(getCart()));
+
+    // NEW: restore any note the user already typed (e.g. came back from checkout)
+    try {
+      const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
+      setNote(savedNote);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
+
     return unsub;
   }, []);
 
@@ -143,6 +159,17 @@ export default function CartPage() {
 
   const applyCoupon = () => {
     if (coupon.trim().toUpperCase() === "NETWORK10") setApplied("NETWORK10");
+  };
+
+  // NEW: keep localStorage in sync as the user types the note
+  const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setNote(value);
+    try {
+      localStorage.setItem(ORDER_NOTE_KEY, value);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
   };
 
   // ── AUTH GUARD: gate the checkout button itself ──
@@ -665,6 +692,43 @@ export default function CartPage() {
               </Box>
             </Box>
           </Box>
+
+          {/* NEW: Order note — bottom of the cart page.
+             Saved to localStorage so it survives navigation to /checkout,
+             where it's prefilled, editable, and finally attached to the order. */}
+          <Box sx={{ ...sectionSx, mt: 2.5, p: "20px 22px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.1, mb: 1.6 }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: "9px", background: C.blueLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <EditNoteRoundedIcon sx={{ color: C.blue, fontSize: 18 }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontFamily: sans, fontWeight: 700, fontSize: "13.5px", color: C.heading }}>
+                  Add a note for your order
+                </Typography>
+                <Typography sx={{ fontFamily: sans, fontSize: "11px", color: C.textMuted, mt: 0.1 }}>
+                  Optional — included in your order confirmation email &amp; WhatsApp message
+                </Typography>
+              </Box>
+            </Box>
+            <TextField
+              fullWidth
+              multiline
+              minRows={2}
+              size="small"
+              placeholder="E.g. Please deliver after 6 PM, leave at the gate, gift wrap, etc."
+              value={note}
+              onChange={handleNoteChange}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "9px", fontSize: "13px", fontFamily: sans,
+                  "& fieldset": { borderColor: C.border, borderWidth: "1.5px" },
+                  "&:hover fieldset": { borderColor: C.heading },
+                  "&.Mui-focused fieldset": { borderColor: C.heading, boxShadow: "0 0 0 3px rgba(10,10,10,.06)" },
+                },
+              }}
+            />
+          </Box>
+
         </Container>
       </Box>
       <Footer />

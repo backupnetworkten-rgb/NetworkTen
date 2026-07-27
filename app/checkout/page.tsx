@@ -24,6 +24,7 @@ import SaveOutlinedIcon              from "@mui/icons-material/SaveOutlined";
 import ArrowBackRoundedIcon          from "@mui/icons-material/ArrowBackRounded";
 import ShoppingCartOutlinedIcon      from "@mui/icons-material/ShoppingCartOutlined";
 import VerifiedUserOutlinedIcon      from "@mui/icons-material/VerifiedUserOutlined";
+import WorkspacePremiumOutlinedIcon  from "@mui/icons-material/WorkspacePremiumOutlined";
 import {
   getCart, onCartChange, cartTotal, clearCart, CartItem,
 } from "@/lib/cartStore";
@@ -43,7 +44,7 @@ declare global {
 }
 
 const C = {
-  pageBg:      "#f7f7f8",
+  pageBg:      "#f6f6f8",
   surface:     "#ffffff",
   surfaceWarm: "#fafafa",
   surfaceGray: "#f2f2f3",
@@ -65,9 +66,11 @@ const C = {
   goldLight:   "#faf5eb",
   goldBorder:  "#ecdcb8",
   goldDeep:    "#8a6323",
+  goldSoft:    "#d9b876",
 };
 
 const GST_RATE = 0.18;
+const COD_CHARGE = 149; // flat handling fee applied when Cash on Delivery is selected
 
 const sans = "'Inter', 'DM Sans', system-ui, sans-serif";
 
@@ -80,6 +83,10 @@ if (typeof document !== "undefined" && !document.getElementById("checkout-font")
   `;
   document.head.appendChild(s);
 }
+
+// Same localStorage key used on the cart page — this is how the note
+// travels from /cart to /checkout without any backend involved.
+const ORDER_NOTE_KEY = "nt_order_note";
 
 const TRUST = [
   { label: "Free Delivery", sub: "Above ₹1000", bg: "#dbeafe",
@@ -122,10 +129,11 @@ const TRUST = [
 const sectionSx = {
   background: C.surface,
   border: `1px solid ${C.border}`,
-  borderRadius: "16px",
+  borderRadius: "18px",
   overflow: "hidden",
   mb: 2.5,
-  boxShadow: "0 1px 2px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.04)",
+  boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 28px rgba(10,10,10,0.05)",
+  transition: "box-shadow .2s ease",
 };
 
 const headerSx = {
@@ -159,11 +167,6 @@ export default function CheckoutPage() {
   const [mounted,        setMounted]        = useState(false);
 
   // ── AUTH GUARD STATE ──
-  // isCheckingAuth: true until Firebase tells us whether a user is logged in.
-  // isAuthed: whether a user is currently logged in.
-  // While isCheckingAuth is true we show a spinner (not the checkout form),
-  // and if it resolves to "no user" we redirect to /login and never render
-  // the checkout content at all.
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthed,       setIsAuthed]       = useState(false);
 
@@ -185,6 +188,8 @@ export default function CheckoutPage() {
   const [companyName, setCompanyName] = useState("");
   const [gstErr,       setGstErr]     = useState("");
 
+  const [orderNote, setOrderNote] = useState(""); // NEW: order note
+
   const [newAddr, setNewAddr] = useState({
     name: "", phone: "", line1: "", line2: "",
     city: "", pin: "", state: "", type: "Home",
@@ -194,6 +199,14 @@ export default function CheckoutPage() {
     setMounted(true);
     setItems(getCart());
     const unsubCart = onCartChange(() => setItems(getCart()));
+
+    // NEW: restore the note the user typed on the cart page (or earlier on this page)
+    try {
+      const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
+      setOrderNote(savedNote);
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
 
     let unsubUser: (() => void) | undefined;
 
@@ -210,8 +223,6 @@ export default function CheckoutPage() {
           }
         });
       } else {
-        // No user logged in — send them to the login page first, and
-        // remember to bring them back to checkout once they log in.
         setSavedAddresses([]);
         setSelectedAddr("");
         setIsAuthed(false);
@@ -240,9 +251,6 @@ export default function CheckoutPage() {
 
   if (!mounted) return null;
 
-  // While we're still resolving auth state, show a spinner instead of the
-  // checkout form (prevents a flash of checkout content before the redirect
-  // to /login kicks in for logged-out users).
   if (isCheckingAuth) {
     return (
       <>
@@ -261,8 +269,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Not logged in — redirect is already in flight (see the effect above).
-  // Render nothing so checkout content never flashes on screen.
   if (!isAuthed) return null;
 
   const gstinTrimmed = gstNumber.trim().toUpperCase();
@@ -272,11 +278,14 @@ export default function CheckoutPage() {
   const discount      = applied === "NETWORK10" ? Math.round(cartSubtotal * 0.1) : 0;
   const shipping       = cartSubtotal >= 1000 ? 0 : 99;
 
+  // NEW: COD handling fee — only applies when Cash on Delivery is the selected payment method
+  const codCharge = payMethod === "cod" ? COD_CHARGE : 0;
+
   const netGoodsValue = cartSubtotal - discount;
 
   const taxableValue = Math.round(netGoodsValue / (1 + GST_RATE));
   const gstAmount     = netGoodsValue - taxableValue;
-  const grandTotal    = netGoodsValue + shipping;
+  const grandTotal    = netGoodsValue + shipping + codCharge;
 
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
 
@@ -304,6 +313,17 @@ export default function CheckoutPage() {
       setGstErr("Enter a valid 15-character GSTIN (e.g. 22AAAAA0000A1Z5).");
     } else {
       setGstErr("");
+    }
+  };
+
+  // NEW: keep localStorage in sync as the user edits the note on checkout
+  const handleOrderNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setOrderNote(value);
+    try {
+      localStorage.setItem(ORDER_NOTE_KEY, value);
+    } catch {
+      /* localStorage unavailable — ignore */
     }
   };
 
@@ -340,9 +360,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // ── finalizeOrder: saves order to Firestore, sends confirmation emails,
-  // then pushes it to Shiprocket in the background (non-blocking) and
-  // stores the shipment info back on the order.
   const finalizeOrder = async (paymentId?: string) => {
     const addr = savedAddresses.find((a) => a.id === selectedAddr) || savedAddresses[0];
 
@@ -370,10 +387,12 @@ export default function CheckoutPage() {
       subtotal: cartSubtotal,
       discount,
       shipping,
+      codCharge, // NEW: recorded on the order so it appears on invoices/order history
       grandTotal,
       totalQty,
       paymentMethod: payMethod,
       paymentId: paymentId || null,
+      note: orderNote.trim(), // NEW: attach the order note to the saved order
       address: {
         name:  addr.name,
         line1: addr.line1,
@@ -400,11 +419,14 @@ export default function CheckoutPage() {
       await saveLastOrder(orderPayload);
 
       clearCart();
+      // NEW: the note has done its job (saved into the order) — clear the draft
+      try {
+        localStorage.removeItem(ORDER_NOTE_KEY);
+      } catch {
+        /* ignore */
+      }
       router.push("/order-success");
 
-      // Send order confirmation emails (customer + owner) in the background —
-      // doesn't block the redirect. Logging added so we can trace failures
-      // in the server terminal.
       const customerEmailToSend = auth.currentUser?.email ?? null;
       console.log(">>> Calling /api/orders/notify | customerEmail:", customerEmailToSend);
 
@@ -427,7 +449,6 @@ export default function CheckoutPage() {
           console.error(">>> Order notify request failed to even reach server:", err);
         });
 
-      // Push to Shiprocket in the background — doesn't block the redirect.
       fetch("/api/shiprocket/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -560,7 +581,7 @@ export default function CheckoutPage() {
 
   const PAY_METHODS = [
     { id: "upi", icon: <QrCode2OutlinedIcon sx={{ fontSize: 24 }} />,       label: "UPI",              sub: "GPay, PhonePe, Paytm & more" },
-    { id: "cod", icon: <CurrencyRupeeOutlinedIcon sx={{ fontSize: 24 }} />, label: "Cash on Delivery", sub: "Pay when it arrives" },
+    { id: "cod", icon: <CurrencyRupeeOutlinedIcon sx={{ fontSize: 24 }} />, label: "Cash on Delivery", sub: `Pay when it arrives · +₹${COD_CHARGE} fee` },
   ] as const;
 
   return (
@@ -632,8 +653,10 @@ export default function CheckoutPage() {
 
             <Box sx={{
               display: "flex", alignItems: "center", gap: 0.7,
-              background: C.goldLight, border: `1px solid ${C.goldBorder}`,
+              background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+              border: `1px solid ${C.goldBorder}`,
               borderRadius: "20px", px: 1.6, py: 0.6,
+              boxShadow: "0 2px 8px rgba(184,135,63,0.12)",
             }}>
               <LockOutlinedIcon sx={{ fontSize: 13, color: C.gold }} />
               <Typography sx={{ fontSize: "11.5px", color: C.gold, fontWeight: 700, fontFamily: sans }}>
@@ -711,19 +734,20 @@ export default function CheckoutPage() {
                           onClick={() => setSelectedAddr(addr.id)}
                           sx={{
                             border: "1.5px solid",
-                            borderColor: selectedAddr === addr.id ? C.heading : C.border,
+                            borderColor: selectedAddr === addr.id ? C.gold : C.border,
                             borderRadius: "12px",
                             p: "15px 17px", mb: 1.2, cursor: "pointer",
-                            background: selectedAddr === addr.id ? C.surfaceWarm : C.surface,
+                            background: selectedAddr === addr.id ? C.goldLight : C.surface,
                             display: "flex", alignItems: "flex-start", gap: 1.5,
                             transition: "all .15s",
-                            "&:hover": { borderColor: C.heading },
+                            boxShadow: selectedAddr === addr.id ? "0 4px 14px rgba(184,135,63,0.14)" : "none",
+                            "&:hover": { borderColor: C.gold },
                           }}
                         >
                           <Radio
                             value={addr.id}
                             size="small"
-                            sx={{ p: 0, mt: 0.2, color: C.border, "&.Mui-checked": { color: C.heading } }}
+                            sx={{ p: 0, mt: 0.2, color: C.border, "&.Mui-checked": { color: C.gold } }}
                           />
                           <Box>
                             <Box sx={{
@@ -878,17 +902,18 @@ export default function CheckoutPage() {
                         onClick={() => setPayMethod(m.id)}
                         sx={{
                           border: "1.5px solid",
-                          borderColor: payMethod === m.id ? C.heading : C.border,
+                          borderColor: payMethod === m.id ? C.gold : C.border,
                           borderRadius: "13px", p: "17px 15px", cursor: "pointer",
-                          background: payMethod === m.id ? C.surfaceWarm : C.surface,
+                          background: payMethod === m.id ? C.goldLight : C.surface,
                           display: "flex", alignItems: "center", gap: 1.4,
                           transition: "all .15s", position: "relative",
-                          "&:hover": { borderColor: C.heading },
+                          boxShadow: payMethod === m.id ? "0 4px 14px rgba(184,135,63,0.14)" : "none",
+                          "&:hover": { borderColor: C.gold },
                         }}
                       >
                         <Box sx={{
                           width: 42, height: 42, borderRadius: "10px", flexShrink: 0,
-                          background: payMethod === m.id ? C.heading : C.surfaceGray,
+                          background: payMethod === m.id ? C.gold : C.surfaceGray,
                           color: payMethod === m.id ? "#fff" : C.heading,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           transition: "all .15s",
@@ -953,18 +978,20 @@ export default function CheckoutPage() {
 
                   {payMethod === "cod" && (
                     <Box sx={{
-                      background: C.blueLight, border: `1px solid ${C.blueBorder}`,
+                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+                      border: `1px solid ${C.goldBorder}`,
                       borderRadius: "11px", p: "17px 19px",
                       display: "flex", gap: 1.5, alignItems: "flex-start",
                     }}>
-                      <CurrencyRupeeOutlinedIcon sx={{ fontSize: 18, color: C.blue, flexShrink: 0, mt: 0.2 }} />
+                      <CurrencyRupeeOutlinedIcon sx={{ fontSize: 18, color: C.gold, flexShrink: 0, mt: 0.2 }} />
                       <Box>
                         <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, mb: 0.5, fontFamily: sans }}>
                           Cash on Delivery
                         </Typography>
                         <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.65, fontFamily: sans }}>
-                          Pay in cash when your order arrives. Available for orders between ₹1,000 – ₹9,999.
-                          A convenience fee of ₹49 may apply.
+                          Pay in cash when your order arrives. A COD handling fee of{" "}
+                          <b style={{ color: C.goldDeep }}>₹{COD_CHARGE}</b> applies and is already added to your
+                          total below.
                         </Typography>
                       </Box>
                     </Box>
@@ -1059,6 +1086,8 @@ export default function CheckoutPage() {
                     fullWidth multiline minRows={2}
                     size="small" label="Order note (optional)"
                     placeholder="Any special instructions for your order…"
+                    value={orderNote}
+                    onChange={handleOrderNoteChange}
                     sx={{ ...inputSx, mt: isB2BInvoice ? 2 : 0.5 }}
                   />
                 </Box>
@@ -1067,9 +1096,11 @@ export default function CheckoutPage() {
 
             <Box sx={{ position: { md: "sticky" }, top: { md: 20 }, alignSelf: "flex-start" }}>
               <Box sx={{
-                background: C.surface, border: `1px solid ${C.border}`,
-                borderRadius: "16px", overflow: "hidden",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.02), 0 12px 32px rgba(0,0,0,0.08)",
+                background: C.surface,
+                border: `1px solid ${C.border}`,
+                borderTop: `3px solid ${C.gold}`,
+                borderRadius: "18px", overflow: "hidden",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 16px 40px rgba(10,10,10,0.10)",
               }}>
                 <Box sx={{
                   background: "linear-gradient(135deg, #0f1f3d 0%, #1a3a6e 55%, #1d4ed8 100%)",
@@ -1208,6 +1239,7 @@ export default function CheckoutPage() {
                     { label: `Subtotal (${totalQty} item${totalQty !== 1 ? "s" : ""})`, value: `₹${cartSubtotal.toLocaleString("en-IN")}`, color: C.heading },
                     ...(discount > 0 ? [{ label: "Coupon discount", value: `−₹${discount.toLocaleString("en-IN")}`, color: C.green }] : []),
                     { label: "Delivery", value: shipping === 0 ? "FREE" : `₹${shipping}`, color: shipping === 0 ? C.green : C.heading },
+                    ...(codCharge > 0 ? [{ label: "COD handling fee", value: `+₹${codCharge.toLocaleString("en-IN")}`, color: C.goldDeep }] : []),
                     { label: "GST (18%)", value: `Included · ₹${gstAmount.toLocaleString("en-IN")}`, color: C.heading },
                   ].map((row, i) => (
                     <Box key={i} sx={{ display: "flex", justifyContent: "space-between", mb: 1.1 }}>
@@ -1215,6 +1247,20 @@ export default function CheckoutPage() {
                       <Typography sx={{ fontSize: "12px", fontWeight: 700, color: row.color, fontFamily: sans }}>{row.value}</Typography>
                     </Box>
                   ))}
+
+                  {codCharge > 0 && (
+                    <Box sx={{
+                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+                      border: `1px solid ${C.goldBorder}`,
+                      borderRadius: "9px", px: 1.4, py: 1, mt: 0.5, mb: 0.5,
+                      display: "flex", gap: 0.9, alignItems: "center",
+                    }}>
+                      <CurrencyRupeeOutlinedIcon sx={{ fontSize: 13, color: C.gold, flexShrink: 0 }} />
+                      <Typography sx={{ fontSize: "10.5px", color: C.goldDeep, fontWeight: 600, fontFamily: sans, lineHeight: 1.5 }}>
+                        A ₹{COD_CHARGE} Cash on Delivery fee has been added to your total.
+                      </Typography>
+                    </Box>
+                  )}
 
                   {isB2BInvoice && (
                     <Box sx={{
@@ -1239,7 +1285,7 @@ export default function CheckoutPage() {
                     </Typography>
                   </Box>
                   <Typography sx={{ fontSize: "10px", color: C.textMuted, textAlign: "right", mb: 2.2, fontFamily: sans }}>
-                    Inclusive of all taxes &amp; charges{isB2BInvoice ? " · tax invoice will be issued" : ""}
+                    Inclusive of all taxes &amp; charges{isB2BInvoice ? " · tax invoice will be issued" : ""}{codCharge > 0 ? " · incl. COD fee" : ""}
                   </Typography>
 
                   <Button
@@ -1251,9 +1297,10 @@ export default function CheckoutPage() {
                       background: "linear-gradient(135deg, #0a0a0a 0%, #262626 100%)",
                       color: "#fff",
                       fontWeight: 700, fontSize: "15px", fontFamily: sans,
-                      textTransform: "none", boxShadow: "0 6px 18px rgba(0,0,0,0.22)",
+                      textTransform: "none",
+                      boxShadow: "0 6px 18px rgba(0,0,0,0.22), 0 0 0 1px rgba(184,135,63,0.25)",
                       display: "flex", alignItems: "center", gap: 1,
-                      "&:hover": { boxShadow: "0 8px 24px rgba(0,0,0,0.28)" },
+                      "&:hover": { boxShadow: "0 8px 26px rgba(0,0,0,0.30), 0 0 0 1px rgba(184,135,63,0.45)" },
                       "&.Mui-disabled": { background: C.border, color: C.textMuted, boxShadow: "none" },
                       transition: "all .15s",
                     }}

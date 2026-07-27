@@ -18,12 +18,19 @@ console.log(">>> EMAILJS CONFIG CHECK:", {
 const OWNER_EMAIL = process.env.OWNER_EMAIL!;
 
 export async function sendOrderEmails(order: Order, customerEmail?: string | null) {
-  const itemsSummary = order.items
+  const itemsList = order.items
     .map(
       (i) =>
         `${i.name} (${i.brand}) x${i.quantity} - ₹${(i.salePrice * i.quantity).toLocaleString("en-IN")}`
     )
     .join("\n");
+
+  // NEW: append the customer's order note (if any) to the items summary so it
+  // shows up in both templates without requiring any EmailJS template changes.
+  const orderNote = order.note?.trim();
+  const itemsSummary = orderNote
+    ? `${itemsList}\n\nOrder note: ${orderNote}`
+    : itemsList;
 
   console.log(">>> Attempting to send emails | customerEmail:", customerEmail, "| owner:", OWNER_EMAIL);
 
@@ -40,6 +47,7 @@ export async function sendOrderEmails(order: Order, customerEmail?: string | nul
             delivery_address: `${order.address.name}, ${order.address.line1}, ${order.address.city} - ${order.address.pin}`,
             delivery_start: new Date(order.estimatedDeliveryStart).toLocaleDateString("en-IN"),
             delivery_end: new Date(order.estimatedDeliveryEnd).toLocaleDateString("en-IN"),
+            order_note: orderNote || "", // NEW: also available as its own template variable {{order_note}}
           }
         )
       : Promise.resolve(null),
@@ -57,6 +65,7 @@ export async function sendOrderEmails(order: Order, customerEmail?: string | nul
         items_summary: itemsSummary,
         grand_total: order.grandTotal.toLocaleString("en-IN"),
         ship_to: `${order.address.line1}${order.address.line2 ? ", " + order.address.line2 : ""}, ${order.address.city}, ${order.address.state} - ${order.address.pin}`,
+        order_note: orderNote || "", // NEW
       }
     ),
   ]);
