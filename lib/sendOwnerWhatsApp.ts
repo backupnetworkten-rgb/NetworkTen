@@ -1,53 +1,57 @@
 import type { Order } from "@/lib/orderStore";
 
-const WAPPFLY_TOKEN = process.env.WAPPFLY_API_TOKEN;
+const INSTANCE_ID = process.env.GREEN_API_INSTANCE_ID;
+const API_TOKEN = process.env.GREEN_API_TOKEN;
 
-// Normalizes a raw Indian phone number into WhatsApp JID format.
-function toWhatsAppJid(raw: string): string | null {
+// Normalizes a raw Indian phone number into Green API's chatId format.
+function toChatId(raw: string): string | null {
   const digits = raw.replace(/\D/g, "");
 
-  if (digits.length === 10) return `91${digits}@s.whatsapp.net`;
-  if (digits.length === 12 && digits.startsWith("91")) return `${digits}@s.whatsapp.net`;
-  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}@s.whatsapp.net`;
+  if (digits.length === 10) return `91${digits}@c.us`;
+  if (digits.length === 12 && digits.startsWith("91")) return `${digits}@c.us`;
+  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}@c.us`;
 
   return null;
 }
 
-async function sendWhatsAppMessage(toJid: string, text: string, label: string) {
-  if (!WAPPFLY_TOKEN) {
-    console.error(`>>> WhatsApp (${label}) skipped: missing WAPPFLY_API_TOKEN`);
+async function sendWhatsAppMessage(chatId: string, message: string, label: string) {
+  if (!INSTANCE_ID || !API_TOKEN) {
+    console.error(`>>> WhatsApp (${label}) skipped: missing GREEN_API_INSTANCE_ID or GREEN_API_TOKEN`);
     return;
   }
 
+  const url = `https://api.green-api.com/waInstance${INSTANCE_ID}/sendMessage/${API_TOKEN}`;
+
   try {
-    const res = await fetch("https://wappfly.com/api/messages/send", {
+    const res = await fetch(url, {
       method: "POST",
-      headers: {
-        "X-API-Token": WAPPFLY_TOKEN,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ to: toJid, text }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatId, message }),
     });
 
     const data = await res.json();
-    console.log(`>>> Wappfly WhatsApp (${label}) response:`, res.status, data);
+    console.log(`>>> WhatsApp (${label}) response:`, res.status, JSON.stringify(data));
 
     if (!res.ok) {
-      console.error(`>>> Wappfly WhatsApp (${label}) send failed:`, res.status, data);
+      console.error(`>>> WhatsApp (${label}) send failed:`, res.status, JSON.stringify(data));
     }
   } catch (err) {
-    console.error(`>>> Wappfly WhatsApp (${label}) request threw:`, err);
+    console.error(`>>> WhatsApp (${label}) request threw:`, err);
   }
 }
 
 export async function sendOwnerWhatsApp(order: Order) {
-  const ownerNumber = process.env.OWNER_WHATSAPP_NUMBER;
-  if (!ownerNumber) {
+  const ownerNumberRaw = process.env.OWNER_WHATSAPP_NUMBER;
+  if (!ownerNumberRaw) {
     console.error(">>> Owner WhatsApp skipped: missing OWNER_WHATSAPP_NUMBER");
     return;
   }
 
-  const ownerJid = `${ownerNumber}@s.whatsapp.net`;
+  const ownerChatId = toChatId(ownerNumberRaw);
+  if (!ownerChatId) {
+    console.error(">>> Owner WhatsApp skipped: could not normalize OWNER_WHATSAPP_NUMBER:", ownerNumberRaw);
+    return;
+  }
 
   const itemsSummary = order.items
     .map((i) => `- ${i.name} (${i.brand}) x${i.quantity}`)
@@ -64,23 +68,27 @@ export async function sendOwnerWhatsApp(order: Order) {
     `Ship to:\n${order.address.line1}${order.address.line2 ? ", " + order.address.line2 : ""}\n` +
     `${order.address.city}, ${order.address.state} - ${order.address.pin}`;
 
-  await sendWhatsAppMessage(ownerJid, message, "owner");
+  await sendWhatsAppMessage(ownerChatId, message, "owner");
 }
 
 export async function sendCustomerWhatsApp(order: Order) {
-  const customerJid = toWhatsAppJid(order.address.phone);
+  const customerChatId = toChatId(order.address.phone);
 
-  if (!customerJid) {
+  if (!customerChatId) {
     console.error(">>> Customer WhatsApp skipped: could not normalize phone:", order.address.phone);
     return;
   }
 
-  const itemsSummary = order.items
-    .map((i) => `- ${i.name} x${i.quantity}`)
-    .join("\n");
+  const itemsSummary = order.items.map((i) => `- ${i.name} x${i.quantity}`).join("\n");
 
-  const deliveryStart = new Date(order.estimatedDeliveryStart).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
-  const deliveryEnd = new Date(order.estimatedDeliveryEnd).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  const deliveryStart = new Date(order.estimatedDeliveryStart).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  });
+  const deliveryEnd = new Date(order.estimatedDeliveryEnd).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  });
 
   const message =
     `Hi ${order.address.name}, thanks for your order! 🎉\n\n` +
@@ -91,5 +99,5 @@ export async function sendCustomerWhatsApp(order: Order) {
     `Estimated delivery: ${deliveryStart} – ${deliveryEnd}\n\n` +
     `We'll notify you once it ships. Thank you for shopping with Network Ten!`;
 
-  await sendWhatsAppMessage(customerJid, message, "customer");
+  await sendWhatsAppMessage(customerChatId, message, "customer");
 }
