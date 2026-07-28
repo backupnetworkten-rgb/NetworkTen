@@ -24,6 +24,7 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
@@ -35,6 +36,10 @@ import SortRoundedIcon from "@mui/icons-material/SortRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import CallRoundedIcon from "@mui/icons-material/CallRounded";
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
+import ChatRoundedIcon from "@mui/icons-material/ChatRounded";
+import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import { getProducts } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
@@ -59,6 +64,11 @@ const filterSx = {
 
 const CART_BAR_DURATION = 10000; // 10 seconds
 const PAGE_SIZE = 16; // show this many before "View All"
+
+// ── Bulk order popup timing ──
+const BULK_POPUP_FIRST_DELAY = 5000;   // show first popup 5s after page load
+const BULK_POPUP_REPEAT_EVERY = 25000; // then repeat every 25s
+const BULK_ORDER_PHONE = "8687878755";
 
 const CATEGORIES = [
   "All",
@@ -100,6 +110,13 @@ export default function ProductsPage() {
   const unmountTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressRAF = useRef<number | null>(null);
 
+  // ── Bulk order / IT products popup (non-blocking — page stays fully usable) ──
+  const [bulkMounted, setBulkMounted] = useState(false);
+  const [bulkVisible, setBulkVisible] = useState(false);
+  const bulkFirstTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bulkIntervalTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const bulkHideAnimTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -121,6 +138,44 @@ export default function ProductsPage() {
       if (progressRAF.current) cancelAnimationFrame(progressRAF.current);
     };
   }, []);
+
+  // ── Bulk popup: open at 5s, then re-open every 25s. No backdrop — page stays interactive. ──
+  const openBulkPopup = () => {
+    if (bulkHideAnimTimer.current) clearTimeout(bulkHideAnimTimer.current);
+    setBulkMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setBulkVisible(true)));
+  };
+
+  const closeBulkPopup = () => {
+    setBulkVisible(false);
+    bulkHideAnimTimer.current = setTimeout(() => setBulkMounted(false), 350);
+  };
+
+  useEffect(() => {
+    bulkFirstTimer.current = setTimeout(() => {
+      openBulkPopup();
+      bulkIntervalTimer.current = setInterval(() => {
+        openBulkPopup();
+      }, BULK_POPUP_REPEAT_EVERY);
+    }, BULK_POPUP_FIRST_DELAY);
+
+    return () => {
+      if (bulkFirstTimer.current) clearTimeout(bulkFirstTimer.current);
+      if (bulkIntervalTimer.current) clearInterval(bulkIntervalTimer.current);
+      if (bulkHideAnimTimer.current) clearTimeout(bulkHideAnimTimer.current);
+    };
+  }, []);
+
+  const handleBulkCall = () => {
+    if (typeof window !== "undefined") {
+      window.location.href = `tel:${BULK_ORDER_PHONE}`;
+    }
+  };
+
+  const handleGoToContact = () => {
+    closeBulkPopup();
+    router.push("/contact");
+  };
 
   // Reset "View All" expansion whenever filters change
   useEffect(() => {
@@ -631,6 +686,192 @@ export default function ProductsPage() {
           </Grid>
         </Container>
       </Box>
+
+      {/* ══════════════════════════════════════════════════════════════
+          COMPACT PREMIUM "BULK ORDER / IT PRODUCTS" FLOATING POPUP
+          - No dark backdrop: page underneath stays fully visible & usable
+          - First shows 5s after load, then repeats every 25s
+          - Small, tight, professional card — scrollable body if needed
+      ══════════════════════════════════════════════════════════════ */}
+      {bulkMounted && (
+        <Box
+          sx={{
+            position: "fixed",
+            zIndex: 2500,
+            right: { xs: "50%", sm: 20 },
+            bottom: { xs: 16, sm: 20 },
+            transform: {
+              xs: `translateX(50%) translateY(${bulkVisible ? "0" : "16px"})`,
+              sm: `translateY(${bulkVisible ? "0" : "16px"})`,
+            },
+            opacity: bulkVisible ? 1 : 0,
+            transition: "opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1)",
+            pointerEvents: bulkVisible ? "auto" : "none",
+            width: { xs: "88vw", sm: 300 },
+            maxWidth: 300,
+          }}
+        >
+          <Box
+            sx={{
+              borderRadius: "16px",
+              overflow: "hidden",
+              background: "#fff",
+              boxShadow: "0 18px 44px rgba(4,10,30,0.24), 0 3px 10px rgba(4,10,30,0.08)",
+              border: "1px solid rgba(16,32,72,0.07)",
+            }}
+          >
+            {/* Compact header — single row, icon + title + close */}
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #0c1938 0%, #102048 55%, #16305f 100%)",
+                px: 1.8,
+                py: 1.5,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.1,
+                position: "relative",
+              }}
+            >
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage:
+                    "radial-gradient(circle at 15% 15%, rgba(139,197,63,0.16) 0%, transparent 45%)",
+                }}
+              />
+              <Box
+                sx={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "10px",
+                  background: "rgba(139,197,63,0.18)",
+                  border: "1px solid rgba(139,197,63,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  position: "relative",
+                }}
+              >
+                <Inventory2RoundedIcon sx={{ fontSize: 17, color: "#8BC53F" }} />
+              </Box>
+
+              <Box sx={{ minWidth: 0, flex: 1, position: "relative" }}>
+                <Typography
+                  sx={{
+                    fontSize: "9px",
+                    fontWeight: 800,
+                    letterSpacing: "0.9px",
+                    textTransform: "uppercase",
+                    color: "#8BC53F",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Bulk &amp; IT Orders
+                </Typography>
+                <Typography sx={{ fontSize: "13px", fontWeight: 800, color: "#fff", lineHeight: 1.25, mt: "1px" }}>
+                  Special Pricing Available
+                </Typography>
+              </Box>
+
+              <IconButton
+                onClick={closeBulkPopup}
+                aria-label="Close"
+                size="small"
+                sx={{
+                  width: 24,
+                  height: 24,
+                  flexShrink: 0,
+                  background: "rgba(255,255,255,0.10)",
+                  color: "rgba(255,255,255,0.85)",
+                  position: "relative",
+                  "&:hover": { background: "rgba(255,255,255,0.22)", color: "#fff" },
+                }}
+              >
+                <CloseRoundedIcon sx={{ fontSize: 14 }} />
+              </IconButton>
+            </Box>
+
+            {/* Compact scrollable body */}
+            <Box
+              sx={{
+                px: 1.8,
+                py: 1.6,
+                maxHeight: { xs: "38vh", sm: 150 },
+                overflowY: "auto",
+                "&::-webkit-scrollbar": { width: 5 },
+                "&::-webkit-scrollbar-thumb": { background: "#dfe3ea", borderRadius: 10 },
+              }}
+            >
+              <Typography sx={{ fontSize: "11.5px", color: "#5b6478", lineHeight: 1.6, mb: 1.2 }}>
+                Switches, CCTV, access control, video conferencing &amp; more — priced specially for bulk &amp; corporate orders.
+              </Typography>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 0.9,
+                  alignItems: "flex-start",
+                  background: "#f5f8fd",
+                  border: "1px solid rgba(16,32,72,0.08)",
+                  borderRadius: "10px",
+                  px: 1.3,
+                  py: 1,
+                }}
+              >
+                <ChatRoundedIcon sx={{ fontSize: 15, color: "#102048", mt: 0.1, flexShrink: 0 }} />
+                <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#102048", lineHeight: 1.5 }}>
+                  Text us for any IT products or bulk order.
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider sx={{ borderColor: "rgba(16,32,72,0.07)" }} />
+
+            {/* Compact CTA row: Contact Us + small call icon */}
+            <Box sx={{ px: 1.8, py: 1.5, display: "flex", alignItems: "center", gap: 0.9 }}>
+              <Button
+                fullWidth
+                onClick={handleGoToContact}
+                startIcon={<SupportAgentRoundedIcon sx={{ fontSize: 15 }} />}
+                sx={{
+                  height: 38,
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #102048, #1e3a6e)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "12px",
+                  textTransform: "none",
+                  boxShadow: "0 6px 16px rgba(16,32,72,0.25)",
+                  "&:hover": { background: "linear-gradient(135deg, #0d1a3a, #152e5a)" },
+                }}
+              >
+                Contact Us
+              </Button>
+
+              <Tooltip title={`Call ${BULK_ORDER_PHONE}`} arrow>
+                <IconButton
+                  onClick={handleBulkCall}
+                  aria-label="Call us"
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "10px",
+                    flexShrink: 0,
+                    background: "linear-gradient(135deg, #8BC53F, #6fa62f)",
+                    color: "#fff",
+                    boxShadow: "0 6px 16px rgba(139,197,63,0.3)",
+                    "&:hover": { background: "linear-gradient(135deg, #7ab332, #5f9328)" },
+                  }}
+                >
+                  <CallRoundedIcon sx={{ fontSize: 17 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+        </Box>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════
           PREMIUM "ADDED TO CART" STICKY BOTTOM BAR

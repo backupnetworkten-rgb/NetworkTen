@@ -28,6 +28,8 @@ import RatingStars from "@/components/review/RatingStars";
 import CustomerReviews from "@/components/review/CustomerReviews";
 import InstagramFeed from "@/components/instagram/InstagramFeed";
 import PdfCoverPreview from "@/components/product/PdfCoverPreview";
+import { auth } from "@/lib/firebase";
+import { fetchUserOrders } from "@/lib/orderStore";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -235,6 +237,11 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<"description" | "specifications" | "datasheet">("description");
   const [snackbar,  setSnackbar]  = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
+  // ── Reviews visibility gate: logged in + has ordered THIS product ──
+  const [isAuthed,             setIsAuthed]             = useState(false);
+  const [canViewReviews,       setCanViewReviews]       = useState(false);
+  const [checkingReviewAccess, setCheckingReviewAccess] = useState(true);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -258,6 +265,50 @@ export default function ProductDetailPage() {
       if (data) setProduct(data);
     } catch (e) { console.error(e); }
   };
+
+  // ── Track login state ──
+  useEffect(() => {
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setIsAuthed(true);
+      } else {
+        setIsAuthed(false);
+        setCanViewReviews(false);
+        setCheckingReviewAccess(false);
+      }
+    });
+    return () => unsubAuth();
+  }, []);
+
+  // ── Verify the logged-in user has actually ordered THIS product ──
+  // Uses the same fetchUserOrders() the profile/orders page relies on,
+  // which reads from users/{uid}/orders (with a localStorage fallback).
+  useEffect(() => {
+    const verifyPurchase = async () => {
+      if (!isAuthed || !product?.id) {
+        setCanViewReviews(false);
+        setCheckingReviewAccess(false);
+        return;
+      }
+
+      setCheckingReviewAccess(true);
+      try {
+        const orders = await fetchUserOrders();
+        const purchased = orders.some((order) =>
+          Array.isArray(order.items) &&
+          order.items.some((item) => item.id === product.id)
+        );
+        setCanViewReviews(purchased);
+      } catch (err) {
+        console.error("Failed to verify purchase for review access:", err);
+        setCanViewReviews(false);
+      } finally {
+        setCheckingReviewAccess(false);
+      }
+    };
+
+    verifyPurchase();
+  }, [isAuthed, product?.id]);
 
   const discount = product?.price > product?.salePrice
     ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
@@ -608,13 +659,6 @@ export default function ProductDetailPage() {
                   </Box>
                 )}
 
-                {/* ═════════════════════════════════════════════════════════
-                    DATASHEET TAB — now fills the full available panel height
-                    (matches the Description/Specifications tabs' flex:1
-                    behaviour) instead of shrink-wrapping into a tiny
-                    centered card. Sticky header + sticky action bar, with
-                    a large premium document preview filling the middle.
-                   ═════════════════════════════════════════════════════════ */}
                 {activeTab === "datasheet" && product.datasheet && (
                   <Box sx={{
                     flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0,
@@ -1219,17 +1263,23 @@ export default function ProductDetailPage() {
             </Box>
           )}
 
-          {/* ── CUSTOMER REVIEWS (now below "You may also like") ─────────── */}
-          <Box>
-            <CustomerReviews
-              productId={product.id}
-              productName={product.name}
-              productImage={allImgs[0]}
-              rating={product.rating}
-              reviewCount={product.reviewCount}
-              onReviewAdded={refreshProduct}
-            />
-          </Box>
+          {/* ── CUSTOMER REVIEWS ─────────────────────────────────────────────
+              Only rendered when the current user is logged in AND has an
+              order (from users/{uid}/orders) that includes this exact
+              product. Otherwise fully hidden.
+          ───────────────────────────────────────────────────────────────── */}
+          {!checkingReviewAccess && canViewReviews && (
+            <Box>
+              <CustomerReviews
+                productId={product.id}
+                productName={product.name}
+                productImage={allImgs[0]}
+                rating={product.rating}
+                reviewCount={product.reviewCount}
+                onReviewAdded={refreshProduct}
+              />
+            </Box>
+          )}
 
           {/* ── INSTAGRAM FEED ─────────── */}
           <InstagramFeed
