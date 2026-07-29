@@ -12,6 +12,8 @@ AuthProvider
 }
 from "@/app/context/AuthContext";
 
+import SessionGuard from "@/components/SessionGuard";
+
 export const metadata: Metadata = {
   title: "NetworkTen",
 
@@ -51,7 +53,9 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
 
-          {children}
+          <SessionGuard>
+            {children}
+          </SessionGuard>
 
         </AppRouterCacheProvider>
 

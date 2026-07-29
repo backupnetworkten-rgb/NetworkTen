@@ -17,6 +17,7 @@ import LockOutlinedIcon              from "@mui/icons-material/LockOutlined";
 import VerifiedOutlinedIcon          from "@mui/icons-material/VerifiedOutlined";
 import CheckCircleRoundedIcon        from "@mui/icons-material/CheckCircleRounded";
 import AddRoundedIcon                from "@mui/icons-material/AddRounded";
+import RemoveRoundedIcon             from "@mui/icons-material/RemoveRounded";
 import HomeOutlinedIcon              from "@mui/icons-material/HomeOutlined";
 import BusinessOutlinedIcon          from "@mui/icons-material/BusinessOutlined";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
@@ -26,7 +27,7 @@ import ShoppingCartOutlinedIcon      from "@mui/icons-material/ShoppingCartOutli
 import VerifiedUserOutlinedIcon      from "@mui/icons-material/VerifiedUserOutlined";
 import WorkspacePremiumOutlinedIcon  from "@mui/icons-material/WorkspacePremiumOutlined";
 import {
-  getCart, onCartChange, cartTotal, clearCart, CartItem,
+  getCart, onCartChange, cartTotal, clearCart, updateQuantity, CartItem,
 } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
 import { saveLastOrder, generateOrderId, updateOrderShiprocketInfo } from "@/lib/orderStore";
@@ -325,6 +326,21 @@ export default function CheckoutPage() {
     } catch {
       /* localStorage unavailable — ignore */
     }
+  };
+
+  // NEW: quantity stepper handlers for the order summary — delegate to
+  // cartStore.updateQuantity so /cart and /checkout always stay in sync.
+  const handleIncreaseQty = (item: CartItem) => {
+    if (item.quantity >= item.stock) {
+      showSnack("No more stock available for this item.", "info");
+      return;
+    }
+    updateQuantity(item.id, item.quantity + 1);
+  };
+
+  const handleDecreaseQty = (item: CartItem) => {
+    if (item.quantity <= 1) return; // don't let checkout silently remove the item
+    updateQuantity(item.id, item.quantity - 1);
   };
 
   const handleSaveAddress = async () => {
@@ -1166,9 +1182,51 @@ export default function CheckoutPage() {
                         }}>
                           {item.name}
                         </Typography>
-                        <Typography sx={{ fontSize: "11px", color: C.textMuted, mt: 0.3, fontFamily: sans }}>
-                          Qty: {item.quantity}
-                        </Typography>
+
+                        {/* NEW: quantity stepper — updates cartStore directly so
+                            /cart, header count, and this page's totals all stay in sync */}
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mt: 0.6 }}>
+                          <Box
+                            onClick={() => handleDecreaseQty(item)}
+                            role="button"
+                            aria-label="Decrease quantity"
+                            sx={{
+                              width: 22, height: 22, borderRadius: "6px",
+                              border: `1.5px solid ${C.border}`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              cursor: item.quantity <= 1 ? "not-allowed" : "pointer",
+                              opacity: item.quantity <= 1 ? 0.4 : 1,
+                              transition: "all .15s",
+                              "&:hover": item.quantity > 1 ? { borderColor: C.heading, background: C.surfaceWarm } : {},
+                            }}
+                          >
+                            <RemoveRoundedIcon sx={{ fontSize: 13, color: C.heading }} />
+                          </Box>
+
+                          <Typography sx={{
+                            fontSize: "12px", fontWeight: 700, color: C.heading,
+                            fontFamily: sans, minWidth: 16, textAlign: "center",
+                          }}>
+                            {item.quantity}
+                          </Typography>
+
+                          <Box
+                            onClick={() => handleIncreaseQty(item)}
+                            role="button"
+                            aria-label="Increase quantity"
+                            sx={{
+                              width: 22, height: 22, borderRadius: "6px",
+                              border: `1.5px solid ${C.border}`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              cursor: item.quantity >= item.stock ? "not-allowed" : "pointer",
+                              opacity: item.quantity >= item.stock ? 0.4 : 1,
+                              transition: "all .15s",
+                              "&:hover": item.quantity < item.stock ? { borderColor: C.heading, background: C.surfaceWarm } : {},
+                            }}
+                          >
+                            <AddRoundedIcon sx={{ fontSize: 13, color: C.heading }} />
+                          </Box>
+                        </Box>
                       </Box>
                       <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, flexShrink: 0, fontFamily: sans }}>
                         ₹{(item.salePrice * item.quantity).toLocaleString("en-IN")}

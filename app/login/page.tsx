@@ -13,6 +13,8 @@ import {
   loginWithGoogle,
 } from "@/services/authService";
 
+import { saveSession } from "@/services/sessionManager";
+
 import {
   Box,
   Typography,
@@ -55,8 +57,6 @@ const CARD = "#FFFFFF";
 const LINE = "#E7E2D6";
 
 // ---- Logo ----
-// Reads from /public/images/logo.png -> served at "/images/logo.png".
-// Sized up for a more premium presence on the light form panel.
 function Logo() {
   return (
     <Image
@@ -85,9 +85,6 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Returning to the method picker (or switching methods) always clears
-  // OTP state, so a stale "showOtpField=true" can't cause a Verify click
-  // before a fresh OTP was ever sent.
   const selectMethod = (m: Method) => {
     setMethod(m);
     setShowOtpField(false);
@@ -121,14 +118,11 @@ export default function LoginPage() {
         if (method === "email") {
           const user = await loginUser(email, password);
 
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              name: user?.user?.displayName || email.split("@")[0],
-              email: user?.user?.email,
-              loginType: "email",
-            })
-          );
+          saveSession({
+            name: user?.user?.displayName || email.split("@")[0],
+            email: user?.user?.email,
+            loginType: "email",
+          });
 
           alert("Login Successful");
 
@@ -161,17 +155,11 @@ export default function LoginPage() {
 
             const result = await verifyOTP(otp.trim());
 
-            // Persist user info so Navbar can pick it up
-            // (phone auth has no displayName/email, so we
-            // fall back to the phone number for "name")
-            localStorage.setItem(
-              "user",
-              JSON.stringify({
-                name: result?.user?.phoneNumber || phone.trim(),
-                phone: result?.user?.phoneNumber || phone.trim(),
-                loginType: "phone",
-              })
-            );
+            saveSession({
+              name: result?.user?.phoneNumber || phone.trim(),
+              phone: result?.user?.phoneNumber || phone.trim(),
+              loginType: "phone",
+            });
 
             alert("Login Successful");
 
@@ -201,14 +189,11 @@ export default function LoginPage() {
 
       const result = await loginWithGoogle();
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: result.user.displayName,
-          email: result.user.email,
-          loginType: "google",
-        })
-      );
+      saveSession({
+        name: result.user.displayName,
+        email: result.user.email,
+        loginType: "google",
+      });
 
       alert("Login Successful");
 
@@ -312,7 +297,6 @@ export default function LoginPage() {
               style={{ objectFit: "cover", opacity: 0.5 }}
             />
 
-            {/* Fine node-grid, quiet and structural rather than glowing */}
             <Box
               sx={{
                 position: "absolute",
@@ -331,9 +315,7 @@ export default function LoginPage() {
               }}
             />
 
-            {/* CONTENT */}
             <Box sx={{ position: "relative", zIndex: 2, width: "100%" }}>
-              {/* Eyebrow — brass hairline tag, classic finance/legal register */}
               <Box
                 sx={{
                   display: "inline-flex",
@@ -411,14 +393,12 @@ export default function LoginPage() {
               background: CARD,
             }}
           >
-            {/* LOGO — top of the right panel, premium size */}
             <Box sx={{ display: "flex", justifyContent: { xs: "center", md: "flex-end" }, mb: 3 }}>
               <Logo />
             </Box>
 
             <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Box sx={{ width: "100%", maxWidth: "320px" }}>
-                {/* HEADER ROW — back arrow appears once a method is chosen */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6, minHeight: 32 }}>
                   {!isSignup && method && (
                     <IconButton
@@ -459,7 +439,7 @@ export default function LoginPage() {
                     : "Choose how you'd like to sign in."}
                 </Typography>
 
-                {/* ---- METHOD PICKER (login only, before a method is chosen) ---- */}
+                {/* ---- METHOD PICKER ---- */}
                 <Collapse in={!isSignup && !method} unmountOnExit>
                   <Box sx={{ display: "grid", gap: 1.1 }}>
                     {(["email", "phone"] as const).map((m) => (
@@ -504,7 +484,6 @@ export default function LoginPage() {
                       </Box>
                     ))}
 
-                    {/* Divider */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, my: 0.5 }}>
                       <Box sx={{ flex: 1, height: "1px", background: LINE }} />
                       <Typography className={mono.className} sx={{ color: "#B7B2A2", fontSize: "10px" }}>
@@ -663,7 +642,7 @@ export default function LoginPage() {
                   </Typography>
                 </Box>
 
-                {/* TRUST LINE — replaces the Firebase note, dark and clearly visible */}
+                {/* TRUST LINE */}
                 <Box
                   sx={{
                     display: "flex",

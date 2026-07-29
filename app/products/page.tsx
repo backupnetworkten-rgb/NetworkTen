@@ -66,8 +66,8 @@ const CART_BAR_DURATION = 10000; // 10 seconds
 const PAGE_SIZE = 16; // show this many before "View All"
 
 // ── Bulk order popup timing ──
-const BULK_POPUP_FIRST_DELAY = 5000;   // show first popup 5s after page load
-const BULK_POPUP_REPEAT_EVERY = 25000; // then repeat every 25s
+const BULK_POPUP_FIRST_DELAY = 10000;   // show first popup 10s after page load
+const BULK_POPUP_REPEAT_EVERY = 50000; // then repeat every 50s
 const BULK_ORDER_PHONE = "8687878755";
 
 const CATEGORIES = [
