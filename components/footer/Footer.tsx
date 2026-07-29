@@ -810,22 +810,17 @@ height:"145px",
 
 borderRadius:"18px",
 
-background:
-"linear-gradient(145deg,#ffffff,#eef3ff)",
+background:"transparent",
 
 display:"flex",
-
-flexDirection:"column",
 
 justifyContent:"center",
 
 alignItems:"center",
 
-textAlign:"center",
-
-px:1.5,
-
 transition:".35s",
+
+overflow:"hidden",
 
 "&:hover":{
 
@@ -838,37 +833,26 @@ transform:
 
 >
 
+<Box
+sx={{
+position:"relative",
+height:"100%",
+aspectRatio:"3 / 4",
+mx:"auto"
+}}
+>
+
 <Image
-src="/images/All platforms.png"
+src="/images/QR.jpeg"
 alt="QR"
-width={58}
-height={58}
+fill
 style={{
+objectFit:"cover",
 borderRadius:"12px"
 }}
 />
 
-<Typography
-sx={{
-mt:1,
-fontWeight:800,
-fontSize:"13px",
-color:"#102048"
-}}
-
->
-
-Scan QR </Typography>
-
-<Typography
-sx={{
-fontSize:"10px",
-color:"#667085"
-}}
-
->
-
-Connect </Typography>
+</Box>
 
 </Box>
 

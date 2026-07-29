@@ -452,143 +452,151 @@ export default function ProductsPage() {
                     the categories list, inside the same sidebar box.
                 ══════════════════════════════════════════════════════ */}
                 {bulkCardVisible && (
-                  <Box
-                    sx={{
-                      mt: 2.5,
-                      position: "relative",
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      background: "linear-gradient(160deg, #0c1938 0%, #102048 60%, #16305f 100%)",
-                      boxShadow: "0 14px 32px rgba(16,32,72,0.22)",
-                      border: "1px solid rgba(139,197,63,0.18)",
-                    }}
-                  >
-                    {/* subtle accent glow */}
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        backgroundImage:
-                          "radial-gradient(circle at 85% 0%, rgba(139,197,63,0.20) 0%, transparent 55%)",
-                        pointerEvents: "none",
-                      }}
-                    />
+  <Box
+    sx={{
+      mt: 2.5,
+      position: "relative",
+      borderRadius: "16px",
+      overflow: "hidden",
+      background: "linear-gradient(160deg, #0c1938 0%, #102048 60%, #16305f 100%)",
+      boxShadow: "0 14px 32px rgba(16,32,72,0.22)",
+      border: "1px solid rgba(139,197,63,0.18)",
+    }}
+  >
+    {/* subtle accent glow */}
+    <Box
+      sx={{
+        position: "absolute",
+        inset: 0,
+        backgroundImage:
+          "radial-gradient(circle at 85% 0%, rgba(139,197,63,0.20) 0%, transparent 55%)",
+        pointerEvents: "none",
+      }}
+    />
 
-                    {/* dismiss */}
-                    <IconButton
-                      onClick={() => setBulkCardVisible(false)}
-                      aria-label="Dismiss"
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        width: 22,
-                        height: 22,
-                        zIndex: 1,
-                        background: "rgba(255,255,255,0.10)",
-                        color: "rgba(255,255,255,0.75)",
-                        "&:hover": { background: "rgba(255,255,255,0.2)", color: "#fff" },
-                      }}
-                    >
-                      <CloseRoundedIcon sx={{ fontSize: 13 }} />
-                    </IconButton>
+    {/* dismiss */}
+    <IconButton
+      onClick={() => setBulkCardVisible(false)}
+      aria-label="Dismiss"
+      size="small"
+      sx={{
+        position: "absolute",
+        top: 8,
+        right: 8,
+        width: 22,
+        height: 22,
+        zIndex: 1,
+        background: "rgba(255,255,255,0.10)",
+        color: "rgba(255,255,255,0.75)",
+        "&:hover": { background: "rgba(255,255,255,0.2)", color: "#fff" },
+      }}
+    >
+      <CloseRoundedIcon sx={{ fontSize: 13 }} />
+    </IconButton>
 
-                    <Box sx={{ position: "relative", p: 2.2 }}>
-                      <Box
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: "10px",
-                          background: "rgba(139,197,63,0.18)",
-                          border: "1px solid rgba(139,197,63,0.35)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          mb: 1.4,
-                        }}
-                      >
-                        <Inventory2RoundedIcon sx={{ fontSize: 18, color: "#8BC53F" }} />
-                      </Box>
+    <Box sx={{ position: "relative", p: 2.2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: 1.6,
+        }}
+      >
+        <Box
+          sx={{
+            width: 34,
+            height: 34,
+            borderRadius: "10px",
+            background: "linear-gradient(135deg, rgba(139,197,63,0.28), rgba(139,197,63,0.12))",
+            border: "1px solid rgba(139,197,63,0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            boxShadow: "0 4px 12px rgba(139,197,63,0.18)",
+          }}
+        >
+          <Inventory2RoundedIcon sx={{ fontSize: 17, color: "#8BC53F" }} />
+        </Box>
 
-                      <Typography
-                        sx={{
-                          fontSize: "9.5px",
-                          fontWeight: 800,
-                          letterSpacing: "1.1px",
-                          textTransform: "uppercase",
-                          color: "#8BC53F",
-                          mb: 0.5,
-                        }}
-                      >
-                        Bulk &amp; IT Orders
-                      </Typography>
+        <Typography
+          sx={{
+            fontSize: "12.5px",
+            fontWeight: 900,
+            letterSpacing: "0.8px",
+            textTransform: "uppercase",
+            color: "#8BC53F",
+          }}
+        >
+          Bulk &amp; IT Orders
+        </Typography>
+      </Box>
 
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          fontWeight: 800,
-                          color: "#fff",
-                          lineHeight: 1.35,
-                          mb: 0.8,
-                        }}
-                      >
-                        Special pricing for corporate &amp; bulk orders
-                      </Typography>
+      <Typography
+        sx={{
+          fontSize: "14px",
+          fontWeight: 800,
+          color: "#fff",
+          lineHeight: 1.35,
+          mb: 0.8,
+        }}
+      >
+        Special pricing for corporate &amp; bulk orders
+      </Typography>
 
-                      <Typography
-                        sx={{
-                          fontSize: "11.5px",
-                          color: "rgba(255,255,255,0.62)",
-                          lineHeight: 1.6,
-                          mb: 1.8,
-                        }}
-                      >
-                        Switches, CCTV, access control, video conferencing &amp; more — text or call us for a
-                        custom quote.
-                      </Typography>
+      <Typography
+        sx={{
+          fontSize: "11.5px",
+          color: "rgba(255,255,255,0.62)",
+          lineHeight: 1.6,
+          mb: 1.8,
+        }}
+      >
+        You can text us for any kind of IT Products or bulk order.
+      </Typography>
 
-                      <Button
-                        fullWidth
-                        onClick={handleGoToContact}
-                        startIcon={<SupportAgentRoundedIcon sx={{ fontSize: 15 }} />}
-                        sx={{
-                          height: 38,
-                          borderRadius: "10px",
-                          background: "linear-gradient(135deg, #ffffff, #f3f5f9)",
-                          color: "#102048",
-                          fontWeight: 800,
-                          fontSize: "12px",
-                          textTransform: "none",
-                          mb: 1,
-                          boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
-                          "&:hover": { background: "#ffffff" },
-                        }}
-                      >
-                        Contact Us
-                      </Button>
+      <Button
+        fullWidth
+        onClick={handleGoToContact}
+        startIcon={<SupportAgentRoundedIcon sx={{ fontSize: 15 }} />}
+        sx={{
+          height: 38,
+          borderRadius: "10px",
+          background: "linear-gradient(135deg, #ffffff, #f3f5f9)",
+          color: "#102048",
+          fontWeight: 800,
+          fontSize: "12px",
+          textTransform: "none",
+          mb: 1,
+          boxShadow: "0 6px 16px rgba(0,0,0,0.22)",
+          "&:hover": { background: "#ffffff" },
+        }}
+      >
+        Contact Us
+      </Button>
 
-                      <Button
-                        fullWidth
-                        onClick={handleBulkCall}
-                        startIcon={<CallRoundedIcon sx={{ fontSize: 15 }} />}
-                        sx={{
-                          height: 38,
-                          borderRadius: "10px",
-                          background: "rgba(139,197,63,0.14)",
-                          border: "1px solid rgba(139,197,63,0.4)",
-                          color: "#8BC53F",
-                          fontWeight: 800,
-                          fontSize: "12px",
-                          textTransform: "none",
-                          "&:hover": { background: "rgba(139,197,63,0.22)" },
-                        }}
-                      >
-                        Call {BULK_ORDER_PHONE}
-                      </Button>
-                    </Box>
-                  </Box>
-                )}
+      <Button
+        fullWidth
+        onClick={handleBulkCall}
+        startIcon={<CallRoundedIcon sx={{ fontSize: 15 }} />}
+        sx={{
+          height: 38,
+          borderRadius: "10px",
+          background: "rgba(139,197,63,0.14)",
+          border: "1px solid rgba(139,197,63,0.4)",
+          color: "#8BC53F",
+          fontWeight: 800,
+          fontSize: "12px",
+          textTransform: "none",
+          "&:hover": { background: "rgba(139,197,63,0.22)" },
+        }}
+      >
+        Call {BULK_ORDER_PHONE}
+      </Button>
+    </Box>
+  </Box>
+)}
               </Box>
             </Grid>
 
