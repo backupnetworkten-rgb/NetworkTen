@@ -26,6 +26,10 @@ import ArrowBackRoundedIcon          from "@mui/icons-material/ArrowBackRounded"
 import ShoppingCartOutlinedIcon      from "@mui/icons-material/ShoppingCartOutlined";
 import VerifiedUserOutlinedIcon      from "@mui/icons-material/VerifiedUserOutlined";
 import WorkspacePremiumOutlinedIcon  from "@mui/icons-material/WorkspacePremiumOutlined";
+import GpsFixedRoundedIcon           from "@mui/icons-material/GpsFixedRounded";
+import Inventory2OutlinedIcon        from "@mui/icons-material/Inventory2Outlined";
+import PublicRoundedIcon             from "@mui/icons-material/PublicRounded";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import {
   getCart, onCartChange, cartTotal, clearCart, updateQuantity, CartItem,
 } from "@/lib/cartStore";
@@ -85,7 +89,7 @@ if (typeof document !== "undefined" && !document.getElementById("checkout-font")
   document.head.appendChild(s);
 }
 
-// Same localStorage key used on the cart page — this is how the note
+// Same localStorage key used on the cart page - this is how the note
 // travels from /cart to /checkout without any backend involved.
 const ORDER_NOTE_KEY = "nt_order_note";
 
@@ -127,6 +131,52 @@ const TRUST = [
     )},
 ];
 
+// Shiprocket trust-card highlights - condensed for the 360px sidebar card
+const SHIPROCKET_POINTS = [
+  { icon: <GpsFixedRoundedIcon sx={{ fontSize: 13 }} />,     label: "Real-time tracking" },
+  { icon: <Inventory2OutlinedIcon sx={{ fontSize: 13 }} />,  label: "Secure packaging" },
+  { icon: <PublicRoundedIcon sx={{ fontSize: 13 }} />,       label: "Pan-India network" },
+];
+
+// UPI app tiles - real brand marks served from the Simple Icons CDN
+// (open-source SVG icon set purpose-built for showing brand logos in
+// payment/checkout UIs). Each icon sits on its own brand-color tile
+// so it reads as a proper logo badge rather than a plain text pill.
+const UPI_APPS = [
+  {
+    id: "gpay",
+    label: "GPay",
+    slug: "googlepay",
+    tileBg: "#ffffff",
+    tileBorder: "#e2e2e4",
+    invert: false, // GPay mark ships dark - keep on white tile, no inversion
+  },
+  {
+    id: "phonepe",
+    label: "PhonePe",
+    slug: "phonepe",
+    tileBg: "#5f259f",
+    tileBorder: "#5f259f",
+    invert: true, // white mark on the brand-purple tile
+  },
+  {
+    id: "paytm",
+    label: "Paytm",
+    slug: "paytm",
+    tileBg: "#00baf2",
+    tileBorder: "#00baf2",
+    invert: true, // white mark on the brand-cyan tile
+  },
+  {
+    id: "other",
+    label: "Other UPI",
+    slug: null,
+    tileBg: "#1a1a1a",
+    tileBorder: "#1a1a1a",
+    invert: true,
+  },
+] as const;
+
 const sectionSx = {
   background: C.surface,
   border: `1px solid ${C.border}`,
@@ -167,7 +217,7 @@ export default function CheckoutPage() {
   const [items,          setItems]          = useState<CartItem[]>([]);
   const [mounted,        setMounted]        = useState(false);
 
-  // ── AUTH GUARD STATE ──
+  // AUTH GUARD STATE
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthed,       setIsAuthed]       = useState(false);
 
@@ -189,7 +239,7 @@ export default function CheckoutPage() {
   const [companyName, setCompanyName] = useState("");
   const [gstErr,       setGstErr]     = useState("");
 
-  const [orderNote, setOrderNote] = useState(""); // NEW: order note
+  const [orderNote, setOrderNote] = useState(""); // order note
 
   const [newAddr, setNewAddr] = useState({
     name: "", phone: "", line1: "", line2: "",
@@ -201,12 +251,12 @@ export default function CheckoutPage() {
     setItems(getCart());
     const unsubCart = onCartChange(() => setItems(getCart()));
 
-    // NEW: restore the note the user typed on the cart page (or earlier on this page)
+    // restore the note the user typed on the cart page (or earlier on this page)
     try {
       const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
       setOrderNote(savedNote);
     } catch {
-      /* localStorage unavailable — ignore */
+      /* localStorage unavailable - ignore */
     }
 
     let unsubUser: (() => void) | undefined;
@@ -279,7 +329,7 @@ export default function CheckoutPage() {
   const discount      = applied === "NETWORK10" ? Math.round(cartSubtotal * 0.1) : 0;
   const shipping       = cartSubtotal >= 1000 ? 0 : 99;
 
-  // NEW: COD handling fee — only applies when Cash on Delivery is the selected payment method
+  // COD handling fee - only applies when Cash on Delivery is the selected payment method
   const codCharge = payMethod === "cod" ? COD_CHARGE : 0;
 
   const netGoodsValue = cartSubtotal - discount;
@@ -317,18 +367,18 @@ export default function CheckoutPage() {
     }
   };
 
-  // NEW: keep localStorage in sync as the user edits the note on checkout
+  // keep localStorage in sync as the user edits the note on checkout
   const handleOrderNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value;
     setOrderNote(value);
     try {
       localStorage.setItem(ORDER_NOTE_KEY, value);
     } catch {
-      /* localStorage unavailable — ignore */
+      /* localStorage unavailable - ignore */
     }
   };
 
-  // NEW: quantity stepper handlers for the order summary — delegate to
+  // quantity stepper handlers for the order summary - delegate to
   // cartStore.updateQuantity so /cart and /checkout always stay in sync.
   const handleIncreaseQty = (item: CartItem) => {
     if (item.quantity >= item.stock) {
@@ -403,12 +453,12 @@ export default function CheckoutPage() {
       subtotal: cartSubtotal,
       discount,
       shipping,
-      codCharge, // NEW: recorded on the order so it appears on invoices/order history
+      codCharge, // recorded on the order so it appears on invoices/order history
       grandTotal,
       totalQty,
       paymentMethod: payMethod,
       paymentId: paymentId || null,
-      note: orderNote.trim(), // NEW: attach the order note to the saved order
+      note: orderNote.trim(), // attach the order note to the saved order
       address: {
         name:  addr.name,
         line1: addr.line1,
@@ -435,7 +485,7 @@ export default function CheckoutPage() {
       await saveLastOrder(orderPayload);
 
       clearCart();
-      // NEW: the note has done its job (saved into the order) — clear the draft
+      // the note has done its job (saved into the order) - clear the draft
       try {
         localStorage.removeItem(ORDER_NOTE_KEY);
       } catch {
@@ -722,10 +772,11 @@ export default function CheckoutPage() {
           <Box sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "1fr 360px" },
+            alignItems: "start",
             gap: 3, pt: 3.5,
           }}>
 
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
 
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
@@ -897,7 +948,105 @@ export default function CheckoutPage() {
                 </Box>
               </Box>
 
+              {/* GST & BILLING - sits above Payment method */}
               <Box sx={sectionSx}>
+                <Box sx={headerSx}>
+                  <Box sx={{
+                    width: 30, height: 30, borderRadius: "9px",
+                    background: C.goldLight, display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                  }}>
+                    <ReceiptLongOutlinedIcon sx={{ fontSize: 16, color: C.gold }} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                      GST &amp; billing details
+                    </Typography>
+                    <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mt: 0.1 }}>
+                      Optional — for a company tax invoice
+                    </Typography>
+                  </Box>
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      display: "flex", alignItems: "center", gap: 0.5,
+                      background: C.greenLight, border: `1px solid ${C.greenBorder}`,
+                      borderRadius: "20px", px: 1.2, py: 0.5,
+                    }}>
+                      <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
+                      <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
+                        GSTIN verified
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{ p: "22px 24px" }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5, mb: 1.5 }}>
+                    <TextField
+                      size="small"
+                      label="GST number"
+                      placeholder="22AAAAA0000A1Z5"
+                      value={gstNumber}
+                      onChange={(e) => { setGstNumber(e.target.value.toUpperCase()); setGstErr(""); }}
+                      onBlur={handleGstBlur}
+                      error={!!gstErr}
+                      helperText={gstErr || " "}
+                      fullWidth
+                      sx={inputSx}
+                    />
+                    <TextField
+                      size="small"
+                      label="Company name"
+                      placeholder="Your company name"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      fullWidth
+                      sx={inputSx}
+                    />
+                  </Box>
+
+                  <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mb: isB2BInvoice ? 1.5 : 0 }}>
+                    Adding a GSTIN doesn't change your total — it only itemises GST on your invoice and records
+                    it against your company.
+                  </Typography>
+
+                  {isB2BInvoice && (
+                    <Box sx={{
+                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
+                      border: `1px solid ${C.goldBorder}`,
+                      borderRadius: "11px", p: "14px 16px",
+                      display: "flex", gap: 1.3, alignItems: "flex-start",
+                    }}>
+                      <Box sx={{
+                        width: 30, height: 30, borderRadius: "8px", flexShrink: 0,
+                        background: C.gold, display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                      }}>
+                        <VerifiedUserOutlinedIcon sx={{ fontSize: 15, color: "#fff" }} />
+                      </Box>
+                      <Box>
+                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.goldDeep, fontFamily: sans, mb: 0.3 }}>
+                          Tax invoice will be issued to {companyName || "your company"}
+                        </Typography>
+                        <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.6 }}>
+                          GSTIN: <b>{gstinTrimmed}</b> · Taxable value ₹{taxableValue.toLocaleString("en-IN")} + GST ₹{gstAmount.toLocaleString("en-IN")}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
+
+                  <TextField
+                    fullWidth multiline minRows={3}
+                    size="small" label="Order note (optional)"
+                    placeholder="Any special instructions for your order…"
+                    value={orderNote}
+                    onChange={handleOrderNoteChange}
+                    sx={{ ...inputSx, mt: isB2BInvoice ? 2 : 0.5 }}
+                  />
+                </Box>
+              </Box>
+
+              {/* PAYMENT METHOD - sits below GST & billing details */}
+              <Box sx={{ ...sectionSx, mb: 0 }}>
                 <Box sx={headerSx}>
                   <Box sx={{
                     width: 30, height: 30, borderRadius: "9px",
@@ -960,29 +1109,77 @@ export default function CheckoutPage() {
 
                   {payMethod === "upi" && (
                     <Box>
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 1, mb: 2 }}>
-                        {[
-                          { id: "gpay",    label: "GPay"    },
-                          { id: "phonepe", label: "PhonePe" },
-                          { id: "paytm",   label: "Paytm"   },
-                          { id: "other",   label: "Other"   },
-                        ].map((u) => (
+                      {/* UPI app tiles - premium logo badges via Simple Icons CDN,
+                          each on its own brand-color tile */}
+                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 1.1, mb: 2 }}>
+                        {UPI_APPS.map((u) => (
                           <Box
                             key={u.id}
                             onClick={() => setSelectedUpi(u.id)}
+                            role="button"
+                            aria-label={u.label}
                             sx={{
                               border: "1.5px solid",
                               borderColor: selectedUpi === u.id ? C.heading : C.border,
-                              borderRadius: "9px", p: "10px 8px",
-                              textAlign: "center", cursor: "pointer",
-                              background: selectedUpi === u.id ? C.surfaceWarm : C.surface,
-                              fontSize: "11px", fontWeight: 700, fontFamily: sans,
-                              color: selectedUpi === u.id ? C.heading : C.textSub,
+                              borderRadius: "12px",
+                              p: "12px 6px 10px",
+                              display: "flex", flexDirection: "column",
+                              alignItems: "center", justifyContent: "center", gap: 0.8,
+                              cursor: "pointer",
+                              background: C.surface,
                               transition: "all .15s",
-                              "&:hover": { borderColor: C.heading, color: C.heading },
+                              position: "relative",
+                              boxShadow: selectedUpi === u.id
+                                ? "0 4px 14px rgba(10,10,10,0.10)"
+                                : "0 1px 2px rgba(0,0,0,0.02)",
+                              "&:hover": { borderColor: C.heading, transform: "translateY(-1px)" },
                             }}
                           >
-                            {u.label}
+                            <Box sx={{
+                              width: 38, height: 38, borderRadius: "10px",
+                              background: u.tileBg,
+                              border: `1px solid ${u.tileBorder}`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              overflow: "hidden",
+                              boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
+                            }}>
+                              {u.slug ? (
+                                <Box
+                                  component="img"
+                                  src={`https://cdn.jsdelivr.net/npm/simple-icons@v13/icons/${u.slug}.svg`}
+                                  alt={u.label}
+                                  sx={{
+                                    width: 19, height: 19,
+                                    // Simple Icons ships single-color marks;
+                                    // invert to white on dark brand tiles.
+                                    filter: u.invert ? "invert(1)" : "none",
+                                  }}
+                                />
+                              ) : (
+                                <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 17, color: "#fff" }} />
+                              )}
+                            </Box>
+
+                            <Typography sx={{
+                              fontSize: "9.5px", fontWeight: 700, fontFamily: sans,
+                              color: selectedUpi === u.id ? C.heading : C.textSub,
+                              letterSpacing: ".1px",
+                            }}>
+                              {u.label}
+                            </Typography>
+
+                            {selectedUpi === u.id && (
+                              <Box sx={{
+                                position: "absolute", top: -6, right: -6,
+                                width: 16, height: 16, borderRadius: "50%",
+                                background: C.green, display: "flex",
+                                alignItems: "center", justifyContent: "center",
+                                border: "2px solid #fff",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                              }}>
+                                <CheckCircleRoundedIcon sx={{ fontSize: 9, color: "#fff" }} />
+                              </Box>
+                            )}
                           </Box>
                         ))}
                       </Box>
@@ -1014,110 +1211,21 @@ export default function CheckoutPage() {
                   )}
                 </Box>
               </Box>
-
-              <Box sx={sectionSx}>
-                <Box sx={headerSx}>
-                  <Box sx={{
-                    width: 30, height: 30, borderRadius: "9px",
-                    background: C.goldLight, display: "flex",
-                    alignItems: "center", justifyContent: "center",
-                  }}>
-                    <ReceiptLongOutlinedIcon sx={{ fontSize: 16, color: C.gold }} />
-                  </Box>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
-                      GST &amp; billing details
-                    </Typography>
-                    <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mt: 0.1 }}>
-                      Optional — for a company tax invoice
-                    </Typography>
-                  </Box>
-                  {isB2BInvoice && (
-                    <Box sx={{
-                      display: "flex", alignItems: "center", gap: 0.5,
-                      background: C.greenLight, border: `1px solid ${C.greenBorder}`,
-                      borderRadius: "20px", px: 1.2, py: 0.5,
-                    }}>
-                      <CheckCircleRoundedIcon sx={{ fontSize: 12, color: C.green }} />
-                      <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
-                        GSTIN verified
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-                <Box sx={{ p: "22px 24px" }}>
-                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, mb: 1.5 }}>
-                    <TextField
-                      size="small"
-                      label="GST number"
-                      placeholder="22AAAAA0000A1Z5"
-                      value={gstNumber}
-                      onChange={(e) => { setGstNumber(e.target.value.toUpperCase()); setGstErr(""); }}
-                      onBlur={handleGstBlur}
-                      error={!!gstErr}
-                      helperText={gstErr || " "}
-                      sx={inputSx}
-                    />
-                    <TextField
-                      size="small"
-                      label="Company name"
-                      placeholder="Your company name"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      sx={inputSx}
-                    />
-                  </Box>
-
-                  <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mb: isB2BInvoice ? 1.5 : 0 }}>
-                    Adding a GSTIN doesn't change your total — it only itemises GST on your invoice and records
-                    it against your company.
-                  </Typography>
-
-                  {isB2BInvoice && (
-                    <Box sx={{
-                      background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
-                      border: `1px solid ${C.goldBorder}`,
-                      borderRadius: "11px", p: "14px 16px",
-                      display: "flex", gap: 1.3, alignItems: "flex-start",
-                    }}>
-                      <Box sx={{
-                        width: 30, height: 30, borderRadius: "8px", flexShrink: 0,
-                        background: C.gold, display: "flex",
-                        alignItems: "center", justifyContent: "center",
-                      }}>
-                        <VerifiedUserOutlinedIcon sx={{ fontSize: 15, color: "#fff" }} />
-                      </Box>
-                      <Box>
-                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: C.goldDeep, fontFamily: sans, mb: 0.3 }}>
-                          Tax invoice will be issued to {companyName || "your company"}
-                        </Typography>
-                        <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.6 }}>
-                          GSTIN: <b>{gstinTrimmed}</b> · Taxable value ₹{taxableValue.toLocaleString("en-IN")} + GST ₹{gstAmount.toLocaleString("en-IN")}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  )}
-
-                  <TextField
-                    fullWidth multiline minRows={2}
-                    size="small" label="Order note (optional)"
-                    placeholder="Any special instructions for your order…"
-                    value={orderNote}
-                    onChange={handleOrderNoteChange}
-                    sx={{ ...inputSx, mt: isB2BInvoice ? 2 : 0.5 }}
-                  />
-                </Box>
-              </Box>
             </Box>
 
-            <Box sx={{ position: { md: "sticky" }, top: { md: 20 }, alignSelf: "flex-start" }}>
+            <Box sx={{ position: { md: "sticky" }, top: { md: 20 }, alignSelf: "start", minWidth: 0 }}>
               <Box sx={{
+                position: "relative",
                 background: C.surface,
                 border: `1px solid ${C.border}`,
-                borderTop: `3px solid ${C.gold}`,
                 borderRadius: "18px", overflow: "hidden",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 16px 40px rgba(10,10,10,0.10)",
               }}>
+                <Box sx={{
+                  position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+                  background: `linear-gradient(90deg, ${C.gold}, ${C.goldSoft}, ${C.gold})`,
+                }} />
+
                 <Box sx={{
                   background: "linear-gradient(135deg, #0f1f3d 0%, #1a3a6e 55%, #1d4ed8 100%)",
                   px: 2.6, py: 2.2, display: "flex", alignItems: "center", gap: 1.2,
@@ -1183,7 +1291,7 @@ export default function CheckoutPage() {
                           {item.name}
                         </Typography>
 
-                        {/* NEW: quantity stepper — updates cartStore directly so
+                        {/* quantity stepper - updates cartStore directly so
                             /cart, header count, and this page's totals all stay in sync */}
                         <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mt: 0.6 }}>
                           <Box
@@ -1398,6 +1506,110 @@ export default function CheckoutPage() {
                       </Typography>
                     </Box>
                   ))}
+                </Box>
+              </Box>
+
+              {/* SHIPROCKET TRUST CARD - sits right below Order Summary,
+                  same 360px width, same border-radius/shadow language as
+                  every other card so it reads as part of the same set. */}
+              <Box sx={{
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: "18px",
+                mt: 2.5,
+                background: "linear-gradient(135deg, #150a2e 0%, #1e1147 50%, #24135c 100%)",
+                border: "1px solid rgba(139,197,63,0.18)",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 16px 40px rgba(21,10,46,0.22)",
+              }}>
+                <Box sx={{
+                  position: "absolute", inset: 0,
+                  backgroundImage:
+                    "radial-gradient(circle at 88% 6%, rgba(94,204,120,0.22) 0%, transparent 55%), radial-gradient(circle at 6% 100%, rgba(94,204,120,0.10) 0%, transparent 45%)",
+                  pointerEvents: "none",
+                }} />
+
+                <Box sx={{ position: "relative", px: 2.6, py: 2.2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.1, mb: 1.4 }}>
+                    <Box sx={{
+                      width: 34, height: 34, borderRadius: "10px", flexShrink: 0,
+                      background: "rgba(94,204,120,0.16)",
+                      border: "1px solid rgba(94,204,120,0.4)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 4l14 8-14 8V4z" fill="#5ecc78" />
+                      </svg>
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{
+                        fontSize: "9px", fontWeight: 800, letterSpacing: "1.1px",
+                        textTransform: "uppercase", color: "#5ecc78", fontFamily: sans, mb: 0.1,
+                      }}>
+                        Fulfilled &amp; Shipped Via
+                      </Typography>
+                      <Typography sx={{
+                        fontSize: "15px", fontWeight: 800, color: "#fff",
+                        fontFamily: sans, letterSpacing: "-0.2px", lineHeight: 1.25,
+                      }}>
+                        Shiprocket
+                      </Typography>
+                    </Box>
+                    <Box sx={{
+                      display: "inline-flex", alignItems: "center", gap: 0.4, flexShrink: 0,
+                      background: "rgba(94,204,120,0.14)",
+                      border: "1px solid rgba(94,204,120,0.35)",
+                      borderRadius: "20px", px: 0.9, py: 0.25,
+                    }}>
+                      <CheckCircleRoundedIcon sx={{ fontSize: 10, color: "#5ecc78" }} />
+                      <Typography sx={{ fontSize: "8.5px", fontWeight: 700, color: "#5ecc78", fontFamily: sans, letterSpacing: ".3px", whiteSpace: "nowrap" }}>
+                        VERIFIED
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Typography sx={{
+                    fontSize: "11.5px", color: "rgba(255,255,255,0.62)", fontFamily: sans,
+                    lineHeight: 1.6, mb: 1.6,
+                  }}>
+                    Your order is packed, labelled and shipped through Shiprocket's pan-India
+                    courier network — trusted for reliable, on-time, fully tracked delivery.
+                  </Typography>
+
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.9, mb: 1.6 }}>
+                    {SHIPROCKET_POINTS.map((p, i) => (
+                      <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 0.9 }}>
+                        <Box sx={{
+                          width: 22, height: 22, borderRadius: "6px", flexShrink: 0,
+                          background: "rgba(94,204,120,0.14)",
+                          border: "1px solid rgba(94,204,120,0.3)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#5ecc78",
+                        }}>
+                          {p.icon}
+                        </Box>
+                        <Typography sx={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: sans }}>
+                          {p.label}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  <Box sx={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    borderRadius: "11px", px: 1.6, py: 1.2,
+                  }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.9 }}>
+                      <LocalShippingOutlinedIcon sx={{ fontSize: 16, color: "#5ecc78" }} />
+                      <Typography sx={{ fontSize: "10.5px", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontWeight: 600, letterSpacing: ".2px" }}>
+                        EST. DELIVERY
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ fontSize: "13px", color: "#fff", fontFamily: sans, fontWeight: 800 }}>
+                      3–6 days
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             </Box>

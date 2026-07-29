@@ -1,10 +1,10 @@
 // services/sessionManager.ts
 const SESSION_KEY = "user";
 const EXPIRY_KEY = "sessionExpiresAt";
-const SESSION_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const SESSION_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 /**
- * Save the logged-in user's data and arm a fresh 5-minute expiry window.
+ * Save the logged-in user's data and arm a fresh 15-minute expiry window.
  */
 export function saveSession(userData: Record<string, any>) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(userData));
