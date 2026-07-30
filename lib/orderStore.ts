@@ -30,12 +30,13 @@ export interface Order {
   subtotal: number;
   discount: number;
   shipping: number;
+  codCharge?: number; // NEW: COD handling fee, set only when paymentMethod === "cod"
   grandTotal: number;
   totalQty: number;
   paymentMethod: string;
   paymentId?: string | null;
   billing?: OrderBilling;
-  note?: string; // NEW: optional customer order note
+  note?: string; // optional customer order note
   address: {
     name: string;
     line1: string;
@@ -45,6 +46,7 @@ export interface Order {
     city: string;
     state: string;
     pin: string;
+    country?: string;
   };
   estimatedDeliveryStart: string;
   estimatedDeliveryEnd: string;
