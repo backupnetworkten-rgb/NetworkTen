@@ -10,6 +10,7 @@ import CustomersSection from "@/components/customers/CustomersSection";
 import VideosSection from "@/components/video/VideosSection";
 import Footer from "@/components/footer/Footer";
 import FAQSection from "@/components/faq/FAQSection";
+import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
 
 export default function Home() {
   return (
@@ -25,6 +26,7 @@ export default function Home() {
       <VideosSection />
       <FloatingButtons />
       <FAQSection/>
+      <GoogleReviewBadge/>
       <Footer />
     </>
   );

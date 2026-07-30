@@ -6,7 +6,7 @@ import Header from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 import {
   Box, Container, Typography, Button,
-  CircularProgress, IconButton, Snackbar, Alert, Radio,
+  CircularProgress, IconButton, Snackbar, Alert, Radio, Tooltip,
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -30,6 +30,7 @@ import InstagramFeed from "@/components/instagram/InstagramFeed";
 import PdfCoverPreview from "@/components/product/PdfCoverPreview";
 import { auth } from "@/lib/firebase";
 import { fetchUserOrders } from "@/lib/orderStore";
+import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -70,6 +71,11 @@ if (typeof document !== "undefined" && !document.getElementById("pdp-font")) {
   document.head.appendChild(s);
 }
 
+// ─── WhatsApp floating button config ───────────────────────────────────────────
+const WHATSAPP_NUMBER = "918687878755"; // country code + number, no + or spaces
+const WHATSAPP_MESSAGE = "Hi! I'm interested in your products and would like to know more.";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
 // ─── Bulk tiers ───────────────────────────────────────────────────────────────
 const BULK = [
   { qty: 1,  label: "Buy 1",   save: 0,  badge: "Popular" },
@@ -79,20 +85,20 @@ const BULK = [
   { qty: 30, label: "Buy 30+", save: 11, badge: null },
 ];
 
-// ─── Trust badges ─────────────────────────────────────────────────────────────
+// ─── Trust badges (icons enlarged for a bolder, premium feel) ─────────────────
 const BADGES = [
   {
     label: "Lower Price", sub: "Than Amazon", bg: "#1a3a5c",
     icon: (
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <text x="14" y="19" textAnchor="middle" fontSize="18" fontWeight="900" fill="#f5c518" fontFamily="Georgia,serif">₹</text>
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <text x="18" y="25" textAnchor="middle" fontSize="23" fontWeight="900" fill="#f5c518" fontFamily="Georgia,serif">₹</text>
       </svg>
     ),
   },
   {
     label: "Free Shipping", sub: "Above ₹1000", bg: "#dbeafe",
     icon: (
-      <svg width="34" height="24" viewBox="0 0 40 24" fill="none">
+      <svg width="44" height="30" viewBox="0 0 40 24" fill="none">
         <rect x="1" y="3" width="21" height="14" rx="2" fill="#2563eb"/>
         <path d="M22 7h6l4 7v4H22V7z" fill="#1d4ed8"/>
         <circle cx="7" cy="20" r="3" fill="#1e3a8a" stroke="#dbeafe" strokeWidth="1.5"/>
@@ -105,7 +111,7 @@ const BADGES = [
   {
     label: "Official", sub: "1 Yr Warranty", bg: "#eef3ff",
     icon: (
-      <svg width="26" height="30" viewBox="0 0 26 30" fill="none">
+      <svg width="34" height="39" viewBox="0 0 26 30" fill="none">
         <path d="M13 1L1 6v9c0 6 4.5 11.5 12 13 7.5-1.5 12-7 12-13V6L13 1z" fill="#1a5fb4"/>
         <text x="13" y="17" textAnchor="middle" fontSize="8" fontWeight="800" fill="#fff" fontFamily="Arial">1 YR</text>
       </svg>
@@ -114,7 +120,7 @@ const BADGES = [
   {
     label: "GST Invoice", sub: "Included", bg: "#f0fdf4",
     icon: (
-      <svg width="24" height="28" viewBox="0 0 24 28" fill="none">
+      <svg width="31" height="36" viewBox="0 0 24 28" fill="none">
         <rect x="1" y="1" width="18" height="22" rx="2" fill="#16a34a"/>
         <rect x="4" y="4" width="11" height="2" rx="1" fill="#bbf7d0"/>
         <rect x="4" y="8" width="8" height="1.5" rx="1" fill="#bbf7d0"/>
@@ -128,7 +134,7 @@ const BADGES = [
   {
     label: "Genuine Product", sub: "100% Authentic", bg: "#fdf2f8",
     icon: (
-      <svg width="26" height="28" viewBox="0 0 26 28" fill="none">
+      <svg width="34" height="36" viewBox="0 0 26 28" fill="none">
         <path d="M13 1L1 6v8c0 6.5 5 12 12 13 7-1 12-6.5 12-13V6L13 1z" fill="#db2777"/>
         <path d="M9 13l3 3 6-6" stroke="#fce7f3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
       </svg>
@@ -137,7 +143,7 @@ const BADGES = [
   {
     label: "COD Available", sub: "₹1000–₹9999", bg: "#eff6ff",
     icon: (
-      <svg width="34" height="24" viewBox="0 0 36 24" fill="none">
+      <svg width="44" height="30" viewBox="0 0 36 24" fill="none">
         <rect x="1" y="2" width="34" height="20" rx="4" fill="#0284c7"/>
         <rect x="1" y="10" width="34" height="6" fill="#0369a1"/>
         <text x="18" y="9" textAnchor="middle" fontSize="7" fontWeight="800" fill="#fff" fontFamily="Arial" letterSpacing="1">COD</text>
@@ -281,8 +287,6 @@ export default function ProductDetailPage() {
   }, []);
 
   // ── Verify the logged-in user has actually ordered THIS product ──
-  // Uses the same fetchUserOrders() the profile/orders page relies on,
-  // which reads from users/{uid}/orders (with a localStorage fallback).
   useEffect(() => {
     const verifyPurchase = async () => {
       if (!isAuthed || !product?.id) {
@@ -317,6 +321,10 @@ export default function ProductDetailPage() {
   const total    = perUnit * BULK[selBulk].qty;
   const allImgs: string[] = product?.images?.length > 0
     ? product.images : product?.image ? [product.image] : [];
+
+  // Rough EMI estimate for the Razorpay-style banner (illustrative only —
+  // wire this up to your real Razorpay EMI plan API if you need exact figures)
+  const emiMonthly = total > 0 ? Math.round(total / 12) : 0;
 
   const mediaItems: { type: "image" | "video"; src: string }[] = [
     ...allImgs.map((src) => ({ type: "image" as const, src })),
@@ -424,7 +432,7 @@ export default function ProductDetailPage() {
     <>
       <Header />
       <Box sx={{ background: C.pageBg, minHeight: "100vh", pt: 2.5, pb: 10, fontFamily: sans, overflowX: "hidden" }}>
-        <Container maxWidth="lg" sx={{ overflow: "hidden" }}>
+        <Container maxWidth="xl" sx={{ overflow: "hidden", px: { xs: 1.5, sm: 2.5, md: 3, lg: 4 } }}>
 
           {/* ── BREADCRUMB ───────────────────────────────────────────────── */}
           <Box
@@ -433,20 +441,18 @@ export default function ProductDetailPage() {
               alignItems: "center",
               gap: 0.5,
               mb: 2,
-              background: C.surface,
+              background: "transparent",
               px: 2.5,
               py: 1.2,
-              borderRadius: "10px",
-              border: `1px solid ${C.border}`
             }}>
             <Button
-              startIcon={<ArrowBackRoundedIcon sx={{ fontSize: "13px !important" }} />}
+              startIcon={<ArrowBackRoundedIcon sx={{ fontSize: "15px !important" }} />}
               onClick={() => router.push("/products")}
-              sx={{ textTransform: "none", fontWeight: 600, color: C.blue, fontSize: "13px", fontFamily: sans, px: 0.5, py: 0, minWidth: 0, "&:hover": { background: "transparent" } }}>
+              sx={{ textTransform: "none", fontWeight: 600, color: C.blue, fontSize: "15px", fontFamily: sans, px: 0.5, py: 0, minWidth: 0, "&:hover": { background: "transparent" } }}>
               Products
             </Button>
-            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 14, color: C.textMuted }} />
-            <Typography sx={{ fontSize: "13px", color: C.text, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: sans }}>
+            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 16, color: C.textMuted }} />
+            <Typography sx={{ fontSize: "15px", color: C.text, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: sans }}>
               {product.name}
             </Typography>
           </Box>
@@ -838,24 +844,166 @@ export default function ProductDetailPage() {
                   </Typography>
                 </Box>
 
-                {/* ── Trust Badges ── */}
-                <Box sx={{ border: `1px solid ${C.border}`, borderRadius: "12px", overflow: "hidden", mb: 2.5 }}>
+                {/* ══ Razorpay — EMI plans, Pay Later & Safe Payment ══ */}
+                <Box sx={{ mb: 2.5 }}>
+                  {/* EMI & Pay Later banner */}
+                  <Box sx={{
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    boxShadow: "0 4px 18px rgba(37,99,235,0.16)",
+                  }}>
+                    {/* Header strip */}
+                    <Box sx={{
+                      background: "linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%)",
+                      px: 2.2, py: 1.1,
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                    }}>
+                      <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans }}>
+                        EMI plans and Pay Later
+                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+                        <Typography sx={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", fontFamily: sans }}>
+                          powered by
+                        </Typography>
+                        <Typography sx={{ fontSize: "13px", fontWeight: 800, color: "#fff", fontFamily: sans, fontStyle: "italic" }}>
+                          Razorpay
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Body */}
+                    <Box sx={{
+                      background: "#0a0f1e",
+                      px: 2.2, py: 2,
+                      display: "flex", flexDirection: { xs: "column", sm: "row" },
+                      alignItems: { xs: "stretch", sm: "center" }, gap: 2,
+                    }}>
+                      {/* EMI */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans, mb: 1 }}>
+                          EMI from ₹{emiMonthly.toLocaleString("en-IN")}/month
+                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.4 }}>
+                          {["HDFC", "ICICI", "SBI"].map((bank) => (
+                            <Box key={bank} sx={{
+                              width: 28, height: 28, borderRadius: "50%",
+                              background: "#fff", display: "flex", alignItems: "center",
+                              justifyContent: "center", flexShrink: 0,
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                            }}>
+                              <Typography sx={{ fontSize: "7px", fontWeight: 800, color: "#1d4ed8", fontFamily: sans }}>
+                                {bank.slice(0, 4)}
+                              </Typography>
+                            </Box>
+                          ))}
+                          <Box sx={{
+                            height: 28, px: 1, borderRadius: "50px",
+                            background: "rgba(255,255,255,0.12)",
+                            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                          }}>
+                            <Typography sx={{ fontSize: "10px", fontWeight: 700, color: "#fff", fontFamily: sans }}>
+                              +10
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Button
+                          endIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: "16px !important" }} />}
+                          sx={{
+                            height: 34, px: 2, borderRadius: "50px",
+                            background: "#2563eb", color: "#fff",
+                            fontSize: "12px", fontWeight: 700, textTransform: "none", fontFamily: sans,
+                            "&:hover": { background: "#1d4ed8" },
+                          }}
+                        >
+                          View plans
+                        </Button>
+                      </Box>
+
+                      {/* Divider */}
+                      <Box sx={{
+                        width: { xs: "100%", sm: "1px" },
+                        height: { xs: "1px", sm: 62 },
+                        background: "rgba(255,255,255,0.14)",
+                      }} />
+
+                      {/* Pay Later */}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans, mb: 1.6 }}>
+                          Pay Later available
+                        </Typography>
+                        <Button
+                          endIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: "16px !important" }} />}
+                          sx={{
+                            height: 34, px: 2, borderRadius: "50px",
+                            background: "#fff", color: "#0a0f1e",
+                            fontSize: "12px", fontWeight: 700, textTransform: "none", fontFamily: sans,
+                            "&:hover": { background: "#f0f0f0" },
+                          }}
+                        >
+                          View options
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Safe Payment strip — replaces Money Back Promise */}
+                  <Box sx={{
+                    mt: 1.4,
+                    borderRadius: "14px",
+                    border: "1px solid #bbf7d0",
+                    background: "linear-gradient(135deg, #f4fdf7 0%, #eafcf1 100%)",
+                    px: 2.2, py: 1.8,
+                    position: "relative",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.6,
+                    boxShadow: "0 2px 12px rgba(22,163,74,0.08)",
+                  }}>
+                    <Box sx={{
+                      width: 42, height: 42, borderRadius: "50%",
+                      background: "linear-gradient(135deg, #16a34a, #15803d)",
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      boxShadow: "0 4px 10px rgba(22,163,74,0.30)",
+                    }}>
+                      <LockOutlinedIcon sx={{ color: "#fff", fontSize: 21 }} />
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.9, mb: 0.3 }}>
+                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#0a0a0a", fontFamily: sans, letterSpacing: "-0.2px" }}>
+                          100% Safe Payment
+                        </Typography>
+                        <VerifiedOutlinedIcon sx={{ fontSize: 15, color: C.green }} />
+                      </Box>
+                      <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.5 }}>
+                        Encrypted, secure checkout — every transaction is protected end-to-end.
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* ── Trust Badges (bigger icons, premium look) ── */}
+                <Box sx={{
+                  border: `1px solid ${C.border}`, borderRadius: "14px", overflow: "hidden", mb: 2.5,
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+                }}>
                   <Box sx={{ display: "flex", overflowX: "auto", "&::-webkit-scrollbar": { height: 0 } }}>
                     {BADGES.map((b, i) => (
                       <Box key={i} sx={{
-                        flex: "1 0 72px", display: "flex", flexDirection: "column",
-                        alignItems: "center", gap: 0.3, p: "12px 5px 10px",
+                        flex: "1 0 84px", display: "flex", flexDirection: "column",
+                        alignItems: "center", gap: 0.4, p: "16px 6px 12px",
                         borderRight: i < BADGES.length - 1 ? `1px solid ${C.border}` : "none",
                         textAlign: "center",
                       }}>
                         <Box sx={{
-                          width: 44, height: 44, borderRadius: "50%", background: b.bg,
+                          width: 56, height: 56, borderRadius: "50%", background: b.bg,
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          mb: 0.5, boxShadow: "0 1px 6px rgba(0,0,0,0.10)",
+                          mb: 0.6, boxShadow: "0 3px 10px rgba(0,0,0,0.14)",
+                          border: "1px solid rgba(255,255,255,0.6)",
                         }}>
                           {b.icon}
                         </Box>
-                        <Typography sx={{ fontSize: "10px", fontWeight: 700, color: C.heading, fontFamily: sans, lineHeight: 1.3 }}>
+                        <Typography sx={{ fontSize: "10.5px", fontWeight: 700, color: C.heading, fontFamily: sans, lineHeight: 1.3 }}>
                           {b.label}
                         </Typography>
                         <Typography sx={{ fontSize: "9px", color: C.textSub, fontFamily: sans, lineHeight: 1.3 }}>
@@ -1301,6 +1449,39 @@ export default function ProductDetailPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <GoogleReviewBadge />
+
+      {/* ── WhatsApp icon — sits directly below the Reviews tab, moved up ── */}
+      <Tooltip title="Chat with us on WhatsApp" placement="left" arrow>
+        <IconButton
+          component="a"
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat on WhatsApp"
+          sx={{
+            position: "fixed",
+            right: 0,
+            top: "calc(42% + 76px)",
+            zIndex: 1200,
+            width: 44,
+            height: 44,
+            borderRadius: "10px 0 0 10px",
+            background: "linear-gradient(180deg, #2fdb6f 0%, #21b85a 100%)",
+            color: "#fff",
+            boxShadow: "0 6px 18px rgba(33,184,90,0.4)",
+            "&:hover": {
+              background: "linear-gradient(180deg, #34e878 0%, #23c561 100%)",
+              transform: "translateX(-2px)",
+            },
+            transition: "all 0.2s ease",
+          }}
+        >
+          <WhatsAppIcon sx={{ fontSize: 22 }} />
+        </IconButton>
+      </Tooltip>
+
       <Footer />
     </>
   );
