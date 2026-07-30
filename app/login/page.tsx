@@ -5,14 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 
-import {
-  signupUser,
-  loginUser,
-  sendOTP,
-  verifyOTP,
-  loginWithGoogle,
-} from "@/services/authService";
-
+import { sendOTP, verifyOTP, loginWithGoogle } from "@/services/authService";
 import { saveSession } from "@/services/sessionManager";
 
 import {
@@ -20,20 +13,14 @@ import {
   Typography,
   TextField,
   Button,
-  IconButton,
-  InputAdornment,
-  Collapse,
   Fade,
 } from "@mui/material";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
-import MailRoundedIcon from "@mui/icons-material/MailRounded";
 import GoogleIcon from "@mui/icons-material/Google";
+import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
 
 import Navbar from "../../components/navbar/Navbar";
@@ -43,8 +30,6 @@ import Footer from "../../components/footer/Footer";
 const display = Fraunces({ subsets: ["latin"], weight: ["500", "600", "700"] });
 const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600"] });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"] });
-
-type Method = "email" | "phone" | null;
 
 // ---- Palette ----
 const NAVY = "#122340";
@@ -71,108 +56,57 @@ function Logo() {
 }
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
-  const [method, setMethod] = useState<Method>(null);
   const [showOtpField, setShowOtpField] = useState(false);
-
-  const router = useRouter();
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const selectMethod = (m: Method) => {
-    setMethod(m);
+  const router = useRouter();
+
+  const goBackToPhone = () => {
     setShowOtpField(false);
     setOtp("");
   };
 
-  const goBack = () => {
-    setMethod(null);
-    setShowOtpField(false);
-    setOtp("");
+  const redirectAfterAuth = () => {
+    const redirect = localStorage.getItem("redirectAfterLogin");
+    if (redirect) {
+      localStorage.removeItem("redirectAfterLogin");
+      window.location.href = redirect;
+    } else {
+      window.location.href = "/";
+    }
   };
 
-  const handleAuth = async () => {
+  const handlePhoneAuth = async () => {
     try {
       setLoading(true);
 
-      if (isSignup) {
-        if (!name || !email || !password) {
-          alert("Please fill all fields");
+      if (!showOtpField) {
+        if (!phone.trim()) {
+          alert("Please enter your phone number");
+          return;
+        }
+        await sendOTP(phone.trim());
+        setShowOtpField(true);
+        alert("OTP Sent");
+      } else {
+        if (!otp.trim()) {
+          alert("Please enter the OTP");
           return;
         }
 
-        await signupUser(name, email, password);
-        alert("Account created successfully");
-        setIsSignup(false);
-        setName("");
-        setEmail("");
-        setPassword("");
-      } else {
-        // EMAIL LOGIN
-        if (method === "email") {
-          const user = await loginUser(email, password);
+        const result = await verifyOTP(otp.trim());
 
-          saveSession({
-            name: user?.user?.displayName || email.split("@")[0],
-            email: user?.user?.email,
-            loginType: "email",
-          });
+        saveSession({
+          name: result?.user?.phoneNumber || phone.trim(),
+          phone: result?.user?.phoneNumber || phone.trim(),
+          loginType: "phone",
+        });
 
-          alert("Login Successful");
-
-          const redirect = localStorage.getItem("redirectAfterLogin");
-
-          if (redirect) {
-            localStorage.removeItem("redirectAfterLogin");
-            router.push(redirect);
-          } else {
-            router.push("/");
-          }
-        }
-
-        // PHONE LOGIN
-        else if (method === "phone") {
-          if (!phone.trim()) {
-            alert("Please enter your phone number");
-            return;
-          }
-
-          if (!showOtpField) {
-            await sendOTP(phone.trim());
-            setShowOtpField(true);
-            alert("OTP Sent");
-          } else {
-            if (!otp.trim()) {
-              alert("Please enter the OTP");
-              return;
-            }
-
-            const result = await verifyOTP(otp.trim());
-
-            saveSession({
-              name: result?.user?.phoneNumber || phone.trim(),
-              phone: result?.user?.phoneNumber || phone.trim(),
-              loginType: "phone",
-            });
-
-            alert("Login Successful");
-
-            const redirect = localStorage.getItem("redirectAfterLogin");
-
-            if (redirect) {
-              localStorage.removeItem("redirectAfterLogin");
-              window.location.href = redirect;
-            } else {
-              window.location.href = "/";
-            }
-          }
-        }
+        alert("Login Successful");
+        redirectAfterAuth();
       }
     } catch (error: any) {
       console.log(error);
@@ -182,10 +116,9 @@ export default function LoginPage() {
     }
   };
 
-  // GOOGLE LOGIN HANDLER — fires immediately, no intermediate form
   const handleGoogleLogin = async () => {
     try {
-      setLoading(true);
+      setGoogleLoading(true);
 
       const result = await loginWithGoogle();
 
@@ -196,26 +129,13 @@ export default function LoginPage() {
       });
 
       alert("Login Successful");
-
-      const redirect = localStorage.getItem("redirectAfterLogin");
-
-      if (redirect) {
-        localStorage.removeItem("redirectAfterLogin");
-        router.push(redirect);
-      } else {
-        router.push("/");
-      }
+      redirectAfterAuth();
     } catch (error: any) {
       console.log(error);
       alert(error.message);
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
-  };
-
-  const methodMeta = {
-    email: { icon: <MailRoundedIcon sx={{ fontSize: 20 }} />, label: "Continue with Email" },
-    phone: { icon: <PhoneIphoneRoundedIcon sx={{ fontSize: 20 }} />, label: "Continue with Phone" },
   };
 
   return (
@@ -286,11 +206,7 @@ export default function LoginPage() {
             }}
           >
             <Image
-              src={
-                isSignup
-                  ? "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1800&auto=format&fit=crop"
-                  : "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1800&auto=format&fit=crop"
-              }
+              src="https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1800&auto=format&fit=crop"
               alt="NetworkTen"
               fill
               priority
@@ -346,11 +262,7 @@ export default function LoginPage() {
                   letterSpacing: "-0.3px",
                 }}
               >
-                {isSignup ? (
-                  <>Provision your<br />account</>
-                ) : (
-                  <>Access your<br />control panel</>
-                )}
+                Access your<br />control panel
               </Typography>
 
               <Typography
@@ -400,19 +312,26 @@ export default function LoginPage() {
             <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Box sx={{ width: "100%", maxWidth: "320px" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.6, minHeight: 32 }}>
-                  {!isSignup && method && (
-                    <IconButton
-                      size="small"
-                      onClick={goBack}
+                  {showOtpField && (
+                    <Box
+                      onClick={goBackToPhone}
                       sx={{
+                        width: 32,
+                        height: 32,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         color: NAVY_SOFT,
                         border: `1px solid ${LINE}`,
                         borderRadius: "8px",
                         mr: 0.5,
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                        "&:hover": { borderColor: EMERALD, color: EMERALD_DARK },
                       }}
                     >
                       <ArrowBackRoundedIcon fontSize="small" />
-                    </IconButton>
+                    </Box>
                   )}
                   <Typography
                     className={display.className}
@@ -423,70 +342,93 @@ export default function LoginPage() {
                       fontSize: { xs: "23px", md: "27px" },
                     }}
                   >
-                    {isSignup
-                      ? "Create account"
-                      : method
-                      ? methodMeta[method].label.replace("Continue with ", "")
-                      : "Welcome back"}
+                    {showOtpField ? "Verify your number" : "Welcome back"}
                   </Typography>
                 </Box>
 
-                <Typography sx={{ color: NAVY_SOFT, lineHeight: 1.6, mb: 2.4, fontSize: "12.5px" }}>
-                  {isSignup
-                    ? "Set up your premium account in under a minute."
-                    : method
-                    ? "Enter your details to continue."
-                    : "Choose how you'd like to sign in."}
+                <Typography sx={{ color: NAVY_SOFT, lineHeight: 1.6, mb: 2.6, fontSize: "12.5px" }}>
+                  {showOtpField
+                    ? `Enter the 6-digit code sent to ${phone}`
+                    : "Enter your phone number to get a one-time code."}
                 </Typography>
 
-                {/* ---- METHOD PICKER ---- */}
-                <Collapse in={!isSignup && !method} unmountOnExit>
-                  <Box sx={{ display: "grid", gap: 1.1 }}>
-                    {(["email", "phone"] as const).map((m) => (
-                      <Box
-                        key={m}
-                        onClick={() => selectMethod(m)}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.4,
-                          px: 1.8,
-                          py: 1.4,
-                          borderRadius: "12px",
-                          border: `1px solid ${LINE}`,
-                          background: "#FCFBF8",
-                          cursor: "pointer",
-                          transition: "all 0.18s ease",
-                          "&:hover": {
-                            background: "rgba(31,94,69,0.05)",
-                            borderColor: EMERALD,
-                          },
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 34,
-                            height: 34,
-                            borderRadius: "9px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            background: "rgba(31,94,69,0.09)",
-                            color: EMERALD,
-                          }}
-                        >
-                          {methodMeta[m].icon}
-                        </Box>
-                        <Typography sx={{ color: NAVY, fontWeight: 600, fontSize: "13.5px", flex: 1 }}>
-                          {methodMeta[m].label}
-                        </Typography>
-                        <ChevronRightRoundedIcon sx={{ color: "#B7B2A2", fontSize: 18 }} />
-                      </Box>
-                    ))}
+                {/* ---- PHONE + OTP FLOW — PRIMARY ---- */}
+                <Box sx={{ display: "grid", gap: 1.3 }}>
+                  <TextField
+                    fullWidth
+                    label="Phone Number"
+                    variant="outlined"
+                    size="small"
+                    disabled={showOtpField}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <Box sx={{ display: "flex", alignItems: "center", color: NAVY_SOFT, mr: 0.8 }}>
+                            <PhoneIphoneRoundedIcon sx={{ fontSize: 18 }} />
+                          </Box>
+                        ),
+                      },
+                    }}
+                    sx={fieldSx}
+                  />
 
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, my: 0.5 }}>
+                  <Fade in={showOtpField} unmountOnExit>
+                    <TextField
+                      fullWidth
+                      label="6-digit OTP"
+                      variant="outlined"
+                      size="small"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      sx={{
+                        ...fieldSx,
+                        "& .MuiOutlinedInput-input": {
+                          letterSpacing: "6px",
+                          fontWeight: 700,
+                          textAlign: "center",
+                        },
+                      }}
+                    />
+                  </Fade>
+
+                  <Button
+                    variant="contained"
+                    onClick={handlePhoneAuth}
+                    disabled={loading}
+                    endIcon={<ArrowForwardRoundedIcon />}
+                    sx={primaryBtnSx}
+                  >
+                    {loading ? "Please wait..." : showOtpField ? "Verify & Continue" : "Send OTP"}
+                  </Button>
+
+                  {showOtpField && (
+                    <Typography
+                      onClick={goBackToPhone}
+                      sx={{
+                        textAlign: "center",
+                        color: EMERALD_DARK,
+                        fontWeight: 600,
+                        fontSize: "11.5px",
+                        cursor: "pointer",
+                        mt: -0.4,
+                        "&:hover": { textDecoration: "underline" },
+                      }}
+                    >
+                      Didn't get it? Change number or resend
+                    </Typography>
+                  )}
+
+                  <div id="recaptcha-container" />
+                </Box>
+
+                {/* ---- GOOGLE — SECONDARY, BELOW DIVIDER ---- */}
+                <Fade in={!showOtpField} unmountOnExit>
+                  <Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, my: 2.2 }}>
                       <Box sx={{ flex: 1, height: "1px", background: LINE }} />
-                      <Typography className={mono.className} sx={{ color: "#B7B2A2", fontSize: "10px" }}>
+                      <Typography className={mono.className} sx={{ color: "#B7B2A2", fontSize: "10px", letterSpacing: "1px" }}>
                         OR
                       </Typography>
                       <Box sx={{ flex: 1, height: "1px", background: LINE }} />
@@ -496,7 +438,7 @@ export default function LoginPage() {
                       variant="outlined"
                       fullWidth
                       onClick={handleGoogleLogin}
-                      disabled={loading}
+                      disabled={googleLoading}
                       startIcon={<GoogleIcon />}
                       sx={{
                         borderRadius: "50px",
@@ -506,141 +448,17 @@ export default function LoginPage() {
                         fontSize: "13px",
                         borderColor: LINE,
                         color: NAVY,
-                        "&:hover": { borderColor: EMERALD, background: "rgba(31,94,69,0.04)" },
-                      }}
-                    >
-                      {loading ? "Please wait..." : "Continue with Google"}
-                    </Button>
-                  </Box>
-                </Collapse>
-
-                {/* ---- EMAIL LOGIN FORM ---- */}
-                <Collapse in={!isSignup && method === "email"} unmountOnExit>
-                  <Box sx={{ display: "grid", gap: 1.3 }}>
-                    <TextField
-                      fullWidth
-                      label="Email Address"
-                      variant="outlined"
-                      size="small"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      sx={fieldSx}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Password"
-                      variant="outlined"
-                      size="small"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      sx={fieldSx}
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                edge="end"
-                                size="small"
-                                onClick={() => setShowPassword(!showPassword)}
-                                sx={{ color: NAVY_SOFT }}
-                              >
-                                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
+                        background: "#FCFBF8",
+                        "&:hover": {
+                          borderColor: EMERALD,
+                          background: "rgba(31,94,69,0.05)",
                         },
                       }}
-                    />
-                    <Button variant="contained" onClick={handleAuth} disabled={loading} endIcon={<ArrowForwardRoundedIcon />} sx={primaryBtnSx}>
-                      {loading ? "Please wait..." : "Login"}
-                    </Button>
-                  </Box>
-                </Collapse>
-
-                {/* ---- PHONE LOGIN FORM ---- */}
-                <Collapse in={!isSignup && method === "phone"} unmountOnExit>
-                  <Box sx={{ display: "grid", gap: 1.3 }}>
-                    <TextField
-                      fullWidth
-                      label="Phone Number"
-                      variant="outlined"
-                      size="small"
-                      placeholder="9876543210"
-                      disabled={showOtpField}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      sx={fieldSx}
-                    />
-
-                    <Fade in={showOtpField} unmountOnExit>
-                      <TextField
-                        fullWidth
-                        label="Enter OTP"
-                        variant="outlined"
-                        size="small"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        sx={fieldSx}
-                      />
-                    </Fade>
-
-                    <Button variant="contained" onClick={handleAuth} disabled={loading} endIcon={<ArrowForwardRoundedIcon />} sx={primaryBtnSx}>
-                      {loading ? "Please wait..." : showOtpField ? "Verify & Login" : "Send OTP"}
-                    </Button>
-
-                    <div id="recaptcha-container" />
-                  </Box>
-                </Collapse>
-
-                {/* ---- SIGNUP FORM ---- */}
-                <Collapse in={isSignup} unmountOnExit>
-                  <Box sx={{ display: "grid", gap: 1.3 }}>
-                    <TextField fullWidth label="Full Name" size="small" value={name} onChange={(e) => setName(e.target.value)} sx={fieldSx} />
-                    <TextField fullWidth label="Email Address" size="small" value={email} onChange={(e) => setEmail(e.target.value)} sx={fieldSx} />
-                    <TextField
-                      fullWidth
-                      label="Password"
-                      size="small"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      sx={fieldSx}
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton edge="end" size="small" onClick={() => setShowPassword(!showPassword)} sx={{ color: NAVY_SOFT }}>
-                                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        },
-                      }}
-                    />
-                    <TextField fullWidth label="Confirm Password" size="small" type={showPassword ? "text" : "password"} sx={fieldSx} />
-                    <Button variant="contained" onClick={handleAuth} disabled={loading} endIcon={<ArrowForwardRoundedIcon />} sx={primaryBtnSx}>
-                      {loading ? "Please wait..." : "Create Account"}
-                    </Button>
-                  </Box>
-                </Collapse>
-
-                {/* SWITCH */}
-                <Box sx={{ mt: 2.4, textAlign: "center" }}>
-                  <Typography sx={{ color: NAVY_SOFT, fontSize: "12px" }}>
-                    {isSignup ? "Already have an account?" : "Don't have an account?"}
-                    <Box
-                      component="span"
-                      onClick={() => {
-                        setIsSignup(!isSignup);
-                        setMethod(null);
-                      }}
-                      sx={{ color: EMERALD_DARK, fontWeight: 700, ml: 0.8, cursor: "pointer" }}
                     >
-                      {isSignup ? "Sign In" : "Sign Up"}
-                    </Box>
-                  </Typography>
-                </Box>
+                      {googleLoading ? "Please wait..." : "Continue with Google"}
+                    </Button>
+                  </Box>
+                </Fade>
 
                 {/* TRUST LINE */}
                 <Box
@@ -649,14 +467,14 @@ export default function LoginPage() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 0.7,
-                    mt: 2,
-                    pt: 1.6,
+                    mt: 2.8,
+                    pt: 1.8,
                     borderTop: `1px solid ${LINE}`,
                   }}
                 >
-                  <VerifiedUserRoundedIcon sx={{ fontSize: 14, color: EMERALD_DARK }} />
+                  <ShieldRoundedIcon sx={{ fontSize: 14, color: EMERALD_DARK }} />
                   <Typography sx={{ color: NAVY, fontWeight: 600, fontSize: "11px", textAlign: "center", lineHeight: 1.6 }}>
-                    Your data is protected with enterprise-grade encryption
+                    No passwords. No spam. Just a secure, one-tap sign in.
                   </Typography>
                 </Box>
               </Box>
@@ -687,10 +505,10 @@ const primaryBtnSx = {
   mt: 0.3,
   background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`,
   borderRadius: "50px",
-  py: 1.15,
+  py: 1.2,
   fontWeight: 700,
   textTransform: "none",
-  fontSize: "13px",
+  fontSize: "13.5px",
   boxShadow: "0 8px 22px rgba(31,94,69,0.22)",
   "&:hover": { background: `linear-gradient(135deg, #266E52, ${EMERALD_DARK})` },
   "&.Mui-disabled": { background: "#D8D4C6", color: "#fff" },

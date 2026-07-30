@@ -24,6 +24,7 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  Tooltip,
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
@@ -36,10 +37,12 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import CallRoundedIcon from "@mui/icons-material/CallRounded";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { getProducts } from "@/services/productService";
 import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
 import RatingStars from "@/components/review/RatingStars";
+import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
 
 import { useRouter } from "next/navigation";
 
@@ -64,6 +67,11 @@ const ADD_TO_CART_COOLDOWN = 800; // ms — prevents double-fire from rapid/dupl
 const LOAD_MORE_DELAY = 400; // ms — small delay so the loader is visible & feels natural
 
 const BULK_ORDER_PHONE = "8687878755";
+
+// ─── WhatsApp floating button config (same as product detail page) ────────────
+const WHATSAPP_NUMBER = "918687878755"; // country code + number, no + or spaces
+const WHATSAPP_MESSAGE = "Hi! I'm interested in your products and would like to know more.";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
 const CATEGORIES = [
   "All",
@@ -1081,6 +1089,40 @@ export default function ProductsPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* ── Google Review badge — same as product detail page ── */}
+      <GoogleReviewBadge />
+
+      {/* ── WhatsApp icon — same position/style as product detail page ── */}
+      <Tooltip title="Chat with us on WhatsApp" placement="left" arrow>
+        <IconButton
+          component="a"
+          href={WHATSAPP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat on WhatsApp"
+          sx={{
+            position: "fixed",
+            right: 0,
+            top: "calc(42% + 76px)",
+            zIndex: 1200,
+            width: 44,
+            height: 44,
+            borderRadius: "10px 0 0 10px",
+            background: "linear-gradient(180deg, #2fdb6f 0%, #21b85a 100%)",
+            color: "#fff",
+            boxShadow: "0 6px 18px rgba(33,184,90,0.4)",
+            "&:hover": {
+              background: "linear-gradient(180deg, #34e878 0%, #23c561 100%)",
+              transform: "translateX(-2px)",
+            },
+            transition: "all 0.2s ease",
+          }}
+        >
+          <WhatsAppIcon sx={{ fontSize: 22 }} />
+        </IconButton>
+      </Tooltip>
+
       <Footer />
     </>
   );

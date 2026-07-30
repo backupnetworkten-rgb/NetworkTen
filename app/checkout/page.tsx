@@ -131,7 +131,7 @@ const TRUST = [
     )},
 ];
 
-// Shiprocket trust-card highlights - condensed for the 360px sidebar card
+// Shiprocket trust-card highlights - condensed for the sidebar card
 const SHIPROCKET_POINTS = [
   { icon: <GpsFixedRoundedIcon sx={{ fontSize: 13 }} />,     label: "Real-time tracking" },
   { icon: <Inventory2OutlinedIcon sx={{ fontSize: 13 }} />,  label: "Secure packaging" },
@@ -180,16 +180,16 @@ const UPI_APPS = [
 const sectionSx = {
   background: C.surface,
   border: `1px solid ${C.border}`,
-  borderRadius: "18px",
+  borderRadius: "20px",
   overflow: "hidden",
-  mb: 2.5,
-  boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 10px 28px rgba(10,10,10,0.05)",
+  mb: 2.75,
+  boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 14px 34px rgba(10,10,10,0.055)",
   transition: "box-shadow .2s ease",
 };
 
 const headerSx = {
   display: "flex", alignItems: "center", gap: 1.2,
-  px: "24px", py: "18px",
+  px: "26px", py: "19px",
   borderBottom: `1px solid ${C.borderLight}`,
   background: C.surfaceWarm,
 };
@@ -594,6 +594,7 @@ export default function CheckoutPage() {
         currency: order.currency,
         name: "Network Ten",
         description: `Order for ${totalQty} item${totalQty !== 1 ? "s" : ""}`,
+        image: "https://networkten.in/images/logo.png",
         order_id: order.id,
         handler: async function (response: any) {
           try {
@@ -621,7 +622,7 @@ export default function CheckoutPage() {
         },
         prefill: {
           name: addr?.name || "",
-          contact: addr?.phone || "",
+          // contact: addr?.phone || "",
         },
         notes: {
           address: addr ? `${addr.line1}, ${addr.city}` : "",
@@ -654,11 +655,21 @@ export default function CheckoutPage() {
     <>
       <Navbar />
 
-      <Box sx={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-        <Container maxWidth="lg">
+      {/* HEADER BAR — full width, subtle premium gradient hairline at top */}
+      <Box sx={{
+        background: C.surface,
+        borderBottom: `1px solid ${C.border}`,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+          background: `linear-gradient(90deg, ${C.gold}, ${C.goldSoft}, ${C.gold})`,
+        },
+      }}>
+        <Container maxWidth={false} sx={{ px: { xs: 2, sm: 3, md: 5, lg: 7, xl: 9 } }}>
           <Box sx={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            py: 2.2, flexWrap: "wrap", gap: 1.5,
+            py: 2.4, flexWrap: "wrap", gap: 1.5,
           }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.6 }}>
               <Box
@@ -666,7 +677,7 @@ export default function CheckoutPage() {
                 role="button"
                 aria-label="Go back"
                 sx={{
-                  width: 34, height: 34, borderRadius: "50%",
+                  width: 36, height: 36, borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   border: `1.5px solid ${C.border}`,
                   cursor: "pointer",
@@ -674,10 +685,10 @@ export default function CheckoutPage() {
                   "&:hover": { borderColor: C.heading, background: C.surfaceWarm },
                 }}
               >
-                <ArrowBackRoundedIcon sx={{ fontSize: 17, color: C.heading }} />
+                <ArrowBackRoundedIcon sx={{ fontSize: 18, color: C.heading }} />
               </Box>
               <Box>
-                <Typography sx={{ fontSize: "18px", fontWeight: 800, color: C.heading, fontFamily: sans, letterSpacing: "-0.3px", lineHeight: 1.2 }}>
+                <Typography sx={{ fontSize: "19px", fontWeight: 800, color: C.heading, fontFamily: sans, letterSpacing: "-0.3px", lineHeight: 1.2 }}>
                   Checkout
                 </Typography>
                 <Typography sx={{ fontSize: "11.5px", color: C.textMuted, fontFamily: sans, mt: 0.1 }}>
@@ -721,8 +732,8 @@ export default function CheckoutPage() {
               display: "flex", alignItems: "center", gap: 0.7,
               background: `linear-gradient(135deg, ${C.goldLight} 0%, #fff 100%)`,
               border: `1px solid ${C.goldBorder}`,
-              borderRadius: "20px", px: 1.6, py: 0.6,
-              boxShadow: "0 2px 8px rgba(184,135,63,0.12)",
+              borderRadius: "20px", px: 1.7, py: 0.65,
+              boxShadow: "0 2px 10px rgba(184,135,63,0.14)",
             }}>
               <LockOutlinedIcon sx={{ fontSize: 13, color: C.gold }} />
               <Typography sx={{ fontSize: "11.5px", color: C.gold, fontWeight: 700, fontFamily: sans }}>
@@ -733,8 +744,12 @@ export default function CheckoutPage() {
         </Container>
       </Box>
 
-      <Box sx={{ background: C.pageBg, minHeight: "100vh", pb: 8, fontFamily: sans }}>
-        <Container maxWidth="lg">
+      {/* PAGE BODY — full width with soft ambient background for a premium feel */}
+      <Box sx={{
+        background: `linear-gradient(180deg, ${C.pageBg} 0%, #f0f0f3 100%)`,
+        minHeight: "100vh", pb: 9, fontFamily: sans,
+      }}>
+        <Container maxWidth={false} sx={{ px: { xs: 2, sm: 3, md: 5, lg: 7, xl: 9 } }}>
 
           {items.length === 0 ? (
             <Box sx={{
@@ -771,9 +786,9 @@ export default function CheckoutPage() {
           ) : (
           <Box sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 360px" },
+            gridTemplateColumns: { xs: "1fr", md: "1fr", lg: "1fr 420px" },
             alignItems: "start",
-            gap: 3, pt: 3.5,
+            gap: { xs: 3, lg: 4 }, pt: 4,
           }}>
 
             <Box sx={{ minWidth: 0 }}>
@@ -781,66 +796,68 @@ export default function CheckoutPage() {
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={{
-                    width: 30, height: 30, borderRadius: "9px",
+                    width: 32, height: 32, borderRadius: "10px",
                     background: C.blueLight, display: "flex",
                     alignItems: "center", justifyContent: "center",
                   }}>
-                    <LocalShippingOutlinedIcon sx={{ fontSize: 16, color: C.blue }} />
+                    <LocalShippingOutlinedIcon sx={{ fontSize: 17, color: C.blue }} />
                   </Box>
-                  <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                  <Typography sx={{ fontSize: "15px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
                     Delivery address
                   </Typography>
                 </Box>
-                <Box sx={{ p: "22px 24px" }}>
+                <Box sx={{ p: { xs: "22px 20px", md: "24px 28px" } }}>
 
                   {savedAddresses.length > 0 ? (
                     <RadioGroup value={selectedAddr} onChange={(e) => setSelectedAddr(e.target.value)}>
-                      {savedAddresses.map((addr) => (
-                        <Box
-                          key={addr.id}
-                          onClick={() => setSelectedAddr(addr.id)}
-                          sx={{
-                            border: "1.5px solid",
-                            borderColor: selectedAddr === addr.id ? C.gold : C.border,
-                            borderRadius: "12px",
-                            p: "15px 17px", mb: 1.2, cursor: "pointer",
-                            background: selectedAddr === addr.id ? C.goldLight : C.surface,
-                            display: "flex", alignItems: "flex-start", gap: 1.5,
-                            transition: "all .15s",
-                            boxShadow: selectedAddr === addr.id ? "0 4px 14px rgba(184,135,63,0.14)" : "none",
-                            "&:hover": { borderColor: C.gold },
-                          }}
-                        >
-                          <Radio
-                            value={addr.id}
-                            size="small"
-                            sx={{ p: 0, mt: 0.2, color: C.border, "&.Mui-checked": { color: C.gold } }}
-                          />
-                          <Box>
-                            <Box sx={{
-                              display: "inline-flex", alignItems: "center", gap: 0.5,
-                              background: C.surfaceGray, color: C.textSub,
-                              fontSize: "9px", fontWeight: 700, px: 0.9, py: 0.3,
-                              borderRadius: "4px", textTransform: "uppercase", letterSpacing: ".5px",
-                              mb: 0.6, fontFamily: sans,
-                            }}>
-                              {addr.tag === "Home"
-                                ? <HomeOutlinedIcon sx={{ fontSize: 10 }} />
-                                : <BusinessOutlinedIcon sx={{ fontSize: 10 }} />
-                              }
-                              {addr.tag}
+                      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 1.2 }}>
+                        {savedAddresses.map((addr) => (
+                          <Box
+                            key={addr.id}
+                            onClick={() => setSelectedAddr(addr.id)}
+                            sx={{
+                              border: "1.5px solid",
+                              borderColor: selectedAddr === addr.id ? C.gold : C.border,
+                              borderRadius: "13px",
+                              p: "16px 18px", cursor: "pointer",
+                              background: selectedAddr === addr.id ? C.goldLight : C.surface,
+                              display: "flex", alignItems: "flex-start", gap: 1.5,
+                              transition: "all .15s",
+                              boxShadow: selectedAddr === addr.id ? "0 4px 16px rgba(184,135,63,0.16)" : "none",
+                              "&:hover": { borderColor: C.gold },
+                            }}
+                          >
+                            <Radio
+                              value={addr.id}
+                              size="small"
+                              sx={{ p: 0, mt: 0.2, color: C.border, "&.Mui-checked": { color: C.gold } }}
+                            />
+                            <Box>
+                              <Box sx={{
+                                display: "inline-flex", alignItems: "center", gap: 0.5,
+                                background: C.surfaceGray, color: C.textSub,
+                                fontSize: "9px", fontWeight: 700, px: 0.9, py: 0.3,
+                                borderRadius: "4px", textTransform: "uppercase", letterSpacing: ".5px",
+                                mb: 0.6, fontFamily: sans,
+                              }}>
+                                {addr.tag === "Home"
+                                  ? <HomeOutlinedIcon sx={{ fontSize: 10 }} />
+                                  : <BusinessOutlinedIcon sx={{ fontSize: 10 }} />
+                                }
+                                {addr.tag}
+                              </Box>
+                              <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, mb: 0.3, fontFamily: sans }}>
+                                {addr.name}
+                              </Typography>
+                              <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.6, fontFamily: sans }}>
+                                {addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}<br />
+                                {addr.city}{addr.state ? `, ${addr.state}` : ""} – {addr.pin}<br />
+                                {addr.phone}
+                              </Typography>
                             </Box>
-                            <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, mb: 0.3, fontFamily: sans }}>
-                              {addr.name}
-                            </Typography>
-                            <Typography sx={{ fontSize: "12px", color: C.textSub, lineHeight: 1.6, fontFamily: sans }}>
-                              {addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}<br />
-                              {addr.city}{addr.state ? `, ${addr.state}` : ""} – {addr.pin}<br />
-                              {addr.phone}
-                            </Typography>
                           </Box>
-                        </Box>
-                      ))}
+                        ))}
+                      </Box>
                     </RadioGroup>
                   ) : (
                     <Box sx={{
@@ -858,7 +875,7 @@ export default function CheckoutPage() {
                     sx={{
                       border: `1.5px dashed ${showNewAddr ? C.heading : C.border}`,
                       borderRadius: "10px", p: "13px 16px", cursor: "pointer",
-                      display: "flex", alignItems: "center", gap: 1,
+                      display: "flex", alignItems: "center", gap: 1, mt: savedAddresses.length ? 1.4 : 0,
                       color: showNewAddr ? C.heading : C.textSub,
                       fontSize: "13px", fontWeight: 600, fontFamily: sans,
                       transition: "all .15s",
@@ -871,7 +888,7 @@ export default function CheckoutPage() {
 
                   <Collapse in={showNewAddr}>
                     <Divider sx={{ borderColor: C.borderLight, my: 2 }} />
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5 }}>
                       {[
                         { label: "Full name *",               key: "name",  col: 1 },
                         { label: "Phone *",                   key: "phone", col: 1 },
@@ -887,7 +904,7 @@ export default function CheckoutPage() {
                           placeholder={f.placeholder}
                           value={newAddr[f.key as keyof typeof newAddr]}
                           onChange={(e) => setNewAddr({ ...newAddr, [f.key]: e.target.value })}
-                          sx={{ ...inputSx, gridColumn: f.col === 2 ? "1 / -1" : undefined }}
+                          sx={{ ...inputSx, gridColumn: { xs: "1 / -1", sm: f.col === 2 ? "1 / -1" : undefined } }}
                         />
                       ))}
 
@@ -952,14 +969,14 @@ export default function CheckoutPage() {
               <Box sx={sectionSx}>
                 <Box sx={headerSx}>
                   <Box sx={{
-                    width: 30, height: 30, borderRadius: "9px",
+                    width: 32, height: 32, borderRadius: "10px",
                     background: C.goldLight, display: "flex",
                     alignItems: "center", justifyContent: "center",
                   }}>
-                    <ReceiptLongOutlinedIcon sx={{ fontSize: 16, color: C.gold }} />
+                    <ReceiptLongOutlinedIcon sx={{ fontSize: 17, color: C.gold }} />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                    <Typography sx={{ fontSize: "15px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
                       GST &amp; billing details
                     </Typography>
                     <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans, mt: 0.1 }}>
@@ -979,8 +996,8 @@ export default function CheckoutPage() {
                     </Box>
                   )}
                 </Box>
-                <Box sx={{ p: "22px 24px" }}>
-                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 1.5, mb: 1.5 }}>
+                <Box sx={{ p: { xs: "22px 20px", md: "24px 28px" } }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" }, gap: 1.5, mb: 1.5 }}>
                     <TextField
                       size="small"
                       label="GST number"
@@ -991,7 +1008,7 @@ export default function CheckoutPage() {
                       error={!!gstErr}
                       helperText={gstErr || " "}
                       fullWidth
-                      sx={inputSx}
+                      sx={{ ...inputSx, gridColumn: { lg: "span 1" } }}
                     />
                     <TextField
                       size="small"
@@ -1049,18 +1066,18 @@ export default function CheckoutPage() {
               <Box sx={{ ...sectionSx, mb: 0 }}>
                 <Box sx={headerSx}>
                   <Box sx={{
-                    width: 30, height: 30, borderRadius: "9px",
+                    width: 32, height: 32, borderRadius: "10px",
                     background: C.blueLight, display: "flex",
                     alignItems: "center", justifyContent: "center",
                   }}>
-                    <CurrencyRupeeOutlinedIcon sx={{ fontSize: 16, color: C.blue }} />
+                    <CurrencyRupeeOutlinedIcon sx={{ fontSize: 17, color: C.blue }} />
                   </Box>
-                  <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
+                  <Typography sx={{ fontSize: "15px", fontWeight: 700, color: C.heading, fontFamily: sans }}>
                     Payment method
                   </Typography>
                 </Box>
-                <Box sx={{ p: "22px 24px" }}>
-                  <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 1.4, mb: 2.5 }}>
+                <Box sx={{ p: { xs: "22px 20px", md: "24px 28px" } }}>
+                  <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "repeat(2,minmax(0,320px))" }, gap: 1.4, mb: 2.5 }}>
                     {PAY_METHODS.map((m) => (
                       <Box
                         key={m.id}
@@ -1111,7 +1128,7 @@ export default function CheckoutPage() {
                     <Box>
                       {/* UPI app tiles - premium logo badges via Simple Icons CDN,
                           each on its own brand-color tile */}
-                      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 1.1, mb: 2 }}>
+                      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(4,1fr)", sm: "repeat(6,minmax(0,110px))" }, gap: 1.1, mb: 2 }}>
                         {UPI_APPS.map((u) => (
                           <Box
                             key={u.id}
@@ -1213,13 +1230,13 @@ export default function CheckoutPage() {
               </Box>
             </Box>
 
-            <Box sx={{ position: { md: "sticky" }, top: { md: 20 }, alignSelf: "start", minWidth: 0 }}>
+            <Box sx={{ position: { lg: "sticky" }, top: { lg: 20 }, alignSelf: "start", minWidth: 0 }}>
               <Box sx={{
                 position: "relative",
                 background: C.surface,
                 border: `1px solid ${C.border}`,
-                borderRadius: "18px", overflow: "hidden",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 16px 40px rgba(10,10,10,0.10)",
+                borderRadius: "20px", overflow: "hidden",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 20px 48px rgba(10,10,10,0.12)",
               }}>
                 <Box sx={{
                   position: "absolute", top: 0, left: 0, right: 0, height: "3px",
@@ -1228,7 +1245,7 @@ export default function CheckoutPage() {
 
                 <Box sx={{
                   background: "linear-gradient(135deg, #0f1f3d 0%, #1a3a6e 55%, #1d4ed8 100%)",
-                  px: 2.6, py: 2.2, display: "flex", alignItems: "center", gap: 1.2,
+                  px: 2.8, py: 2.3, display: "flex", alignItems: "center", gap: 1.2,
                 }}>
                   <Box sx={{
                     width: 34, height: 34, borderRadius: "10px",
@@ -1239,7 +1256,7 @@ export default function CheckoutPage() {
                     <ShoppingBagOutlinedIcon sx={{ fontSize: 17, color: "#fff" }} />
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontSize: "14.5px", fontWeight: 800, color: "#fff", fontFamily: sans, letterSpacing: "-0.2px" }}>
+                    <Typography sx={{ fontSize: "15px", fontWeight: 800, color: "#fff", fontFamily: sans, letterSpacing: "-0.2px" }}>
                       Order summary
                     </Typography>
                   </Box>
@@ -1258,7 +1275,7 @@ export default function CheckoutPage() {
                   )}
                 </Box>
 
-                <Box sx={{ px: 2.6, py: 1.6, borderBottom: `1px solid ${C.borderLight}` }}>
+                <Box sx={{ px: 2.8, py: 1.7, borderBottom: `1px solid ${C.borderLight}` }}>
                   {items.map((item, idx) => (
                     <Box
                       key={item.id}
@@ -1268,7 +1285,7 @@ export default function CheckoutPage() {
                       }}
                     >
                       <Box sx={{
-                        width: 54, height: 54, borderRadius: "9px",
+                        width: 56, height: 56, borderRadius: "10px",
                         background: C.surfaceGray, border: `1px solid ${C.border}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         flexShrink: 0, p: 1,
@@ -1343,7 +1360,7 @@ export default function CheckoutPage() {
                   ))}
                 </Box>
 
-                <Box sx={{ px: 2.6, py: 1.6, borderBottom: `1px solid ${C.borderLight}` }}>
+                <Box sx={{ px: 2.8, py: 1.7, borderBottom: `1px solid ${C.borderLight}` }}>
                   <Typography sx={{ fontSize: "11px", fontWeight: 700, color: C.textSub, textTransform: "uppercase", letterSpacing: ".5px", mb: 1, fontFamily: sans }}>
                     Coupon
                   </Typography>
@@ -1400,7 +1417,7 @@ export default function CheckoutPage() {
                   )}
                 </Box>
 
-                <Box sx={{ px: 2.6, py: 2.2 }}>
+                <Box sx={{ px: 2.8, py: 2.3 }}>
                   {[
                     { label: `Subtotal (${totalQty} item${totalQty !== 1 ? "s" : ""})`, value: `₹${cartSubtotal.toLocaleString("en-IN")}`, color: C.heading },
                     ...(discount > 0 ? [{ label: "Coupon discount", value: `−₹${discount.toLocaleString("en-IN")}`, color: C.green }] : []),
@@ -1446,7 +1463,7 @@ export default function CheckoutPage() {
 
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 0.5 }}>
                     <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.heading, fontFamily: sans }}>Total payable</Typography>
-                    <Typography sx={{ fontSize: "23px", fontWeight: 800, color: C.heading, letterSpacing: "-.5px", fontFamily: sans }}>
+                    <Typography sx={{ fontSize: "24px", fontWeight: 800, color: C.heading, letterSpacing: "-.5px", fontFamily: sans }}>
                       ₹{grandTotal.toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -1459,14 +1476,14 @@ export default function CheckoutPage() {
                     onClick={handlePlaceOrder}
                     disabled={placingOrder}
                     sx={{
-                      height: 51, borderRadius: "12px",
+                      height: 52, borderRadius: "13px",
                       background: "linear-gradient(135deg, #0a0a0a 0%, #262626 100%)",
                       color: "#fff",
                       fontWeight: 700, fontSize: "15px", fontFamily: sans,
                       textTransform: "none",
-                      boxShadow: "0 6px 18px rgba(0,0,0,0.22), 0 0 0 1px rgba(184,135,63,0.25)",
+                      boxShadow: "0 8px 22px rgba(0,0,0,0.24), 0 0 0 1px rgba(184,135,63,0.28)",
                       display: "flex", alignItems: "center", gap: 1,
-                      "&:hover": { boxShadow: "0 8px 26px rgba(0,0,0,0.30), 0 0 0 1px rgba(184,135,63,0.45)" },
+                      "&:hover": { boxShadow: "0 10px 30px rgba(0,0,0,0.32), 0 0 0 1px rgba(184,135,63,0.48)" },
                       "&.Mui-disabled": { background: C.border, color: C.textMuted, boxShadow: "none" },
                       transition: "all .15s",
                     }}
@@ -1490,7 +1507,7 @@ export default function CheckoutPage() {
                   {TRUST.map((t, i) => (
                     <Box key={i} sx={{
                       flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-                      gap: 0.5, py: 1.5, px: 0.5,
+                      gap: 0.5, py: 1.6, px: 0.5,
                       borderRight: i < TRUST.length - 1 ? `1px solid ${C.borderLight}` : "none",
                       textAlign: "center",
                     }}>
@@ -1510,16 +1527,16 @@ export default function CheckoutPage() {
               </Box>
 
               {/* SHIPROCKET TRUST CARD - sits right below Order Summary,
-                  same 360px width, same border-radius/shadow language as
-                  every other card so it reads as part of the same set. */}
+                  same width, same border-radius/shadow language as every
+                  other card so it reads as part of the same set. */}
               <Box sx={{
                 position: "relative",
                 overflow: "hidden",
-                borderRadius: "18px",
-                mt: 2.5,
+                borderRadius: "20px",
+                mt: 2.75,
                 background: "linear-gradient(135deg, #150a2e 0%, #1e1147 50%, #24135c 100%)",
                 border: "1px solid rgba(139,197,63,0.18)",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 16px 40px rgba(21,10,46,0.22)",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03), 0 20px 48px rgba(21,10,46,0.26)",
               }}>
                 <Box sx={{
                   position: "absolute", inset: 0,
@@ -1528,7 +1545,7 @@ export default function CheckoutPage() {
                   pointerEvents: "none",
                 }} />
 
-                <Box sx={{ position: "relative", px: 2.6, py: 2.2 }}>
+                <Box sx={{ position: "relative", px: 2.8, py: 2.3 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.1, mb: 1.4 }}>
                     <Box sx={{
                       width: 34, height: 34, borderRadius: "10px", flexShrink: 0,

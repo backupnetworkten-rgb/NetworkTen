@@ -55,6 +55,10 @@ const C = {
 
 const sans = "'Inter', 'DM Sans', system-ui, sans-serif";
 
+// Full-width page padding — used consistently across the breadcrumb,
+// step bar, and main container so everything lines up edge to edge.
+const PAGE_PX = { xs: 2, sm: 3, md: 5, lg: 7, xl: 9 };
+
 if (typeof document !== "undefined" && !document.getElementById("cart-font")) {
   const s = document.createElement("style");
   s.id = "cart-font";
@@ -130,14 +134,14 @@ export default function CartPage() {
   const [coupon,  setCoupon]  = useState("");
   const [applied, setApplied] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [note,    setNote]    = useState(""); // NEW: order note
+  const [note,    setNote]    = useState(""); // order note
 
   useEffect(() => {
     setMounted(true);
     setItems(getCart());
     const unsub = onCartChange(() => setItems(getCart()));
 
-    // NEW: restore any note the user already typed (e.g. came back from checkout)
+    // restore any note the user already typed (e.g. came back from checkout)
     try {
       const savedNote = localStorage.getItem(ORDER_NOTE_KEY) || "";
       setNote(savedNote);
@@ -161,7 +165,7 @@ export default function CartPage() {
     if (coupon.trim().toUpperCase() === "NETWORK10") setApplied("NETWORK10");
   };
 
-  // NEW: keep localStorage in sync as the user types the note
+  // keep localStorage in sync as the user types the note
   const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value;
     setNote(value);
@@ -173,10 +177,6 @@ export default function CartPage() {
   };
 
   // ── AUTH GUARD: gate the checkout button itself ──
-  // IMPORTANT: use the SAME auth source as the rest of the app (product page's
-  // "Buy it now" checks localStorage "user"). The previous version here checked
-  // Firebase's auth.currentUser instead, which is a different source of truth —
-  // that mismatch is why logged-out users weren't being redirected to /login.
   const handleProceedToCheckout = () => {
     const user = localStorage.getItem("user");
     if (!user) {
@@ -189,8 +189,8 @@ export default function CartPage() {
 
   // ── Step bar (matches checkout's step indicator) ─────────────────────────
   const StepBar = (
-    <Box sx={{ background: C.surface, borderBottom: `1px solid ${C.border}`, px: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", maxWidth: 960, mx: "auto", height: 56 }}>
+    <Box sx={{ background: C.surface, borderBottom: `1px solid ${C.border}`, px: PAGE_PX }}>
+      <Box sx={{ display: "flex", alignItems: "center", width: "100%", height: 56 }}>
         {[
           { label: "Cart", active: true },
           { label: "Checkout" },
@@ -227,8 +227,8 @@ export default function CartPage() {
       <>
         <Header />
         {StepBar}
-        <Box sx={{ background: C.pageBg, minHeight: "82vh", display: "flex", alignItems: "center", py: { xs: 6, md: 10 }, fontFamily: sans }}>
-          <Container maxWidth="sm">
+        <Box sx={{ background: C.pageBg, minHeight: "82vh", display: "flex", alignItems: "center", py: { xs: 6, md: 10 }, px: PAGE_PX, fontFamily: sans }}>
+          <Box sx={{ width: "100%", maxWidth: 480, mx: "auto" }}>
             <Box sx={{ ...sectionSx, textAlign: "center", px: { xs: 4, md: 7 }, py: { xs: 6, md: 8 } }}>
               <Box sx={{
                 width: 96, height: 96, borderRadius: "50%",
@@ -288,7 +288,7 @@ export default function CartPage() {
                 ))}
               </Box>
             </Box>
-          </Container>
+          </Box>
         </Box>
         <Footer />
       </>
@@ -303,23 +303,23 @@ export default function CartPage() {
       <Header />
       {StepBar}
       <Box sx={{ background: C.pageBg, minHeight: "100vh", pt: 3.5, pb: 9, fontFamily: sans }}>
-        <Container maxWidth="lg">
+        <Container maxWidth={false} sx={{ px: PAGE_PX }}>
 
-          {/* Breadcrumb */}
-          <Box sx={{ ...sectionSx, display: "flex", alignItems: "center", gap: 0.8, px: 2.5, py: 1.4, mb: 2.5, flexWrap: "wrap" }}>
+          {/* Breadcrumb — transparent, no card background, blends into the page */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 0.5, py: 1.2, mb: 2.5, flexWrap: "wrap" }}>
             <Button
-              startIcon={<ArrowBackRoundedIcon sx={{ fontSize: "12px !important" }} />}
+              startIcon={<ArrowBackRoundedIcon sx={{ fontSize: "14px !important" }} />}
               onClick={() => router.push("/products")}
-              sx={{ textTransform: "none", fontWeight: 600, fontFamily: sans, color: C.blue, fontSize: "13px", px: 0.5, py: 0, minWidth: 0, lineHeight: 1, "&:hover": { background: "transparent" } }}
+              sx={{ textTransform: "none", fontWeight: 600, fontFamily: sans, color: C.blue, fontSize: "14.5px", px: 0.5, py: 0, minWidth: 0, lineHeight: 1, "&:hover": { background: "transparent" } }}
             >
               Products
             </Button>
-            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 14, color: C.textMuted }} />
-            <Typography sx={{ fontSize: "13px", color: C.text, fontWeight: 500, fontFamily: sans, lineHeight: 1 }}>Cart</Typography>
+            <KeyboardArrowRightRoundedIcon sx={{ fontSize: 16, color: C.textMuted }} />
+            <Typography sx={{ fontSize: "14.5px", color: C.text, fontWeight: 500, fontFamily: sans, lineHeight: 1 }}>Cart</Typography>
             <Box sx={{
               display: "inline-flex", alignItems: "center", width: "fit-content",
-              background: C.surfaceGray, border: `1px solid ${C.border}`, color: C.textSub,
-              fontWeight: 700, fontFamily: sans, fontSize: "10px", px: 1.1, py: 0.35,
+              background: "transparent", border: `1px solid ${C.border}`, color: C.textSub,
+              fontWeight: 700, fontFamily: sans, fontSize: "11.5px", px: 1.2, py: 0.4,
               borderRadius: "20px", whiteSpace: "nowrap", letterSpacing: ".3px", ml: 0.3,
             }}>
               {totalQty} item{totalQty !== 1 ? "s" : ""}
@@ -348,16 +348,21 @@ export default function CartPage() {
               </Box>
             </Box>
           ) : (
-            <Box sx={{ background: C.greenLight, border: `1px solid ${C.greenBorder}`, borderRadius: "16px", px: 3, py: 1.8, mb: 2.5, display: "flex", alignItems: "center", gap: 1.5 }}>
-              <CheckCircleRoundedIcon sx={{ color: C.green, fontSize: 20 }} />
-              <Typography sx={{ fontSize: "13px", fontWeight: 700, color: C.green, fontFamily: sans }}>
+            <Box sx={{ background: "transparent", px: 1.5, py: 1.8, mb: 2.5, display: "flex", alignItems: "center", gap: 1.5 }}>
+              <CheckCircleRoundedIcon sx={{ color: C.green, fontSize: 22 }} />
+              <Typography sx={{ fontSize: "14.5px", fontWeight: 700, color: C.green, fontFamily: sans }}>
                 You've unlocked FREE delivery!
               </Typography>
             </Box>
           )}
 
-          {/* Main layout */}
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 360px" }, gap: 3, alignItems: "flex-start" }}>
+          {/* Main layout — fluid two-column grid */}
+          <Box sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 360px", lg: "1fr 400px", xl: "1fr 440px" },
+            gap: { xs: 2.5, md: 3, lg: 3.5 },
+            alignItems: "flex-start",
+          }}>
 
             {/* ── LEFT — ITEMS ── */}
             <Box>
@@ -390,7 +395,7 @@ export default function CartPage() {
                       <Box
                         onClick={() => router.push(`/products/${item.id}`)}
                         sx={{
-                          width: { xs: 108, md: 148 }, flexShrink: 0,
+                          width: { xs: 108, sm: 148, lg: 168 }, flexShrink: 0,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           p: 2.2, cursor: "pointer",
                           background: C.surfaceGray, borderRight: `1px solid ${C.border}`,
@@ -427,14 +432,7 @@ export default function CartPage() {
                           {item.name}
                         </Typography>
 
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: 1.1,
-                            mb: 1.6
-                          }}>
+                        <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1.1, mb: 1.6 }}>
                           <Typography sx={{ fontFamily: sans, fontWeight: 800, fontSize: { xs: "18px", md: "20px" }, color: C.heading, letterSpacing: "-0.5px" }}>
                             ₹{item.salePrice.toLocaleString("en-IN")}
                           </Typography>
@@ -455,7 +453,6 @@ export default function CartPage() {
                         <Divider sx={{ borderColor: C.borderLight, mb: 1.8 }} />
 
                         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mt: "auto" }}>
-                          {/* Qty stepper */}
                           <Box sx={{
                             display: "inline-flex", alignItems: "center",
                             border: `1.5px solid ${C.border}`, borderRadius: "10px",
@@ -693,9 +690,7 @@ export default function CartPage() {
             </Box>
           </Box>
 
-          {/* NEW: Order note — bottom of the cart page.
-             Saved to localStorage so it survives navigation to /checkout,
-             where it's prefilled, editable, and finally attached to the order. */}
+          {/* Order note */}
           <Box sx={{ ...sectionSx, mt: 2.5, p: "20px 22px" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.1, mb: 1.6 }}>
               <Box sx={{ width: 32, height: 32, borderRadius: "9px", background: C.blueLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
