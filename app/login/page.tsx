@@ -14,6 +14,10 @@ import {
   TextField,
   Button,
   Fade,
+  Snackbar,
+  Alert,
+  Slide,
+  SlideProps,
 } from "@mui/material";
 
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -41,6 +45,18 @@ const IVORY = "#FBF9F4";
 const CARD = "#FFFFFF";
 const LINE = "#E7E2D6";
 
+// ---- Toast types ----
+type ToastSeverity = "success" | "error" | "info" | "warning";
+interface ToastState {
+  open: boolean;
+  message: string;
+  severity: ToastSeverity;
+}
+
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="down" />;
+}
+
 // ---- Logo ----
 function Logo() {
   return (
@@ -62,7 +78,22 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const [toast, setToast] = useState<ToastState>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const router = useRouter();
+
+  const showToast = (message: string, severity: ToastSeverity = "success") => {
+    setToast({ open: true, message, severity });
+  };
+
+  const closeToast = (_?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") return;
+    setToast((prev) => ({ ...prev, open: false }));
+  };
 
   const goBackToPhone = () => {
     setShowOtpField(false);
@@ -85,15 +116,15 @@ export default function LoginPage() {
 
       if (!showOtpField) {
         if (!phone.trim()) {
-          alert("Please enter your phone number");
+          showToast("Please enter your phone number", "warning");
           return;
         }
         await sendOTP(phone.trim());
         setShowOtpField(true);
-        alert("OTP Sent");
+        showToast("OTP sent successfully", "success");
       } else {
         if (!otp.trim()) {
-          alert("Please enter the OTP");
+          showToast("Please enter the OTP", "warning");
           return;
         }
 
@@ -105,12 +136,12 @@ export default function LoginPage() {
           loginType: "phone",
         });
 
-        alert("Login Successful");
-        redirectAfterAuth();
+        showToast("Login successful", "success");
+        setTimeout(redirectAfterAuth, 900);
       }
     } catch (error: any) {
       console.log(error);
-      alert(error.message);
+      showToast(error?.message || "Something went wrong", "error");
     } finally {
       setLoading(false);
     }
@@ -128,11 +159,11 @@ export default function LoginPage() {
         loginType: "google",
       });
 
-      alert("Login Successful");
-      redirectAfterAuth();
+      showToast("Login successful", "success");
+      setTimeout(redirectAfterAuth, 900);
     } catch (error: any) {
       console.log(error);
-      alert(error.message);
+      showToast(error?.message || "Google sign-in failed", "error");
     } finally {
       setGoogleLoading(false);
     }
@@ -483,6 +514,34 @@ export default function LoginPage() {
         </Box>
       </Box>
       <Footer />
+
+      {/* ---- TOAST / SNACKBAR ---- */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3500}
+        onClose={closeToast}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        TransitionComponent={SlideTransition}
+      >
+        <Alert
+          onClose={closeToast}
+          severity={toast.severity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            borderRadius: "10px",
+            fontWeight: 600,
+            fontSize: "13px",
+            alignItems: "center",
+            boxShadow: "0 12px 30px rgba(18,35,64,0.18)",
+            ...(toast.severity === "success" && {
+              background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`,
+            }),
+          }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
