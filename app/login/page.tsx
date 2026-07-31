@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
@@ -26,6 +26,7 @@ import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 import GoogleIcon from "@mui/icons-material/Google";
 import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -47,8 +48,8 @@ const LINE = "#E7E2D6";
 
 // ---- Toast types ----
 type ToastSeverity = "success" | "error" | "info" | "warning";
-interface ToastState {
-  open: boolean;
+interface ToastMessage {
+  key: number;
   message: string;
   severity: ToastSeverity;
 }
@@ -78,22 +79,34 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const [toast, setToast] = useState<ToastState>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  // ---- Toast queue state ----
+  const [toastQueue, setToastQueue] = useState<ToastMessage[]>([]);
+  const [currentToast, setCurrentToast] = useState<ToastMessage | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
 
   const router = useRouter();
 
   const showToast = (message: string, severity: ToastSeverity = "success") => {
-    setToast({ open: true, message, severity });
+    setToastQueue((prev) => [...prev, { key: Date.now(), message, severity }]);
   };
+
+  // Process queue: show next toast once current one is fully closed
+  useEffect(() => {
+    if (toastQueue.length && !currentToast) {
+      setCurrentToast(toastQueue[0]);
+      setToastQueue((prev) => prev.slice(1));
+      setToastOpen(true);
+    } else if (toastQueue.length && currentToast && toastOpen) {
+      setToastOpen(false);
+    }
+  }, [toastQueue, currentToast, toastOpen]);
 
   const closeToast = (_?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") return;
-    setToast((prev) => ({ ...prev, open: false }));
+    setToastOpen(false);
   };
+
+  const handleToastExited = () => setCurrentToast(null);
 
   const goBackToPhone = () => {
     setShowOtpField(false);
@@ -515,31 +528,47 @@ export default function LoginPage() {
       </Box>
       <Footer />
 
-      {/* ---- TOAST / SNACKBAR ---- */}
+      {/* ---- TOAST / SNACKBAR (queued, professional) ---- */}
       <Snackbar
-        open={toast.open}
+        key={currentToast?.key}
+        open={toastOpen}
         autoHideDuration={3500}
         onClose={closeToast}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        TransitionComponent={SlideTransition}
+        slots={{ transition: SlideTransition }}
+        slotProps={{ transition: { onExited: handleToastExited } }}
+        sx={{ mt: { xs: 1, md: 1.5 } }}
       >
         <Alert
           onClose={closeToast}
-          severity={toast.severity}
+          severity={currentToast?.severity}
           variant="filled"
+          action={
+            <Box
+              onClick={closeToast}
+              sx={{ display: "flex", alignItems: "center", cursor: "pointer", ml: 0.5 }}
+            >
+              <CloseRoundedIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.85)" }} />
+            </Box>
+          }
           sx={{
             width: "100%",
+            minWidth: 280,
             borderRadius: "10px",
             fontWeight: 600,
             fontSize: "13px",
             alignItems: "center",
             boxShadow: "0 12px 30px rgba(18,35,64,0.18)",
-            ...(toast.severity === "success" && {
+            "& .MuiAlert-icon": { alignItems: "center" },
+            ...(currentToast?.severity === "success" && {
               background: `linear-gradient(135deg, ${EMERALD}, ${EMERALD_DARK})`,
+            }),
+            ...(currentToast?.severity === "warning" && {
+              background: `linear-gradient(135deg, ${BRASS}, #8C6C3D)`,
             }),
           }}
         >
-          {toast.message}
+          {currentToast?.message}
         </Alert>
       </Snackbar>
     </>
