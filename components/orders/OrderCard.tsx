@@ -1,9 +1,11 @@
 // components/orders/OrderCard.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Box, Typography, Divider, Chip, Collapse, Button,
+  Box, Typography, Divider, Collapse, Button,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, CircularProgress, Alert,
 } from "@mui/material";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import KeyboardArrowUpRoundedIcon   from "@mui/icons-material/KeyboardArrowUpRounded";
@@ -13,7 +15,9 @@ import HomeOutlinedIcon             from "@mui/icons-material/HomeOutlined";
 import CurrencyRupeeOutlinedIcon    from "@mui/icons-material/CurrencyRupeeOutlined";
 import QrCode2OutlinedIcon          from "@mui/icons-material/QrCode2Outlined";
 import DownloadOutlinedIcon         from "@mui/icons-material/DownloadOutlined";
-import { Order } from "@/lib/orderStore";
+import CancelOutlinedIcon           from "@mui/icons-material/CancelOutlined";
+import ErrorOutlineRoundedIcon      from "@mui/icons-material/ErrorOutlineRounded";
+import { Order, canCancelOrder, cancelDeadline, cancelOrder } from "@/lib/orderStore";
 import { proxyImage } from "@/lib/proxyImage";
 
 const sans = "'Inter','DM Sans',system-ui,sans-serif";
@@ -33,6 +37,9 @@ const C = {
   green:       "#16a34a",
   greenLight:  "#f0fdf4",
   greenBorder: "#bbf7d0",
+  red:         "#dc2626",
+  redLight:    "#fef2f2",
+  redBorder:   "#fecaca",
 };
 
 function fmtDate(iso: string) {
@@ -49,36 +56,78 @@ function fmtDateRange(start: string, end: string) {
   return `${sm} – ${em}`;
 }
 
-// Derive a simple status from dates
-function getStatus(order: Order): "Delivered" | "Out for Delivery" | "In Transit" | "Confirmed" {
+function fmtDeadline(d: Date) {
+  return d.toLocaleString("en-IN", {
+    day: "numeric", month: "short", hour: "numeric", minute: "2-digit",
+  });
+}
+
+type Status = "Cancelled" | "Delivered" | "Out for Delivery" | "In Transit" | "Confirmed";
+
+// Derive a simple status from dates (now also checks order.status first)
+function getStatus(order: Order): Status {
+  if (order.status === "cancelled") return "Cancelled";
   const now = new Date();
   const start = new Date(order.estimatedDeliveryStart);
   const end   = new Date(order.estimatedDeliveryEnd);
-  if (now > end)   return "Delivered";
+  if (now > end)    return "Delivered";
   if (now >= start) return "Out for Delivery";
   return "In Transit";
 }
 
-const STATUS_CONFIG = {
-  "Delivered":       { color: C.green,    bg: C.greenLight,  border: C.greenBorder,  dot: "#4ade80" },
-  "Out for Delivery":{ color: "#b45309",  bg: "#fffbeb",     border: "#fde68a",      dot: "#f59e0b" },
-  "In Transit":      { color: C.blue,     bg: C.blueLight,   border: C.blueBorder,   dot: "#60a5fa" },
-  "Confirmed":       { color: C.blue,     bg: C.blueLight,   border: C.blueBorder,   dot: "#60a5fa" },
+const STATUS_CONFIG: Record<Status, { color: string; bg: string; border: string; dot: string }> = {
+  "Cancelled":        { color: C.red,     bg: C.redLight,    border: C.redBorder,    dot: "#f87171" },
+  "Delivered":        { color: C.green,   bg: C.greenLight,  border: C.greenBorder,  dot: "#4ade80" },
+  "Out for Delivery": { color: "#b45309", bg: "#fffbeb",     border: "#fde68a",      dot: "#f59e0b" },
+  "In Transit":       { color: C.blue,    bg: C.blueLight,   border: C.blueBorder,   dot: "#60a5fa" },
+  "Confirmed":        { color: C.blue,    bg: C.blueLight,   border: C.blueBorder,   dot: "#60a5fa" },
 };
 
-export default function OrderCard({ order }: { order: Order }) {
+export default function OrderCard({ order: initialOrder }: { order: Order }) {
+  const [order,    setOrder]    = useState<Order>(initialOrder);
   const [expanded, setExpanded] = useState(false);
+
+  // Cancel dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [reason,     setReason]     = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+
   const status = getStatus(order);
   const sc     = STATUS_CONFIG[status];
+  const eligible = canCancelOrder(order);
 
-  // Delivery progress 0–3
+  // Live re-render every minute so the Cancel button/banner disappears
+  // on its own once the 24hr window lapses, without needing a refresh.
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    if (!eligible) return;
+    const id = setInterval(() => forceTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, [eligible]);
+
   const progress =
     status === "Confirmed"        ? 1 :
     status === "In Transit"       ? 2 :
     status === "Out for Delivery" ? 2 :
+    status === "Cancelled"        ? 0 :
     3;
 
   const steps = ["Order Confirmed", "In Transit", "Delivered"];
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    setError(null);
+    try {
+      const updated = await cancelOrder(order);
+      setOrder(updated);
+      setDialogOpen(false);
+    } catch (e: any) {
+      setError(e?.message || "Something went wrong while cancelling. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <Box sx={{
@@ -153,7 +202,7 @@ export default function OrderCard({ order }: { order: Order }) {
         </Box>
       </Box>
 
-      {/* ── Items preview (always visible, first 2) ── */}
+      {/* ── Items preview (always visible, first 3) + cancel button ── */}
       <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
         {order.items.slice(0, 3).map((item) => (
           <Box key={item.id} sx={{
@@ -181,70 +230,119 @@ export default function OrderCard({ order }: { order: Order }) {
           </Box>
         )}
 
-        {/* delivery window pill */}
-        <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
+        {/* delivery window pill + cancel button */}
+        <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          {status !== "Cancelled" && (
+            <Box sx={{
+              display: "inline-flex", alignItems: "center", gap: 0.8,
+              background: C.blueLight, border: `1px solid ${C.blueBorder}`,
+              borderRadius: "10px", px: 1.5, py: 0.8,
+            }}>
+              <LocalShippingOutlinedIcon sx={{ fontSize: 14, color: C.blue }} />
+              <Typography sx={{ fontSize: "11px", fontWeight: 600, color: C.blue, fontFamily: sans }}>
+                Est. {fmtDateRange(order.estimatedDeliveryStart, order.estimatedDeliveryEnd)}
+              </Typography>
+            </Box>
+          )}
+
+          {eligible && (
+            <Button
+              size="small"
+              startIcon={<CancelOutlinedIcon sx={{ fontSize: "15px !important" }} />}
+              onClick={() => setDialogOpen(true)}
+              sx={{
+                height: 34, borderRadius: "9px", px: 1.6,
+                border: `1.5px solid ${C.redBorder}`,
+                background: C.redLight, color: C.red,
+                fontWeight: 700, fontSize: "11.5px", fontFamily: sans,
+                textTransform: "none",
+                "&:hover": { background: C.red, color: "#fff", borderColor: C.red },
+              }}
+            >
+              Cancel Order
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* Cancellation deadline hint */}
+      {eligible && (
+        <Box sx={{ px: { xs: 2.5, md: 3.5 }, pb: 2 }}>
+          <Typography sx={{ fontSize: "11px", color: C.textMuted, fontFamily: sans }}>
+            Free cancellation available until {fmtDeadline(cancelDeadline(order))}
+          </Typography>
+        </Box>
+      )}
+
+      {/* Cancelled banner */}
+      {status === "Cancelled" && order.cancelledAt && (
+        <Box sx={{ px: { xs: 2.5, md: 3.5 }, pb: 2 }}>
           <Box sx={{
             display: "inline-flex", alignItems: "center", gap: 0.8,
-            background: C.blueLight, border: `1px solid ${C.blueBorder}`,
-            borderRadius: "10px", px: 1.5, py: 0.8,
+            background: C.redLight, border: `1px solid ${C.redBorder}`,
+            borderRadius: "8px", px: 1.4, py: 0.8,
           }}>
-            <LocalShippingOutlinedIcon sx={{ fontSize: 14, color: C.blue }} />
-            <Typography sx={{ fontSize: "11px", fontWeight: 600, color: C.blue, fontFamily: sans }}>
-              Est. {fmtDateRange(order.estimatedDeliveryStart, order.estimatedDeliveryEnd)}
+            <ErrorOutlineRoundedIcon sx={{ fontSize: 14, color: C.red }} />
+            <Typography sx={{ fontSize: "11.5px", fontWeight: 600, color: C.red, fontFamily: sans }}>
+              Cancelled on {fmtDate(order.cancelledAt)}
             </Typography>
           </Box>
         </Box>
-      </Box>
+      )}
 
       {/* ── Expanded details ── */}
       <Collapse in={expanded}>
         <Divider sx={{ borderColor: C.borderLight }} />
 
-        {/* Tracking bar */}
-        <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
-          <Typography sx={{ fontSize: "11px", fontWeight: 700, color: C.textMuted,
-            textTransform: "uppercase", letterSpacing: "1px", mb: 2, fontFamily: sans }}>
-            Tracking
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0 }}>
-            {steps.map((step, i) => {
-              const done   = i < progress;
-              const active = i === progress - 1;
-              return (
-                <Box key={i} sx={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
-                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.6 }}>
-                    <Box sx={{
-                      width: 28, height: 28, borderRadius: "50%",
-                      background: done ? C.heading : C.surfaceGray,
-                      border: `2px solid ${done ? C.heading : C.border}`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: active ? "0 0 0 4px rgba(10,10,10,0.08)" : "none",
-                      transition: "all .2s",
-                    }}>
-                      <CheckCircleOutlinedIcon sx={{ fontSize: 14, color: done ? "#fff" : C.textMuted }} />
+        {/* Tracking bar — hidden for cancelled orders */}
+        {status !== "Cancelled" && (
+          <>
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
+              <Typography sx={{ fontSize: "11px", fontWeight: 700, color: C.textMuted,
+                textTransform: "uppercase", letterSpacing: "1px", mb: 2, fontFamily: sans }}>
+                Tracking
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0 }}>
+                {steps.map((step, i) => {
+                  const done   = i < progress;
+                  const active = i === progress - 1;
+                  return (
+                    <Box key={i} sx={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.6 }}>
+                        <Box sx={{
+                          width: 28, height: 28, borderRadius: "50%",
+                          background: done ? C.heading : C.surfaceGray,
+                          border: `2px solid ${done ? C.heading : C.border}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          boxShadow: active ? "0 0 0 4px rgba(10,10,10,0.08)" : "none",
+                          transition: "all .2s",
+                        }}>
+                          <CheckCircleOutlinedIcon sx={{ fontSize: 14, color: done ? "#fff" : C.textMuted }} />
+                        </Box>
+                        <Typography sx={{
+                          fontSize: "10px", fontWeight: done ? 700 : 500,
+                          color: done ? C.heading : C.textMuted, fontFamily: sans,
+                          whiteSpace: "nowrap",
+                        }}>
+                          {step}
+                        </Typography>
+                      </Box>
+                      {i < steps.length - 1 && (
+                        <Box sx={{
+                          flex: 1, height: "2px", mx: 1, mb: 2.5,
+                          background: i < progress - 1 ? C.heading : C.border,
+                          borderRadius: "2px", transition: "all .2s",
+                        }} />
+                      )}
                     </Box>
-                    <Typography sx={{
-                      fontSize: "10px", fontWeight: done ? 700 : 500,
-                      color: done ? C.heading : C.textMuted, fontFamily: sans,
-                      whiteSpace: "nowrap",
-                    }}>
-                      {step}
-                    </Typography>
-                  </Box>
-                  {i < steps.length - 1 && (
-                    <Box sx={{
-                      flex: 1, height: "2px", mx: 1, mb: 2.5,
-                      background: i < progress - 1 ? C.heading : C.border,
-                      borderRadius: "2px", transition: "all .2s",
-                    }} />
-                  )}
-                </Box>
-              );
-            })}
-          </Box>
-        </Box>
+                  );
+                })}
+              </Box>
+            </Box>
 
-        <Divider sx={{ borderColor: C.borderLight }} />
+            <Divider sx={{ borderColor: C.borderLight }} />
+          </>
+        )}
 
         {/* All items */}
         <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
@@ -380,6 +478,61 @@ export default function OrderCard({ order }: { order: Order }) {
           </Box>
         </Box>
       </Collapse>
+
+      {/* ── Cancel confirmation dialog ── */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => !cancelling && setDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}
+      >
+        <DialogTitle sx={{ fontFamily: sans, fontWeight: 800, fontSize: "17px" }}>
+          Cancel this order?
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: "13px", color: C.textSub, fontFamily: sans, mb: 2 }}>
+            Order <strong>#{order.orderId}</strong> will be cancelled and cannot be undone.
+            We'll notify our team right away.
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            minRows={2}
+            placeholder="Reason for cancelling (optional)"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            disabled={cancelling}
+            sx={{ "& .MuiOutlinedInput-root": { fontFamily: sans, fontSize: "13px", borderRadius: "10px" } }}
+          />
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, borderRadius: "10px", fontFamily: sans, fontSize: "12.5px" }}>
+              {error}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button
+            onClick={() => setDialogOpen(false)}
+            disabled={cancelling}
+            sx={{ textTransform: "none", fontFamily: sans, fontWeight: 600, color: C.textSub }}
+          >
+            Keep Order
+          </Button>
+          <Button
+            onClick={handleCancel}
+            disabled={cancelling}
+            variant="contained"
+            sx={{
+              textTransform: "none", fontFamily: sans, fontWeight: 700,
+              background: C.red, borderRadius: "9px", px: 2.5,
+              "&:hover": { background: "#b91c1c" },
+            }}
+          >
+            {cancelling ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : "Yes, Cancel Order"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -1,7 +1,7 @@
 // lib/orderStore.ts
 import { db, auth } from "@/lib/firebase";
 import {
-  collection, addDoc, getDocs, query,
+  collection, addDoc, getDocs, getDoc, query,
   orderBy, serverTimestamp, doc, setDoc,
 } from "firebase/firestore";
 
@@ -23,6 +23,8 @@ export interface OrderBilling {
   gstAmount: number;
 }
 
+export type OrderStatus = "confirmed" | "cancelled";
+
 export interface Order {
   orderId: string;
   placedAt: string;
@@ -30,13 +32,15 @@ export interface Order {
   subtotal: number;
   discount: number;
   shipping: number;
-  codCharge?: number; // NEW: COD handling fee, set only when paymentMethod === "cod"
+  codCharge?: number;
   grandTotal: number;
   totalQty: number;
   paymentMethod: string;
   paymentId?: string | null;
   billing?: OrderBilling;
-  note?: string; // optional customer order note
+  note?: string;
+  status?: OrderStatus;
+  cancelledAt?: string;
   address: {
     name: string;
     line1: string;
@@ -57,14 +61,30 @@ export interface Order {
   };
 }
 
+// ─── Cancellation window ────────────────────────────────────────────────────
+export const CANCELLATION_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export function canCancelOrder(order: Order): boolean {
+  if (order.status === "cancelled") return false;
+  const placedAt = new Date(order.placedAt).getTime();
+  if (Number.isNaN(placedAt)) return false;
+  return Date.now() - placedAt < CANCELLATION_WINDOW_MS;
+}
+
+export function cancelDeadline(order: Order): Date {
+  return new Date(new Date(order.placedAt).getTime() + CANCELLATION_WINDOW_MS);
+}
+
 export function generateOrderId(): string {
   return "NT" + Date.now().toString(36).toUpperCase();
 }
 
 export async function saveLastOrder(order: Order): Promise<void> {
+  const orderToSave: Order = { status: "confirmed", ...order };
+
   // Always save to localStorage as fallback
   const existing = getLocalOrders();
-  const updated = [order, ...existing];
+  const updated = [orderToSave, ...existing];
   localStorage.setItem("nt_orders", JSON.stringify(updated));
 
   // Save to Firestore if logged in
@@ -73,7 +93,7 @@ export async function saveLastOrder(order: Order): Promise<void> {
     try {
       await setDoc(
         doc(db, "users", user.uid, "orders", order.orderId),
-        { ...order, createdAt: serverTimestamp() }
+        { ...orderToSave, createdAt: serverTimestamp() }
       );
     } catch (e) {
       console.error("Firestore order save failed:", e);
@@ -111,6 +131,74 @@ export async function fetchUserOrders(): Promise<Order[]> {
   } catch {
     return getLocalOrders();
   }
+}
+
+// Fetch a single order by id for the current user (used by the
+// email "Cancel Order" deep-link page, which lands on a specific order).
+export async function fetchOrderById(orderId: string): Promise<Order | null> {
+  const user = auth.currentUser;
+  if (!user) return null;
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid, "orders", orderId));
+    return snap.exists() ? (snap.data() as Order) : null;
+  } catch (e) {
+    console.error("fetchOrderById failed:", e);
+    return null;
+  }
+}
+
+// Cancel an order. Updates Firestore + localStorage, then asks the
+// server to send cancellation emails (must run server-side since EmailJS
+// uses a private key there). Throws if outside the 24hr window.
+export async function cancelOrder(order: Order): Promise<Order> {
+  if (!canCancelOrder(order)) {
+    throw new Error("This order can no longer be cancelled (24-hour window has passed).");
+  }
+
+  const cancelledAt = new Date().toISOString();
+  const updatedOrder: Order = { ...order, status: "cancelled", cancelledAt };
+
+  // Update localStorage
+  try {
+    const existing = getLocalOrders();
+    const updatedLocal = existing.map((o) =>
+      o.orderId === order.orderId ? updatedOrder : o
+    );
+    localStorage.setItem("nt_orders", JSON.stringify(updatedLocal));
+  } catch (e) {
+    console.error("Failed to update local order on cancel:", e);
+  }
+
+  // Update Firestore
+  const user = auth.currentUser;
+  if (user) {
+    await setDoc(
+      doc(db, "users", user.uid, "orders", order.orderId),
+      { status: "cancelled", cancelledAt },
+      { merge: true }
+    );
+  }
+
+  // Notify server to send cancellation emails (best-effort — order is
+  // already cancelled even if this fails, so don't block/throw on it)
+  try {
+    const res = await fetch("/api/cancel-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        order: updatedOrder,
+        customerEmail: user?.email ?? null,
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      console.error("Cancellation email trigger failed:", data);
+    }
+  } catch (e) {
+    console.error("Failed to reach /api/cancel-order:", e);
+  }
+
+  return updatedOrder;
 }
 
 // Updates Shiprocket info on both Firestore AND localStorage.

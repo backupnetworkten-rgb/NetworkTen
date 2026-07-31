@@ -21,6 +21,7 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import ReplayRoundedIcon from "@mui/icons-material/ReplayRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PlayCircleRoundedIcon from "@mui/icons-material/PlayCircleRounded";
+import CallOutlinedIcon from "@mui/icons-material/CallOutlined";
 import { getProductById, getProducts } from "@/services/productService";
 import { addToCart } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
@@ -75,6 +76,7 @@ if (typeof document !== "undefined" && !document.getElementById("pdp-font")) {
 const WHATSAPP_NUMBER = "918687878755"; // country code + number, no + or spaces
 const WHATSAPP_MESSAGE = "Hi! I'm interested in your products and would like to know more.";
 const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+const SUPPORT_PHONE = "+918687878755";
 
 // ─── Bulk tiers ───────────────────────────────────────────────────────────────
 const BULK = [
@@ -321,10 +323,6 @@ export default function ProductDetailPage() {
   const total    = perUnit * BULK[selBulk].qty;
   const allImgs: string[] = product?.images?.length > 0
     ? product.images : product?.image ? [product.image] : [];
-
-  // Rough EMI estimate for the Razorpay-style banner (illustrative only —
-  // wire this up to your real Razorpay EMI plan API if you need exact figures)
-  const emiMonthly = total > 0 ? Math.round(total / 12) : 0;
 
   const mediaItems: { type: "image" | "video"; src: string }[] = [
     ...allImgs.map((src) => ({ type: "image" as const, src })),
@@ -844,9 +842,8 @@ export default function ProductDetailPage() {
                   </Typography>
                 </Box>
 
-                {/* ══ Razorpay — EMI plans, Pay Later & Safe Payment ══ */}
+                {/* ══ Need Help? — Call / WhatsApp banner (replaces EMI/Razorpay) ══ */}
                 <Box sx={{ mb: 2.5 }}>
-                  {/* EMI & Pay Later banner */}
                   <Box sx={{
                     borderRadius: "14px",
                     overflow: "hidden",
@@ -859,16 +856,11 @@ export default function ProductDetailPage() {
                       display: "flex", alignItems: "center", justifyContent: "space-between",
                     }}>
                       <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans }}>
-                        EMI plans and Pay Later
+                        Need help deciding?
                       </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
-                        <Typography sx={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", fontFamily: sans }}>
-                          powered by
-                        </Typography>
-                        <Typography sx={{ fontSize: "13px", fontWeight: 800, color: "#fff", fontFamily: sans, fontStyle: "italic" }}>
-                          Razorpay
-                        </Typography>
-                      </Box>
+                      <Typography sx={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", fontFamily: sans }}>
+                        Our team responds fast
+                      </Typography>
                     </Box>
 
                     {/* Body */}
@@ -878,36 +870,18 @@ export default function ProductDetailPage() {
                       display: "flex", flexDirection: { xs: "column", sm: "row" },
                       alignItems: { xs: "stretch", sm: "center" }, gap: 2,
                     }}>
-                      {/* EMI */}
+                      {/* Call */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans, mb: 1 }}>
-                          EMI from ₹{emiMonthly.toLocaleString("en-IN")}/month
+                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans, mb: 0.4 }}>
+                          Call for bulk pricing
                         </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.4 }}>
-                          {["HDFC", "ICICI", "SBI"].map((bank) => (
-                            <Box key={bank} sx={{
-                              width: 28, height: 28, borderRadius: "50%",
-                              background: "#fff", display: "flex", alignItems: "center",
-                              justifyContent: "center", flexShrink: 0,
-                              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
-                            }}>
-                              <Typography sx={{ fontSize: "7px", fontWeight: 800, color: "#1d4ed8", fontFamily: sans }}>
-                                {bank.slice(0, 4)}
-                              </Typography>
-                            </Box>
-                          ))}
-                          <Box sx={{
-                            height: 28, px: 1, borderRadius: "50px",
-                            background: "rgba(255,255,255,0.12)",
-                            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                          }}>
-                            <Typography sx={{ fontSize: "10px", fontWeight: 700, color: "#fff", fontFamily: sans }}>
-                              +10
-                            </Typography>
-                          </Box>
-                        </Box>
+                        <Typography sx={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: sans, mb: 1.4 }}>
+                          Mon–Sat, 10 AM – 7 PM
+                        </Typography>
                         <Button
-                          endIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: "16px !important" }} />}
+                          component="a"
+                          href={`tel:${SUPPORT_PHONE}`}
+                          startIcon={<CallOutlinedIcon sx={{ fontSize: "16px !important" }} />}
                           sx={{
                             height: 34, px: 2, borderRadius: "50px",
                             background: "#2563eb", color: "#fff",
@@ -915,7 +889,7 @@ export default function ProductDetailPage() {
                             "&:hover": { background: "#1d4ed8" },
                           }}
                         >
-                          View plans
+                          Call Now
                         </Button>
                       </Box>
 
@@ -926,13 +900,17 @@ export default function ProductDetailPage() {
                         background: "rgba(255,255,255,0.14)",
                       }} />
 
-                      {/* Pay Later */}
+                      {/* WhatsApp */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#fff", fontFamily: sans, mb: 1.6 }}>
-                          Pay Later available
+                          Chat with us on WhatsApp
                         </Typography>
                         <Button
-                          endIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: "16px !important" }} />}
+                          component="a"
+                          href={WHATSAPP_LINK}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          startIcon={<WhatsAppIcon sx={{ fontSize: "16px !important" }} />}
                           sx={{
                             height: 34, px: 2, borderRadius: "50px",
                             background: "#fff", color: "#0a0f1e",
@@ -940,13 +918,13 @@ export default function ProductDetailPage() {
                             "&:hover": { background: "#f0f0f0" },
                           }}
                         >
-                          View options
+                          Message Us
                         </Button>
                       </Box>
                     </Box>
                   </Box>
 
-                  {/* Safe Payment strip — replaces Money Back Promise */}
+                  {/* Safe Payment strip */}
                   <Box sx={{
                     mt: 1.4,
                     borderRadius: "14px",
