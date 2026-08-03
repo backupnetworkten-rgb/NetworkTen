@@ -16,6 +16,7 @@ import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import VolumeUpRoundedIcon from "@mui/icons-material/VolumeUpRounded";
 import VolumeOffRoundedIcon from "@mui/icons-material/VolumeOffRounded";
 import LocalPhoneRoundedIcon from "@mui/icons-material/LocalPhoneRounded";
+import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
 
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
@@ -52,6 +53,57 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
+
+      {/* FLOATING — DOWNLOAD COMPANY PROFILE TAB */}
+      <Box
+        component="a"
+        href="/files/CompanyProfile.pdf"
+        download
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{
+          position: "fixed",
+          top: "45%",
+          right: 0,
+          transform: "translateY(-50%)",
+          zIndex: 1300,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 0.8,
+          textDecoration: "none",
+          background: "#0B0B0B",
+          color: "#fff",
+          px: { xs: 1, md: 1.2 },
+          py: { xs: 1.6, md: 2 },
+          borderTopLeftRadius: "14px",
+          borderBottomLeftRadius: "14px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+          cursor: "pointer",
+          transition: "0.3s",
+          "&:hover": {
+            background: "#8BC53F",
+            paddingRight: { xs: 1.4, md: 1.8 },
+          },
+        }}
+      >
+        <PictureAsPdfRoundedIcon
+          sx={{ fontSize: { xs: 18, md: 20 }, color: "#8BC53F" }}
+        />
+        <Typography
+          sx={{
+            writingMode: "vertical-rl",
+            transform: "rotate(180deg)",
+            fontWeight: 700,
+            letterSpacing: "1px",
+            fontSize: { xs: "11px", md: "12px" },
+            whiteSpace: "nowrap",
+            textTransform: "uppercase",
+          }}
+        >
+          Download Profile
+        </Typography>
+      </Box>
 
       {/* HERO */}
       <Box
