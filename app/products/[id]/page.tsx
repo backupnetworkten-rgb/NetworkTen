@@ -842,9 +842,81 @@ export default function ProductDetailPage() {
                   </Typography>
                 </Box>
 
-                {/* ══ Need Help? — Call / WhatsApp banner (replaces EMI/Razorpay) ══ */}
+                {/* ══ Safe Payment strip — premium Razorpay + Shiprocket showcase (now first) ══ */}
                 <Box sx={{ mb: 2.5 }}>
                   <Box sx={{
+                    borderRadius: "16px",
+                    border: "1px solid #d1fae5",
+                    background: "linear-gradient(135deg, #f6fdf9 0%, #eafcf1 100%)",
+                    overflow: "hidden",
+                    boxShadow: "0 4px 20px rgba(22,163,74,0.10)",
+                  }}>
+                    {/* Top row: lock + heading */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.6, px: 2.4, pt: 2, pb: 1.6 }}>
+                      <Box sx={{
+                        width: 44, height: 44, borderRadius: "50%",
+                        background: "linear-gradient(135deg, #16a34a, #15803d)",
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                        boxShadow: "0 4px 10px rgba(22,163,74,0.30)",
+                      }}>
+                        <LockOutlinedIcon sx={{ color: "#fff", fontSize: 22 }} />
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                          <Typography sx={{ fontSize: "15px", fontWeight: 800, color: "#0a0a0a", fontFamily: sans, letterSpacing: "-0.2px" }}>
+                            100% Safe Payment
+                          </Typography>
+                          <VerifiedOutlinedIcon sx={{ fontSize: 16, color: C.green }} />
+                        </Box>
+                        <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.5, mt: 0.2 }}>
+                          Encrypted, secure checkout — every transaction protected end-to-end
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Bottom row: two premium partner badges — Razorpay + Shiprocket */}
+                    <Box sx={{
+                      display: "flex",
+                      borderTop: "1px solid #d1fae5",
+                      background: "#ffffff",
+                    }}>
+                      {/* Razorpay badge */}
+                      <Box sx={{
+                        flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3,
+                        py: 1.8, borderRight: "1px solid #f0f0f0",
+                      }}>
+                        <Typography sx={{ fontSize: "10px", color: C.textMuted, fontFamily: sans, fontWeight: 600, letterSpacing: "0.4px", textTransform: "uppercase" }}>
+                          Payments Secured By
+                        </Typography>
+                        <Typography sx={{
+                          fontSize: "19px", fontWeight: 900, color: "#0f172a", fontFamily: sans,
+                          letterSpacing: "-0.4px", lineHeight: 1.2,
+                        }}>
+                          Razor<span style={{ color: C.razorBlue }}>pay</span>
+                        </Typography>
+                      </Box>
+
+                      {/* Shiprocket badge */}
+                      <Box sx={{
+                        flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0.3,
+                        py: 1.8,
+                      }}>
+                        <Typography sx={{ fontSize: "10px", color: C.textMuted, fontFamily: sans, fontWeight: 600, letterSpacing: "0.4px", textTransform: "uppercase" }}>
+                          Delivery Powered By
+                        </Typography>
+                        <Typography sx={{
+                          fontSize: "19px", fontWeight: 900, color: "#0f172a", fontFamily: sans,
+                          letterSpacing: "-0.4px", lineHeight: 1.2,
+                        }}>
+                          Ship<span style={{ color: "#f97316" }}>rocket</span>
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* ══ Need Help? — Call / WhatsApp banner (now second) ══ */}
+                  <Box sx={{
+                    mt: 1.4,
                     borderRadius: "14px",
                     overflow: "hidden",
                     boxShadow: "0 4px 18px rgba(37,99,235,0.16)",
@@ -921,41 +993,6 @@ export default function ProductDetailPage() {
                           Message Us
                         </Button>
                       </Box>
-                    </Box>
-                  </Box>
-
-                  {/* Safe Payment strip */}
-                  <Box sx={{
-                    mt: 1.4,
-                    borderRadius: "14px",
-                    border: "1px solid #bbf7d0",
-                    background: "linear-gradient(135deg, #f4fdf7 0%, #eafcf1 100%)",
-                    px: 2.2, py: 1.8,
-                    position: "relative",
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.6,
-                    boxShadow: "0 2px 12px rgba(22,163,74,0.08)",
-                  }}>
-                    <Box sx={{
-                      width: 42, height: 42, borderRadius: "50%",
-                      background: "linear-gradient(135deg, #16a34a, #15803d)",
-                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                      boxShadow: "0 4px 10px rgba(22,163,74,0.30)",
-                    }}>
-                      <LockOutlinedIcon sx={{ color: "#fff", fontSize: 21 }} />
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.9, mb: 0.3 }}>
-                        <Typography sx={{ fontSize: "14px", fontWeight: 800, color: "#0a0a0a", fontFamily: sans, letterSpacing: "-0.2px" }}>
-                          100% Safe Payment
-                        </Typography>
-                        <VerifiedOutlinedIcon sx={{ fontSize: 15, color: C.green }} />
-                      </Box>
-                      <Typography sx={{ fontSize: "11.5px", color: C.textSub, fontFamily: sans, lineHeight: 1.5 }}>
-                        Encrypted, secure checkout — every transaction is protected end-to-end.
-                      </Typography>
                     </Box>
                   </Box>
                 </Box>
