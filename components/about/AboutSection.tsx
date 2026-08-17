@@ -28,13 +28,22 @@ export default function AboutSection() {
     const video = videoRef.current;
     if (!video) return;
 
-    // Browsers REQUIRE muted for guaranteed autoplay — this is not optional
     video.muted = true;
-    video.play().catch(() => {});
 
-    // The moment the user interacts with the VIDEO itself (or the page),
-    // unmute automatically — this is the closest thing to "instant sound"
-    // that any browser allows.
+    const attemptPlay = () => {
+      video.play().catch((err) => {
+        console.warn("Autoplay blocked, will retry on interaction:", err);
+      });
+    };
+
+    attemptPlay();
+
+    video.addEventListener("loadedmetadata", attemptPlay);
+    video.addEventListener("canplay", attemptPlay);
+
+    // Only real user gestures (click, touch, key press) count for unmuted playback.
+    // Scroll is intentionally excluded — browsers block audio triggered by scroll
+    // and will pause the video, which was causing the "plays then pauses" bug.
     const unmuteOnInteraction = () => {
       if (video) {
         video.muted = false;
@@ -42,19 +51,18 @@ export default function AboutSection() {
         video.play().catch(() => {});
       }
       window.removeEventListener("click", unmuteOnInteraction);
-      window.removeEventListener("scroll", unmuteOnInteraction);
       window.removeEventListener("keydown", unmuteOnInteraction);
       window.removeEventListener("touchstart", unmuteOnInteraction);
     };
 
     window.addEventListener("click", unmuteOnInteraction);
-    window.addEventListener("scroll", unmuteOnInteraction);
     window.addEventListener("keydown", unmuteOnInteraction);
     window.addEventListener("touchstart", unmuteOnInteraction);
 
     return () => {
+      video.removeEventListener("loadedmetadata", attemptPlay);
+      video.removeEventListener("canplay", attemptPlay);
       window.removeEventListener("click", unmuteOnInteraction);
-      window.removeEventListener("scroll", unmuteOnInteraction);
       window.removeEventListener("keydown", unmuteOnInteraction);
       window.removeEventListener("touchstart", unmuteOnInteraction);
     };
@@ -71,39 +79,18 @@ export default function AboutSection() {
   };
 
   const services = [
-    {
-      title: "Networking Solutions",
-      icon: <LanIcon />,
-    },
-    {
-      title: "Audio-Visual Solutions",
-      icon: <VolumeUpIcon />,
-    },
-    {
-      title: "IT Security & Surveillance",
-      icon: <SecurityIcon />,
-    },
-    {
-      title: "Communication Infrastructure",
-      icon: <PhoneInTalkIcon />,
-    },
-    {
-      title: "Automation Solutions",
-      icon: <SettingsSuggestIcon />,
-    },
-    {
-      title: "Modern Workplace Setup",
-      icon: <DesktopWindowsIcon />,
-    },
+    { title: "Networking Solutions", icon: <LanIcon /> },
+    { title: "Audio-Visual Solutions", icon: <VolumeUpIcon /> },
+    { title: "IT Security & Surveillance", icon: <SecurityIcon /> },
+    { title: "Communication Infrastructure", icon: <PhoneInTalkIcon /> },
+    { title: "Automation Solutions", icon: <SettingsSuggestIcon /> },
+    { title: "Modern Workplace Setup", icon: <DesktopWindowsIcon /> },
   ];
 
   return (
     <Box
       sx={{
-        py: {
-          xs: 4,
-          md: 5,
-        },
+        py: { xs: 4, md: 5 },
         background: "linear-gradient(to bottom, #f9fcf6, #eef7e8)",
         position: "relative",
         overflow: "hidden",
@@ -128,15 +115,11 @@ export default function AboutSection() {
         <Box
           sx={{
             textAlign: "center",
-            mb: {
-              xs: 3,
-              md: 3.5,
-            },
+            mb: { xs: 3, md: 3.5 },
             position: "relative",
             zIndex: 2,
           }}
         >
-          {/* TAG */}
           <Box
             sx={{
               display: "inline-flex",
@@ -163,7 +146,6 @@ export default function AboutSection() {
             </Typography>
           </Box>
 
-          {/* TITLE */}
           <Typography
             sx={{
               color: "#08142e",
@@ -171,24 +153,17 @@ export default function AboutSection() {
               lineHeight: 1.1,
               letterSpacing: "-0.8px",
               mb: 1,
-              fontSize: {
-                xs: "24px",
-                md: "38px",
-              },
+              fontSize: { xs: "24px", md: "38px" },
             }}
           >
             All Solutions Under One Umbrella
           </Typography>
 
-          {/* SUBTITLE */}
           <Typography
             sx={{
               color: "#667085",
               lineHeight: 1.7,
-              fontSize: {
-                xs: "13px",
-                md: "14px",
-              },
+              fontSize: { xs: "13px", md: "14px" },
               maxWidth: "680px",
               mx: "auto",
             }}
@@ -202,14 +177,8 @@ export default function AboutSection() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: "40% 60%",
-            },
-            gap: {
-              xs: 2.5,
-              md: 2.5,
-            },
+            gridTemplateColumns: { xs: "1fr", lg: "40% 60%" },
+            gap: { xs: 2.5, md: 2.5 },
             alignItems: "stretch",
             position: "relative",
             zIndex: 2,
@@ -222,25 +191,18 @@ export default function AboutSection() {
               backdropFilter: "blur(14px)",
               borderRadius: "30px",
               border: "1px solid rgba(139,197,63,0.10)",
-              p: {
-                xs: 2,
-                md: 2.4,
-              },
+              p: { xs: 2, md: 2.4 },
               boxShadow: "0 18px 50px rgba(0,0,0,0.05)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
             }}
           >
-            {/* SERVICE GRID */}
             <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 1fr)",
-                gap: {
-                  xs: 1.8,
-                  md: 2,
-                },
+                gap: { xs: 1.8, md: 2 },
               }}
             >
               {services.map((item, index) => (
@@ -258,18 +220,11 @@ export default function AboutSection() {
                     },
                   }}
                 >
-                  {/* ICON */}
                   <Box
                     className="circleIcon"
                     sx={{
-                      width: {
-                        xs: 92,
-                        md: 108,
-                      },
-                      height: {
-                        xs: 92,
-                        md: 108,
-                      },
+                      width: { xs: 92, md: 108 },
+                      height: { xs: 92, md: 108 },
                       borderRadius: "50%",
                       background: "linear-gradient(135deg, #8BC53F, #b2e565)",
                       display: "flex",
@@ -293,10 +248,7 @@ export default function AboutSection() {
                         right: -20,
                       },
                       "& svg": {
-                        fontSize: {
-                          xs: 38,
-                          md: 44,
-                        },
+                        fontSize: { xs: 38, md: 44 },
                         position: "relative",
                         zIndex: 2,
                       },
@@ -305,16 +257,12 @@ export default function AboutSection() {
                     {item.icon}
                   </Box>
 
-                  {/* TITLE */}
                   <Typography
                     sx={{
                       color: "#08142e",
                       fontWeight: 800,
                       lineHeight: 1.35,
-                      fontSize: {
-                        xs: "11px",
-                        md: "12px",
-                      },
+                      fontSize: { xs: "11px", md: "12px" },
                       maxWidth: "110px",
                     }}
                   >
@@ -324,7 +272,6 @@ export default function AboutSection() {
               ))}
             </Box>
 
-            {/* BUTTONS */}
             <Box
               sx={{
                 display: "flex",
@@ -346,9 +293,7 @@ export default function AboutSection() {
                     textTransform: "none",
                     fontSize: "13px",
                     boxShadow: "0 10px 22px rgba(139,197,63,0.20)",
-                    "&:hover": {
-                      background: "#74ab35",
-                    },
+                    "&:hover": { background: "#74ab35" },
                   }}
                 >
                   Contact Us
@@ -386,10 +331,7 @@ export default function AboutSection() {
               position: "relative",
               borderRadius: "30px",
               overflow: "hidden",
-              minHeight: {
-                xs: "260px",
-                md: "100%",
-              },
+              minHeight: { xs: "260px", md: "100%" },
               background: "linear-gradient(145deg, #ffffff, #f6fbf1)",
               boxShadow: "0 22px 55px rgba(0,0,0,0.08)",
               p: 1,
@@ -398,18 +340,17 @@ export default function AboutSection() {
               alignItems: "center",
               justifyContent: "center",
               transition: "0.35s",
-              "&:hover": {
-                transform: "translateY(-4px)",
-              },
+              "&:hover": { transform: "translateY(-4px)" },
             }}
           >
-            {/* VIDEO */}
             <video
               ref={videoRef}
               autoPlay
+              muted
               loop
               playsInline
               controls
+              preload="auto"
               style={{
                 width: "100%",
                 height: "100%",
@@ -422,7 +363,6 @@ export default function AboutSection() {
               <source src="/videos/1.mp4" type="video/mp4" />
             </video>
 
-            {/* SOUND PROMPT — visible the instant the page loads */}
             {isMuted && (
               <IconButton
                 onClick={toggleMute}
@@ -442,9 +382,7 @@ export default function AboutSection() {
                   fontSize: "12px",
                   fontWeight: 700,
                   animation: "pulseSound 1.6s infinite",
-                  "&:hover": {
-                    background: "rgba(139,197,63,0.9)",
-                  },
+                  "&:hover": { background: "rgba(139,197,63,0.9)" },
                   "@keyframes pulseSound": {
                     "0%": { boxShadow: "0 0 0 0 rgba(139,197,63,0.5)" },
                     "70%": { boxShadow: "0 0 0 14px rgba(139,197,63,0)" },
