@@ -43,6 +43,7 @@ import { proxyImage } from "@/lib/proxyImage";
 import { addToCart } from "@/lib/cartStore";
 import RatingStars from "@/components/review/RatingStars";
 import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
+import ScrollToTop from "@/components/ScrollToTop/ScrollToTop";
 
 import { useRouter } from "next/navigation";
 
@@ -1124,6 +1125,8 @@ export default function ProductsPage() {
       </Tooltip>
 
       <Footer />
+
+      <ScrollToTop />
     </>
   );
 }

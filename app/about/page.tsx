@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 import {
   Box,
@@ -24,12 +24,37 @@ import PartnersSection from "../../components/partners/PartnersSection";
 import PillarsSection from "../../components/pillars/PillarsSection";
 import InstallationSupportSection from "../../components/install/InstallationSupportSection";
 
+import ScrollToTop from "@/components/ScrollToTop/ScrollToTop";
+
 import Link from "next/link";
 
 export default function AboutPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+
+  useEffect(() => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  video.muted = false;
+
+  video
+    .play()
+    .then(() => {
+      setIsPlaying(true);
+      setIsMuted(false);
+    })
+    .catch(() => {
+      // Browser blocked autoplay with sound — fall back to muted autoplay
+      video.muted = true;
+      setIsMuted(true);
+      video
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
+    });
+}, []);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -304,7 +329,6 @@ export default function AboutPage() {
                   ref={videoRef}
                   src="/videos/About.mp4"
                   autoPlay
-                  muted
                   loop
                   playsInline
                   onClick={togglePlay}
@@ -695,6 +719,8 @@ export default function AboutPage() {
       </Box>
 
       <Footer />
+
+      <ScrollToTop />
     </>
   );
 }
