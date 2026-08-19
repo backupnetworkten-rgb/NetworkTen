@@ -7,7 +7,7 @@ import {
   AppBar, Toolbar, Box, Button, IconButton, Drawer, List,
   ListItem, ListItemButton, ListItemText, Badge, InputBase,
   useMediaQuery, Menu, MenuItem, Typography, Collapse, Paper, Fade,
-  TextField,
+  TextField, Popover,
 } from "@mui/material";
 import MenuIcon                      from "@mui/icons-material/Menu";
 import ShoppingCartIcon              from "@mui/icons-material/ShoppingCart";
@@ -31,7 +31,7 @@ import {
 } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
 
-// ── Solutions mega-menu data ─────────────────────────────────────────────────
+// ── Solutions mega-menu data
 const solutions = [
   {
     title: "Banking & Retail",
@@ -113,9 +113,11 @@ export default function Navbar() {
   const solutionsRef   = useRef<HTMLDivElement>(null);
   const closeTimer     = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Search state ──────────────────────────────────────────────────────────
-  const [searchQuery,     setSearchQuery]     = useState("");
+  // ── Search state (icon-triggered, after Contact) ──────────────────────────
+  const [searchQuery,      setSearchQuery]      = useState("");
+  const [searchAnchor,     setSearchAnchor]     = useState<null | HTMLElement>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const searchInputRef       = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   const theme  = useTheme();
@@ -151,6 +153,14 @@ export default function Navbar() {
       }
     }
   }, [cartOpen]);
+
+  // Autofocus the desktop search popover input when it opens
+  useEffect(() => {
+    if (searchAnchor) {
+      const t = setTimeout(() => searchInputRef.current?.focus(), 120);
+      return () => clearTimeout(t);
+    }
+  }, [searchAnchor]);
 
   // Autofocus the mobile search field when it opens
   useEffect(() => {
@@ -192,6 +202,7 @@ export default function Navbar() {
     if (!q) return;
     router.push(`/products?search=${encodeURIComponent(q)}`);
     setSearchQuery("");
+    setSearchAnchor(null);
     setMobileSearchOpen(false);
   };
 
@@ -201,13 +212,14 @@ export default function Navbar() {
       runSearch(searchQuery);
     } else if (e.key === "Escape") {
       setSearchQuery("");
+      setSearchAnchor(null);
       setMobileSearchOpen(false);
     }
   };
 
-  const toggleMobileSearch = () => {
-    setMobileSearchOpen((prev) => !prev);
-  };
+  const openDesktopSearch  = (e: React.MouseEvent<HTMLElement>) => setSearchAnchor(e.currentTarget);
+  const closeDesktopSearch = () => setSearchAnchor(null);
+  const toggleMobileSearch = () => setMobileSearchOpen((prev) => !prev);
 
   // NEW: keep localStorage in sync as the user types the note in the drawer
   const handleNoteChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -259,7 +271,7 @@ export default function Navbar() {
               </Box>
             </Link>
 
-            {/* DESKTOP NAV — order: Home, About, Products, Solutions, Contact */}
+            {/* DESKTOP NAV — order: Home, About, Products, Solutions, Conference Room, Interior Designer, Contact, Search (icon) */}
             {!mobile && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, overflow: "visible" }}>
                 {/* Home */}
@@ -558,11 +570,87 @@ export default function Navbar() {
                   </Fade>
                 </Box>
 
+                {/* ── Conference Room (compact, "Hot" tag inline right after label, raised slightly) ── */}
+                <Link href="/conference-room" style={{ textDecoration: "none" }}>
+                  <Button
+                    sx={{
+                      color: "#102048", fontWeight: 700, textTransform: "none",
+                      fontSize: "15px", px: 1.4, py: 0.6, borderRadius: "10px", minWidth: "auto",
+                      transition: "0.3s",
+                      display: "flex", alignItems: "flex-start", gap: 0.5,
+                      "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                    }}
+                  >
+                    <Box component="span" sx={{ lineHeight: 1.2 }}>
+                      Conference Room
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{
+                        position: "relative",
+                        top: "-6px",
+                        background: "linear-gradient(135deg,#ef4444,#dc2626)",
+                        color: "#fff",
+                        fontWeight: 800,
+                        fontSize: "8px",
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                        px: 0.55,
+                        py: 0.15,
+                        borderRadius: "20px",
+                        boxShadow: "0 3px 8px rgba(220,38,38,0.35)",
+                        lineHeight: 1.2,
+                        flexShrink: 0,
+                      }}
+                    >
+                      Hot
+                    </Box>
+                  </Button>
+                </Link>
+
+                {/* ── Interior Designer (compact, "New" tag inline right after label, raised slightly) ── */}
+                <Link href="/interior-designer" style={{ textDecoration: "none" }}>
+                  <Button
+                    sx={{
+                      color: "#102048", fontWeight: 700, textTransform: "none",
+                      fontSize: "15px", px: 1.4, py: 0.6, borderRadius: "10px", minWidth: "auto",
+                      transition: "0.3s",
+                      display: "flex", alignItems: "flex-start", gap: 0.5,
+                      "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                    }}
+                  >
+                    <Box component="span" sx={{ lineHeight: 1.2 }}>
+                      Interior Designer
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{
+                        position: "relative",
+                        top: "-6px",
+                        background: "linear-gradient(135deg,#3b82f6,#2563eb)",
+                        color: "#fff",
+                        fontWeight: 800,
+                        fontSize: "8px",
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                        px: 0.55,
+                        py: 0.15,
+                        borderRadius: "20px",
+                        boxShadow: "0 3px 8px rgba(37,99,235,0.35)",
+                        lineHeight: 1.2,
+                        flexShrink: 0,
+                      }}
+                    >
+                      New
+                    </Box>
+                  </Button>
+                </Link>
+
                 {/* Contact */}
                 <Link href="/contact" style={{ textDecoration: "none" }}>
                   <Button sx={{
                     color: "#102048", fontWeight: 700, textTransform: "none",
-                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    fontSize: "15px", px: 1.8, mr: 2, borderRadius: "10px", minWidth: "auto",
                     transition: "0.3s",
                     "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
                   }}>
@@ -576,42 +664,78 @@ export default function Navbar() {
           {/* RIGHT — DESKTOP */}
           {!mobile ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.1 }}>
-              {/* Search — now functional */}
-              <Box sx={{
-                display: "flex", alignItems: "center",
-                background: "#f5f7fb", borderRadius: "40px",
-                px: 2, height: "46px", width: "250px",
-                border: "1px solid #edf1f7",
-                transition: "border-color 0.2s",
-                "&:focus-within": { borderColor: "#8BC53F" },
-              }}>
-                <IconButton
-                  onClick={() => runSearch(searchQuery)}
-                  size="small"
-                  sx={{ p: 0.4, mr: 1 }}
-                  aria-label="Search"
-                >
-                  <SearchIcon sx={{ color: "#7b8794", fontSize: 22 }} />
-                </IconButton>
-                <InputBase
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  sx={{ width: "100%", fontSize: "14px" }}
-                  inputProps={{ "aria-label": "Search products" }}
-                />
-                {searchQuery && (
+              {/* ── Search icon (opens a small popover input, right before Cart) ── */}
+              <IconButton
+                onClick={openDesktopSearch}
+                aria-label="Search"
+                sx={{
+                  width: 46, height: 46,
+                  background: Boolean(searchAnchor) ? "#102048" : "#f5f7fb",
+                  border: "1px solid #edf1f7",
+                  transition: "all 0.2s",
+                  "&:hover": { background: "#102048", "& svg": { color: "#fff" } },
+                }}
+              >
+                <SearchIcon sx={{ color: Boolean(searchAnchor) ? "#fff" : "#102048", fontSize: 21 }} />
+              </IconButton>
+
+              <Popover
+                open={Boolean(searchAnchor)}
+                anchorEl={searchAnchor}
+                onClose={closeDesktopSearch}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{
+                  paper: {
+                    elevation: 0,
+                    sx: {
+                      mt: 1.5, borderRadius: "18px", p: 1.2, width: 300,
+                      border: "1px solid #eef2f7",
+                      boxShadow: "0 20px 50px rgba(0,0,0,0.10)",
+                    },
+                  },
+                }}
+              >
+                <Box sx={{
+                  display: "flex", alignItems: "center",
+                  background: "#f5f7fb", borderRadius: "40px",
+                  px: 2, height: "46px",
+                  border: "1px solid #edf1f7",
+                  "&:focus-within": { borderColor: "#8BC53F" },
+                }}>
+                  <SearchIcon sx={{ color: "#7b8794", fontSize: 20, mr: 1 }} />
+                  <InputBase
+                    inputRef={searchInputRef}
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    sx={{ width: "100%", fontSize: "14px" }}
+                    inputProps={{ "aria-label": "Search products" }}
+                  />
+                  {searchQuery && (
+                    <IconButton
+                      onClick={() => setSearchQuery("")}
+                      size="small"
+                      sx={{ p: 0.3 }}
+                      aria-label="Clear search"
+                    >
+                      <CloseRoundedIcon sx={{ fontSize: 15, color: "#9aa0af" }} />
+                    </IconButton>
+                  )}
                   <IconButton
-                    onClick={() => setSearchQuery("")}
+                    onClick={() => runSearch(searchQuery)}
                     size="small"
-                    sx={{ p: 0.3 }}
-                    aria-label="Clear search"
+                    sx={{
+                      background: "#8BC53F", width: 30, height: 30, ml: 0.5,
+                      "&:hover": { background: "#74ab35" },
+                    }}
+                    aria-label="Run search"
                   >
-                    <CloseRoundedIcon sx={{ fontSize: 15, color: "#9aa0af" }} />
+                    <SearchIcon sx={{ fontSize: 15, color: "#fff" }} />
                   </IconButton>
-                )}
-              </Box>
+                </Box>
+              </Popover>
 
               {/* Cart */}
               <IconButton
@@ -755,7 +879,7 @@ export default function Navbar() {
           )}
         </Toolbar>
 
-        {/* ── MOBILE SEARCH BAR (expands under toolbar) ── */}
+        {/* ── MOBILE SEARCH BAR (expands under toolbar, toggled by the search icon) ── */}
         {mobile && (
           <Collapse in={mobileSearchOpen} timeout={220} unmountOnExit>
             <Box sx={{ px: 2, pb: 2 }}>
@@ -808,7 +932,7 @@ export default function Navbar() {
         )}
       </AppBar>
 
-      {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Products, Solutions, Contact ════════════════════════ */}
+      {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Products, Solutions, Conference Room, Interior Designer, Contact ════════════════════════ */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
         <Box sx={{ width: 300, p: 3 }}>
           <List>
@@ -916,6 +1040,78 @@ export default function Navbar() {
                 </ListItem>
               </List>
             </Collapse>
+
+            {/* ── Conference Room (compact, "Hot" tag inline right after label, raised slightly) ── */}
+            <ListItem disablePadding>
+              <Link href="/conference-room" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+                <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.6 }}>
+                        <Typography component="span" sx={{ fontSize: "15px", fontWeight: 500, lineHeight: 1.2 }}>
+                          Conference Room
+                        </Typography>
+                        <Box
+                          component="span"
+                          sx={{
+                            position: "relative",
+                            top: "-4px",
+                            background: "linear-gradient(135deg,#ef4444,#dc2626)",
+                            color: "#fff",
+                            fontWeight: 800,
+                            fontSize: "8px",
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            px: 0.6,
+                            py: 0.15,
+                            borderRadius: "20px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Hot
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+
+            {/* ── Interior Designer (compact, "New" tag inline right after label, raised slightly) ── */}
+            <ListItem disablePadding>
+              <Link href="/interior-designer" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+                <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 0.6 }}>
+                        <Typography component="span" sx={{ fontSize: "15px", fontWeight: 500, lineHeight: 1.2 }}>
+                          Interior Designer
+                        </Typography>
+                        <Box
+                          component="span"
+                          sx={{
+                            position: "relative",
+                            top: "-4px",
+                            background: "linear-gradient(135deg,#3b82f6,#2563eb)",
+                            color: "#fff",
+                            fontWeight: 800,
+                            fontSize: "8px",
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            px: 0.6,
+                            py: 0.15,
+                            borderRadius: "20px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          New
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </ListItemButton>
+              </Link>
+            </ListItem>
 
             {/* Contact */}
             <ListItem disablePadding>
@@ -1166,7 +1362,7 @@ export default function Navbar() {
         {cartItems.length > 0 && (
           <Box sx={{ px: 2.5, pb: 3, pt: 2, background: "#fff", borderTop: "1px solid #eef2f7", flexShrink: 0 }}>
 
-            {/* NEW: Order note — synced with /cart and /checkout via localStorage */}
+            {/* Order note — synced with /cart and /checkout via localStorage */}
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mb: 0.9 }}>
                 <EditNoteRoundedIcon sx={{ fontSize: 16, color: "#102048" }} />
