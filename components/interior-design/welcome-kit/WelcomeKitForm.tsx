@@ -1,22 +1,15 @@
 "use client";
 
-import {
-  FormEvent,
-  useState,
-} from "react";
+import React, { FormEvent, useState } from "react";
 
 import {
   Alert,
   Box,
   Button,
   Checkbox,
-  Chip,
   Container,
-  Divider,
   FormControlLabel,
-  Grid,
   Paper,
-  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -30,18 +23,18 @@ import { useRouter } from "next/navigation";
 
 import { signOut } from "firebase/auth";
 
-import {
-  auth,
-} from "@/lib/firebase/client";
+import { auth } from "@/lib/firebase/client";
 
 import {
   generateWelcomeKitPdf,
   saveWelcomeKitSubmission,
 } from "@/services/welcomeKitService";
 
-import {
-  WelcomeKitFormData,
-} from "@/types/interior-design";
+import { WelcomeKitFormData } from "@/types/interior-design";
+
+/* =========================================================
+   DESIGN STYLES
+========================================================= */
 
 const styles = [
   "Modern Minimalist",
@@ -54,6 +47,10 @@ const styles = [
   "Classic / Traditional",
   "Other",
 ];
+
+/* =========================================================
+   INITIAL FORM
+========================================================= */
 
 const initialForm: WelcomeKitFormData = {
   fullName: "",
@@ -91,12 +88,20 @@ const initialForm: WelcomeKitFormData = {
   additionalNotes: "",
 };
 
+/* =========================================================
+   FORM SECTION PROPS
+========================================================= */
+
 interface SectionProps {
   number: string;
   title: string;
   description?: string;
   children: React.ReactNode;
 }
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
 
 function FormSection({
   number,
@@ -113,17 +118,27 @@ function FormSection({
           sm: 4,
         },
         borderRadius: 4,
-        border:
-          "1px solid #e5eaf0",
+        border: "1px solid #e5eaf0",
+        backgroundColor: "#ffffff",
       }}
     >
-      <Stack spacing={3}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+        {/* SECTION HEADER */}
 
         <Box>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
             <Box
               sx={{
@@ -136,6 +151,7 @@ function FormSection({
                 alignItems: "center",
                 justifyContent: "center",
                 fontWeight: 900,
+                flexShrink: 0,
               }}
             >
               {number}
@@ -162,7 +178,7 @@ function FormSection({
                 }}
               />
             </Box>
-          </Stack>
+          </Box>
 
           {description && (
             <Typography
@@ -177,26 +193,83 @@ function FormSection({
           )}
         </Box>
 
-        {children}
+        {/* SECTION CONTENT */}
 
-      </Stack>
+        {children}
+      </Box>
     </Paper>
   );
 }
+
+/* =========================================================
+   TWO COLUMN LAYOUT
+========================================================= */
+
+function TwoColumnGrid({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          md: "repeat(2, minmax(0, 1fr))",
+        },
+        gap: 2.5,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+/* =========================================================
+   THREE COLUMN LAYOUT
+========================================================= */
+
+function ThreeColumnGrid({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "repeat(2, minmax(0, 1fr))",
+          md: "repeat(3, minmax(0, 1fr))",
+        },
+        gap: 1.5,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+/* =========================================================
+   WELCOME KIT FORM
+========================================================= */
 
 export default function WelcomeKitForm() {
   const router = useRouter();
 
   const [form, setForm] =
-    useState<WelcomeKitFormData>(
-      initialForm
-    );
+    useState<WelcomeKitFormData>(initialForm);
 
   const [submitting, setSubmitting] =
     useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
+
+  /* =======================================================
+     UPDATE FIELD
+  ======================================================= */
 
   function updateField<
     K extends keyof WelcomeKitFormData
@@ -210,19 +283,21 @@ export default function WelcomeKitForm() {
     }));
   }
 
+  /* =======================================================
+     TOGGLE DESIGN STYLE
+  ======================================================= */
+
   function toggleStyle(style: string) {
     setForm((previous) => {
       const exists =
-        previous.designStyles.includes(
-          style
-        );
+        previous.designStyles.includes(style);
 
       return {
         ...previous,
+
         designStyles: exists
           ? previous.designStyles.filter(
-              (item) =>
-                item !== style
+              (item) => item !== style
             )
           : [
               ...previous.designStyles,
@@ -231,6 +306,10 @@ export default function WelcomeKitForm() {
       };
     });
   }
+
+  /* =======================================================
+     SUBMIT FORM
+  ======================================================= */
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -241,14 +320,22 @@ export default function WelcomeKitForm() {
     setSubmitting(true);
 
     try {
-      await saveWelcomeKitSubmission(
-        form
-      );
+      /* -----------------------------------------------
+         SAVE TO FIRESTORE
+      ------------------------------------------------ */
+
+      await saveWelcomeKitSubmission(form);
+
+      /* -----------------------------------------------
+         GENERATE PDF
+      ------------------------------------------------ */
 
       const pdf =
-        await generateWelcomeKitPdf(
-          form
-        );
+        await generateWelcomeKitPdf(form);
+
+      /* -----------------------------------------------
+         CREATE DOWNLOAD URL
+      ------------------------------------------------ */
 
       const url =
         URL.createObjectURL(pdf);
@@ -271,11 +358,18 @@ export default function WelcomeKitForm() {
 
       URL.revokeObjectURL(url);
 
+      /* -----------------------------------------------
+         SUCCESS PAGE
+      ------------------------------------------------ */
+
       router.push(
         "/interior-design/kits/welcome?success=true"
       );
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Welcome Kit submission error:",
+        error
+      );
 
       setError(
         error instanceof Error
@@ -287,13 +381,28 @@ export default function WelcomeKitForm() {
     }
   }
 
-  async function logout() {
-    await signOut(auth);
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
 
-    router.push(
-      "/interior-design"
-    );
+  async function logout() {
+    try {
+      await signOut(auth);
+
+      router.push(
+        "/interior-design"
+      );
+    } catch (error) {
+      console.error(
+        "Logout error:",
+        error
+      );
+    }
   }
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
     <Container
@@ -305,8 +414,9 @@ export default function WelcomeKitForm() {
         },
       }}
     >
-
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
 
       <Paper
         elevation={0}
@@ -322,16 +432,19 @@ export default function WelcomeKitForm() {
             "linear-gradient(135deg, #08111f, #102048)",
         }}
       >
-        <Stack
-          direction={{
-            xs: "column",
-            sm: "row",
-          }}
-          spacing={3}
-          justifyContent="space-between"
-          alignItems={{
-            xs: "flex-start",
-            sm: "center",
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
+            gap: 3,
+            justifyContent: "space-between",
+            alignItems: {
+              xs: "flex-start",
+              sm: "center",
+            },
           }}
         >
           <Box>
@@ -386,6 +499,8 @@ export default function WelcomeKitForm() {
                 "rgba(255,255,255,0.3)",
               borderRadius: 2.5,
               fontWeight: 700,
+              whiteSpace: "nowrap",
+
               "&:hover": {
                 borderColor: "#8BC53F",
                 bgcolor:
@@ -395,225 +510,228 @@ export default function WelcomeKitForm() {
           >
             Sign Out
           </Button>
-        </Stack>
+        </Box>
       </Paper>
+
+      {/* =====================================================
+          FORM
+      ====================================================== */}
 
       <Box
         component="form"
         onSubmit={handleSubmit}
       >
-        <Stack spacing={3}>
-
-          {/* 01 */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          {/* =================================================
+              01 PERSONAL DETAILS
+          ================================================== */}
 
           <FormSection
             number="01"
             title="Personal Details"
           >
-            <Grid container spacing={2.5}>
+            <TwoColumnGrid>
+              <TextField
+                fullWidth
+                required
+                label="Full Name"
+                value={form.fullName}
+                onChange={(event) =>
+                  updateField(
+                    "fullName",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Full Name"
-                  value={form.fullName}
-                  onChange={(event) =>
-                    updateField(
-                      "fullName",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                type="email"
+                label="Email Address"
+                value={form.email}
+                onChange={(event) =>
+                  updateField(
+                    "email",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  type="email"
-                  label="Email Address"
-                  value={form.email}
-                  onChange={(event) =>
-                    updateField(
-                      "email",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                required
+                label="Phone / WhatsApp"
+                value={form.phone}
+                onChange={(event) =>
+                  updateField(
+                    "phone",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Phone / WhatsApp"
-                  value={form.phone}
-                  onChange={(event) =>
-                    updateField(
-                      "phone",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="City / Location"
-                  value={form.city}
-                  onChange={(event) =>
-                    updateField(
-                      "city",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-
-            </Grid>
+              <TextField
+                fullWidth
+                required
+                label="City / Location"
+                value={form.city}
+                onChange={(event) =>
+                  updateField(
+                    "city",
+                    event.target.value
+                  )
+                }
+              />
+            </TwoColumnGrid>
           </FormSection>
 
-          {/* 02 */}
+          {/* =================================================
+              02 PROPERTY
+          ================================================== */}
 
           <FormSection
             number="02"
             title="Your Property"
           >
-            <Grid container spacing={2.5}>
+            <TwoColumnGrid>
+              <TextField
+                fullWidth
+                select
+                SelectProps={{
+                  native: true,
+                }}
+                label="Property Type"
+                value={form.propertyType}
+                onChange={(event) =>
+                  updateField(
+                    "propertyType",
+                    event.target.value
+                  )
+                }
+              >
+                <option value="" />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true,
-                  }}
-                  label="Property Type"
-                  value={form.propertyType}
-                  onChange={(event) =>
-                    updateField(
-                      "propertyType",
-                      event.target.value
-                    )
-                  }
-                >
-                  <option value="" />
-                  <option value="Apartment">
-                    Apartment
-                  </option>
-                  <option value="Villa">
-                    Villa
-                  </option>
-                  <option value="Independent House">
-                    Independent House
-                  </option>
-                  <option value="Penthouse">
-                    Penthouse
-                  </option>
-                  <option value="Office">
-                    Office
-                  </option>
-                  <option value="Commercial">
-                    Commercial
-                  </option>
-                  <option value="Other">
-                    Other
-                  </option>
-                </TextField>
-              </Grid>
+                <option value="Apartment">
+                  Apartment
+                </option>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Total Area"
-                  placeholder="Example: 1800 sq.ft."
-                  value={form.totalArea}
-                  onChange={(event) =>
-                    updateField(
-                      "totalArea",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+                <option value="Villa">
+                  Villa
+                </option>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Configuration"
-                  placeholder="Example: 3 BHK"
-                  value={form.configuration}
-                  onChange={(event) =>
-                    updateField(
-                      "configuration",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+                <option value="Independent House">
+                  Independent House
+                </option>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  select
-                  SelectProps={{
-                    native: true,
-                  }}
-                  label="Property Status"
-                  value={form.propertyStatus}
-                  onChange={(event) =>
-                    updateField(
-                      "propertyStatus",
-                      event.target.value
-                    )
-                  }
-                >
-                  <option value="" />
-                  <option value="New Construction">
-                    New Construction
-                  </option>
-                  <option value="Under Construction">
-                    Under Construction
-                  </option>
-                  <option value="Ready to Move">
-                    Ready to Move
-                  </option>
-                  <option value="Renovation">
-                    Renovation
-                  </option>
-                  <option value="Other">
-                    Other
-                  </option>
-                </TextField>
-              </Grid>
+                <option value="Penthouse">
+                  Penthouse
+                </option>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Possession / Start Date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={
-                    form.possessionDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "possessionDate",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+                <option value="Office">
+                  Office
+                </option>
 
-            </Grid>
+                <option value="Commercial">
+                  Commercial
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+              </TextField>
+
+              <TextField
+                fullWidth
+                label="Total Area"
+                placeholder="Example: 1800 sq.ft."
+                value={form.totalArea}
+                onChange={(event) =>
+                  updateField(
+                    "totalArea",
+                    event.target.value
+                  )
+                }
+              />
+
+              <TextField
+                fullWidth
+                label="Configuration"
+                placeholder="Example: 3 BHK"
+                value={form.configuration}
+                onChange={(event) =>
+                  updateField(
+                    "configuration",
+                    event.target.value
+                  )
+                }
+              />
+
+              <TextField
+                fullWidth
+                select
+                SelectProps={{
+                  native: true,
+                }}
+                label="Property Status"
+                value={form.propertyStatus}
+                onChange={(event) =>
+                  updateField(
+                    "propertyStatus",
+                    event.target.value
+                  )
+                }
+              >
+                <option value="" />
+
+                <option value="New Construction">
+                  New Construction
+                </option>
+
+                <option value="Under Construction">
+                  Under Construction
+                </option>
+
+                <option value="Ready to Move">
+                  Ready to Move
+                </option>
+
+                <option value="Renovation">
+                  Renovation
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+              </TextField>
+
+              <TextField
+                fullWidth
+                type="date"
+                label="Possession / Start Date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                value={form.possessionDate}
+                onChange={(event) =>
+                  updateField(
+                    "possessionDate",
+                    event.target.value
+                  )
+                }
+              />
+            </TwoColumnGrid>
           </FormSection>
 
-          {/* 03 */}
+          {/* =================================================
+              03 DESIGN STYLE
+          ================================================== */}
 
           <FormSection
             number="03"
@@ -631,7 +749,7 @@ export default function WelcomeKitForm() {
                 describe what you like?
               </Typography>
 
-              <Grid container spacing={1.2}>
+              <ThreeColumnGrid>
                 {styles.map((style) => {
                   const selected =
                     form.designStyles.includes(
@@ -639,78 +757,75 @@ export default function WelcomeKitForm() {
                     );
 
                   return (
-                    <Grid
+                    <Box
                       key={style}
-                      size={{
-                        xs: 12,
-                        sm: 6,
-                        md: 4,
+                      onClick={() =>
+                        toggleStyle(style)
+                      }
+                      sx={{
+                        cursor: "pointer",
+                        p: 1.5,
+                        borderRadius: 2.5,
+                        border: "1px solid",
+                        borderColor:
+                          selected
+                            ? "#8BC53F"
+                            : "#e0e5eb",
+                        bgcolor:
+                          selected
+                            ? "#f0f8e9"
+                            : "#fff",
+                        transition:
+                          "all .2s ease",
+
+                        "&:hover": {
+                          borderColor:
+                            "#8BC53F",
+                          bgcolor:
+                            "#f7fbf2",
+                        },
                       }}
                     >
-                      <Box
-                        onClick={() =>
-                          toggleStyle(
-                            style
-                          )
-                        }
-                        sx={{
-                          cursor: "pointer",
-                          p: 1.5,
-                          borderRadius: 2.5,
-                          border: "1px solid",
-                          borderColor:
-                            selected
-                              ? "#8BC53F"
-                              : "#e0e5eb",
-                          bgcolor:
-                            selected
-                              ? "#f0f8e9"
-                              : "#fff",
-                          transition:
-                            "all .2s ease",
-                        }}
-                      >
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={
-                                selected
-                              }
-                              onChange={() =>
-                                toggleStyle(
-                                  style
-                                )
-                              }
-                              sx={{
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={selected}
+                            onChange={() =>
+                              toggleStyle(
+                                style
+                              )
+                            }
+                            sx={{
+                              color:
+                                "#8BC53F",
+
+                              "&.Mui-checked": {
                                 color:
                                   "#8BC53F",
-                                "&.Mui-checked":
-                                  {
-                                    color:
-                                      "#8BC53F",
-                                  },
-                              }}
-                            />
-                          }
-                          label={
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight:
-                                  selected
-                                    ? 700
-                                    : 500,
-                              }}
-                            >
-                              {style}
-                            </Typography>
-                          }
-                        />
-                      </Box>
-                    </Grid>
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight:
+                                selected
+                                  ? 700
+                                  : 500,
+                              color:
+                                "#102048",
+                            }}
+                          >
+                            {style}
+                          </Typography>
+                        }
+                      />
+                    </Box>
                   );
                 })}
-              </Grid>
+              </ThreeColumnGrid>
             </Box>
 
             <TextField
@@ -727,49 +842,52 @@ export default function WelcomeKitForm() {
               }
             />
 
-            <Grid container spacing={2.5}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Colours You Love"
-                  value={form.colorsLove}
-                  onChange={(event) =>
-                    updateField(
-                      "colorsLove",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+            <TwoColumnGrid>
+              <TextField
+                fullWidth
+                multiline
+                minRows={4}
+                label="Colours You Love"
+                value={form.colorsLove}
+                onChange={(event) =>
+                  updateField(
+                    "colorsLove",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Colours to Avoid"
-                  value={form.colorsAvoid}
-                  onChange={(event) =>
-                    updateField(
-                      "colorsAvoid",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-            </Grid>
+              <TextField
+                fullWidth
+                multiline
+                minRows={4}
+                label="Colours to Avoid"
+                value={form.colorsAvoid}
+                onChange={(event) =>
+                  updateField(
+                    "colorsAvoid",
+                    event.target.value
+                  )
+                }
+              />
+            </TwoColumnGrid>
           </FormSection>
 
-          {/* 04 */}
+          {/* =================================================
+              04 ROOM REQUIREMENTS
+          ================================================== */}
 
           <FormSection
             number="04"
             title="Room-by-Room Requirements"
           >
-            <Stack spacing={2.5}>
-
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2.5,
+              }}
+            >
               <TextField
                 fullWidth
                 multiline
@@ -839,167 +957,148 @@ export default function WelcomeKitForm() {
                   )
                 }
               />
-
-            </Stack>
+            </Box>
           </FormSection>
 
-          {/* 05 */}
+          {/* =================================================
+              05 BUDGET & TIMELINE
+          ================================================== */}
 
           <FormSection
             number="05"
             title="Budget & Timeline"
           >
-            <Grid container spacing={2.5}>
+            <TwoColumnGrid>
+              <TextField
+                fullWidth
+                label="Total Budget"
+                placeholder="Example: ₹25,00,000"
+                value={form.totalBudget}
+                onChange={(event) =>
+                  updateField(
+                    "totalBudget",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Total Budget"
-                  placeholder="Example: ₹25,00,000"
-                  value={form.totalBudget}
-                  onChange={(event) =>
-                    updateField(
-                      "totalBudget",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                label="Design Fee Budget"
+                value={form.designFeeBudget}
+                onChange={(event) =>
+                  updateField(
+                    "designFeeBudget",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Design Fee Budget"
-                  value={
-                    form.designFeeBudget
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "designFeeBudget",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                type="date"
+                label="Preferred Start Date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                value={form.preferredStartDate}
+                onChange={(event) =>
+                  updateField(
+                    "preferredStartDate",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Preferred Start Date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={
-                    form.preferredStartDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "preferredStartDate",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Target Completion Date"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  value={
-                    form.targetCompletionDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "targetCompletionDate",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-
-            </Grid>
+              <TextField
+                fullWidth
+                type="date"
+                label="Target Completion Date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                value={
+                  form.targetCompletionDate
+                }
+                onChange={(event) =>
+                  updateField(
+                    "targetCompletionDate",
+                    event.target.value
+                  )
+                }
+              />
+            </TwoColumnGrid>
           </FormSection>
 
-          {/* 06 */}
+          {/* =================================================
+              06 LIFESTYLE
+          ================================================== */}
 
           <FormSection
             number="06"
             title="Lifestyle & Additional Information"
           >
-            <Grid container spacing={2.5}>
+            <TwoColumnGrid>
+              <TextField
+                fullWidth
+                label="Number of Family Members"
+                value={form.familyMembers}
+                onChange={(event) =>
+                  updateField(
+                    "familyMembers",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Number of Family Members"
-                  value={
-                    form.familyMembers
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "familyMembers",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                label="Elderly Family Members"
+                value={form.elderlyMembers}
+                onChange={(event) =>
+                  updateField(
+                    "elderlyMembers",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Elderly Family Members"
-                  value={
-                    form.elderlyMembers
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "elderlyMembers",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                label="Children / Ages"
+                value={form.children}
+                onChange={(event) =>
+                  updateField(
+                    "children",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Children / Ages"
-                  value={form.children}
-                  onChange={(event) =>
-                    updateField(
-                      "children",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
+              <TextField
+                fullWidth
+                label="Pets"
+                value={form.pets}
+                onChange={(event) =>
+                  updateField(
+                    "pets",
+                    event.target.value
+                  )
+                }
+              />
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Pets"
-                  value={form.pets}
-                  onChange={(event) =>
-                    updateField(
-                      "pets",
-                      event.target.value
-                    )
-                  }
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  gridColumn: {
+                    xs: "auto",
+                    md: "1 / -1",
+                  },
+                }}
+              >
                 <TextField
                   fullWidth
                   label="Work From Home Requirements"
-                  value={
-                    form.workFromHome
-                  }
+                  value={form.workFromHome}
                   onChange={(event) =>
                     updateField(
                       "workFromHome",
@@ -1007,9 +1106,16 @@ export default function WelcomeKitForm() {
                     )
                   }
                 />
-              </Grid>
+              </Box>
 
-              <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  gridColumn: {
+                    xs: "auto",
+                    md: "1 / -1",
+                  },
+                }}
+              >
                 <TextField
                   fullWidth
                   multiline
@@ -1025,12 +1131,13 @@ export default function WelcomeKitForm() {
                     )
                   }
                 />
-              </Grid>
-
-            </Grid>
+              </Box>
+            </TwoColumnGrid>
           </FormSection>
 
-          {/* SUBMIT */}
+          {/* =================================================
+              ERROR
+          ================================================== */}
 
           {error && (
             <Alert
@@ -1042,6 +1149,10 @@ export default function WelcomeKitForm() {
               {error}
             </Alert>
           )}
+
+          {/* =================================================
+              SUBMIT
+          ================================================== */}
 
           <Paper
             elevation={0}
@@ -1055,17 +1166,28 @@ export default function WelcomeKitForm() {
               color: "#fff",
             }}
           >
-            <Stack spacing={2.5}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2.5,
+              }}
+            >
+              {/* SUBMIT INFORMATION */}
 
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="flex-start"
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  gap: 2,
+                }}
               >
                 <CheckCircleIcon
                   sx={{
                     color: "#8BC53F",
                     fontSize: 30,
+                    flexShrink: 0,
                   }}
                 />
 
@@ -1094,7 +1216,9 @@ export default function WelcomeKitForm() {
                     Kit PDF will be generated.
                   </Typography>
                 </Box>
-              </Stack>
+              </Box>
+
+              {/* SUBMIT BUTTON */}
 
               <Button
                 type="submit"
@@ -1110,8 +1234,16 @@ export default function WelcomeKitForm() {
                   bgcolor: "#8BC53F",
                   color: "#102048",
                   fontWeight: 900,
+                  fontSize: "0.95rem",
+
                   "&:hover": {
                     bgcolor: "#fff",
+                    color: "#102048",
+                  },
+
+                  "&.Mui-disabled": {
+                    bgcolor: "#64748b",
+                    color: "#dbe2ea",
                   },
                 }}
               >
@@ -1119,9 +1251,12 @@ export default function WelcomeKitForm() {
                   ? "Submitting & Generating PDF..."
                   : "Submit & Generate Welcome Kit PDF"}
               </Button>
-
-            </Stack>
+            </Box>
           </Paper>
+
+          {/* =================================================
+              BACK
+          ================================================== */}
 
           <Box
             sx={{
@@ -1139,13 +1274,18 @@ export default function WelcomeKitForm() {
               sx={{
                 color: "#64748b",
                 fontWeight: 700,
+
+                "&:hover": {
+                  color: "#102048",
+                  bgcolor:
+                    "rgba(16,32,72,0.04)",
+                },
               }}
             >
               Back to Network Ten
             </Button>
           </Box>
-
-        </Stack>
+        </Box>
       </Box>
     </Container>
   );
