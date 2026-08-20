@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   Paper,
-  Stack,
   Typography,
 } from "@mui/material";
 
@@ -36,9 +35,13 @@ export default function AccessDeniedPage() {
             border: "1px solid #e5eaf0",
           }}
         >
-          <Stack
-            spacing={2}
-            alignItems="center"
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+            }}
           >
             {/* LOCK ICON */}
 
@@ -52,6 +55,7 @@ export default function AccessDeniedPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                mb: 1,
               }}
             >
               <LockIcon
@@ -82,6 +86,7 @@ export default function AccessDeniedPage() {
               sx={{
                 fontWeight: 800,
                 color: "#102048",
+                mt: 0.5,
               }}
             >
               Access Restricted
@@ -94,6 +99,7 @@ export default function AccessDeniedPage() {
                 color: "#64748b",
                 lineHeight: 1.8,
                 maxWidth: 480,
+                mt: 1,
               }}
             >
               Your account does not currently
@@ -101,11 +107,14 @@ export default function AccessDeniedPage() {
               Interior Design Client Portal.
             </Typography>
 
+            {/* SECONDARY DESCRIPTION */}
+
             <Typography
               variant="body2"
               sx={{
                 color: "#94a3b8",
                 maxWidth: 440,
+                mt: 0.5,
               }}
             >
               Please contact Network Ten if you
@@ -119,12 +128,16 @@ export default function AccessDeniedPage() {
               variant="contained"
               startIcon={<ArrowBackIcon />}
               sx={{
+                width: "100%",
                 mt: 2,
                 bgcolor: "#102048",
+                color: "#ffffff",
                 borderRadius: 2.5,
                 px: 3,
-                py: 1.2,
+                py: 1.5,
                 fontWeight: 800,
+                fontSize: "0.95rem",
+                textTransform: "uppercase",
 
                 "&:hover": {
                   bgcolor: "#8BC53F",
@@ -134,7 +147,7 @@ export default function AccessDeniedPage() {
             >
               Back to Company Profile
             </Button>
-          </Stack>
+          </Box>
         </Paper>
       </Container>
     </Box>
