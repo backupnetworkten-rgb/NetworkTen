@@ -271,7 +271,7 @@ export default function Navbar() {
               </Box>
             </Link>
 
-            {/* DESKTOP NAV — order: Home, About, Products, Solutions, Conference Room, Interior Designer, Contact, Search (icon) */}
+            {/* DESKTOP NAV — order: Home, About, Shop Desk, Solutions, Conference Room, Interior Designer, Contact, Search (icon) */}
             {!mobile && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, overflow: "visible" }}>
                 {/* Home */}
@@ -331,15 +331,27 @@ export default function Navbar() {
                   ))}
                 </Menu>
 
-                {/* Products */}
+                {/* Shop Desk — highlighted for attraction (was "Products") */}
                 <Link href="/products" style={{ textDecoration: "none" }}>
                   <Button sx={{
-                    color: "#102048", fontWeight: 700, textTransform: "none",
-                    fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
-                    transition: "0.3s",
-                    "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
+                    color: "#fff",
+                    fontWeight: 700,
+                    textTransform: "none",
+                    fontSize: "14px",
+                    px: 1.6,
+                    py: 0.5,
+                    borderRadius: "9px",
+                    minWidth: "auto",
+                    background: "linear-gradient(135deg, #1FA37A 0%, #16C784 45%, #8BC53F 100%)",
+                    boxShadow: "0 4px 14px rgba(23,181,130,0.32), inset 0 1px 0 rgba(255,255,255,0.25)",
+                    transition: "0.25s",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #178F6C 0%, #12B276 45%, #74ab35 100%)",
+                      transform: "translateY(-1.5px)",
+                      boxShadow: "0 8px 18px rgba(23,181,130,0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
+                    },
                   }}>
-                    Products
+                    Shop Desk
                   </Button>
                 </Link>
 
@@ -932,7 +944,7 @@ export default function Navbar() {
         )}
       </AppBar>
 
-      {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Products, Solutions, Conference Room, Interior Designer, Contact ════════════════════════ */}
+      {/* ═══════════════════════════ MOBILE NAV DRAWER — order: Home, About, Shop Desk, Solutions, Conference Room, Interior Designer, Contact ════════════════════════ */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
         <Box sx={{ width: 300, p: 3 }}>
           <List>
@@ -970,11 +982,28 @@ export default function Navbar() {
               </List>
             </Collapse>
 
-            {/* Products */}
+            {/* Shop Desk — highlighted for attraction (was "Products") */}
             <ListItem disablePadding>
               <Link href="/products" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
-                <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
-                  <ListItemText primary="Products" />
+                <ListItemButton
+                  onClick={() => setOpen(false)}
+                  sx={{
+                    borderRadius: "10px",
+                    mb: 1,
+                    py: 0.9,
+                    background: "linear-gradient(135deg, #1FA37A 0%, #16C784 45%, #8BC53F 100%)",
+                    boxShadow: "0 4px 14px rgba(23,181,130,0.32), inset 0 1px 0 rgba(255,255,255,0.25)",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #178F6C 0%, #12B276 45%, #74ab35 100%)",
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary="Shop Desk"
+                    slotProps={{
+                      primary: { sx: { color: "#fff", fontWeight: 700, fontSize: "14px" } },
+                    }}
+                  />
                 </ListItemButton>
               </Link>
             </ListItem>
