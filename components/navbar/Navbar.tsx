@@ -621,7 +621,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* ── Interior Designer (compact, "New" tag inline right after label, raised slightly) ── */}
-                <Link href="/interior-designer" style={{ textDecoration: "none" }}>
+                <Link href="/interior-design" style={{ textDecoration: "none" }}>
                   <Button
                     sx={{
                       color: "#102048", fontWeight: 700, textTransform: "none",
@@ -1108,7 +1108,7 @@ export default function Navbar() {
 
             {/* ── Interior Designer (compact, "New" tag inline right after label, raised slightly) ── */}
             <ListItem disablePadding>
-              <Link href="/interior-designer" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
+              <Link href="/interior-design" style={{ width: "100%", textDecoration: "none", color: "inherit" }}>
                 <ListItemButton onClick={() => setOpen(false)} sx={{ borderRadius: "12px", mb: 1 }}>
                   <ListItemText
                     primary={
