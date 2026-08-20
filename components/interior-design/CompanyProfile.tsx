@@ -4,9 +4,7 @@ import {
   Box,
   Button,
   Container,
-  Grid,
   Paper,
-  Stack,
   Typography,
 } from "@mui/material";
 
@@ -50,17 +48,37 @@ export default function CompanyProfile() {
       }}
     >
       <Container maxWidth="xl">
-        <Grid
-          container
-          spacing={{
-            xs: 5,
-            md: 8,
+        {/* =====================================================
+            MAIN CONTENT
+        ====================================================== */}
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "minmax(0, 7fr) minmax(0, 5fr)",
+            },
+            gap: {
+              xs: 5,
+              md: 8,
+            },
+            alignItems: "center",
           }}
-          alignItems="center"
         >
-          {/* LEFT */}
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Stack spacing={3}>
+          {/* =====================================================
+              LEFT SIDE
+          ====================================================== */}
+
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+              }}
+            >
+              {/* BRAND */}
 
               <Typography
                 variant="overline"
@@ -73,6 +91,8 @@ export default function CompanyProfile() {
                 NETWORK TEN
               </Typography>
 
+              {/* TITLE */}
+
               <Typography
                 component="h1"
                 sx={{
@@ -83,9 +103,11 @@ export default function CompanyProfile() {
                   },
                   lineHeight: 1.05,
                   fontWeight: 800,
+                  m: 0,
                 }}
               >
                 Interior Design
+
                 <Box
                   component="span"
                   sx={{
@@ -96,6 +118,8 @@ export default function CompanyProfile() {
                   Client Portal
                 </Box>
               </Typography>
+
+              {/* DESCRIPTION */}
 
               <Typography
                 sx={{
@@ -108,18 +132,25 @@ export default function CompanyProfile() {
                   lineHeight: 1.8,
                 }}
               >
-                Welcome to Network Ten Interior Design. This
-                secure client portal gives approved clients
-                access to project resources, consultation forms
-                and project documentation.
+                Welcome to Network Ten Interior Design.
+                This secure client portal gives approved
+                clients access to project resources,
+                consultation forms and project
+                documentation.
               </Typography>
 
-              <Stack
-                direction={{
-                  xs: "column",
-                  sm: "row",
+              {/* BUTTONS */}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: {
+                    xs: "column",
+                    sm: "row",
+                  },
+                  gap: 2,
+                  mt: 1,
                 }}
-                spacing={2}
               >
                 <Button
                   href="#client-kits"
@@ -132,8 +163,11 @@ export default function CompanyProfile() {
                     py: 1.4,
                     borderRadius: 3,
                     fontWeight: 800,
+                    minHeight: 50,
+
                     "&:hover": {
                       bgcolor: "#fff",
+                      color: "#102048",
                     },
                   }}
                 >
@@ -151,6 +185,8 @@ export default function CompanyProfile() {
                     py: 1.4,
                     borderRadius: 3,
                     fontWeight: 700,
+                    minHeight: 50,
+
                     "&:hover": {
                       borderColor: "#8BC53F",
                       bgcolor:
@@ -160,106 +196,138 @@ export default function CompanyProfile() {
                 >
                   Our Process
                 </Button>
-              </Stack>
+              </Box>
+            </Box>
+          </Box>
 
-            </Stack>
-          </Grid>
+          {/* =====================================================
+              RIGHT SIDE
+          ====================================================== */}
 
-          {/* RIGHT */}
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Paper
-              elevation={0}
+          <Paper
+            elevation={0}
+            sx={{
+              p: {
+                xs: 3,
+                md: 4,
+              },
+              borderRadius: 5,
+              background:
+                "rgba(255,255,255,0.07)",
+              border:
+                "1px solid rgba(255,255,255,0.12)",
+              color: "#fff",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+            }}
+          >
+            {/* BRAND */}
+
+            <Typography
+              variant="overline"
               sx={{
-                p: {
-                  xs: 3,
-                  md: 4,
-                },
-                borderRadius: 5,
-                background:
-                  "rgba(255,255,255,0.07)",
-                border:
-                  "1px solid rgba(255,255,255,0.12)",
-                color: "#fff",
-                backdropFilter: "blur(10px)",
+                color: "#8BC53F",
+                fontWeight: 800,
+                letterSpacing: "0.18em",
               }}
             >
-              <Typography
-                variant="overline"
-                sx={{
-                  color: "#8BC53F",
-                  fontWeight: 800,
-                }}
-              >
-                NETWORK TEN
-              </Typography>
+              NETWORK TEN
+            </Typography>
 
-              <Typography
-                variant="h4"
-                sx={{
-                  mt: 1,
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                }}
-              >
-                Designing spaces that work for you.
-              </Typography>
+            {/* HEADING */}
 
-              <Typography
-                sx={{
-                  mt: 2,
-                  color: "rgba(255,255,255,0.7)",
-                  lineHeight: 1.8,
-                }}
-              >
-                Every successful project begins with understanding
-                your requirements, lifestyle, budget and vision.
-              </Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                mt: 1,
+                fontWeight: 800,
+                lineHeight: 1.2,
+                fontSize: {
+                  xs: "1.8rem",
+                  md: "2.2rem",
+                },
+              }}
+            >
+              Designing spaces that work for you.
+            </Typography>
 
-              <Grid
-                container
-                spacing={1.5}
-                sx={{ mt: 2 }}
-              >
-                {services.map((service) => (
-                  <Grid
-                    key={service.title}
-                    size={{ xs: 6 }}
+            {/* DESCRIPTION */}
+
+            <Typography
+              sx={{
+                mt: 2,
+                color: "rgba(255,255,255,0.7)",
+                lineHeight: 1.8,
+              }}
+            >
+              Every successful project begins with
+              understanding your requirements,
+              lifestyle, budget and vision.
+            </Typography>
+
+            {/* =================================================
+                SERVICES
+            ================================================== */}
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr 1fr",
+                },
+                gap: 1.5,
+                mt: 3,
+              }}
+            >
+              {services.map((service) => (
+                <Box
+                  key={service.title}
+                  sx={{
+                    p: 2,
+                    minHeight: 110,
+                    borderRadius: 3,
+                    background:
+                      "rgba(255,255,255,0.07)",
+                    border:
+                      "1px solid rgba(255,255,255,0.08)",
+                    transition:
+                      "all 0.25s ease",
+
+                    "&:hover": {
+                      background:
+                        "rgba(139,197,63,0.10)",
+                      borderColor:
+                        "rgba(139,197,63,0.35)",
+                      transform:
+                        "translateY(-3px)",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      color: "#8BC53F",
+                      mb: 1,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
-                    <Box
-                      sx={{
-                        p: 2,
-                        minHeight: 110,
-                        borderRadius: 3,
-                        background:
-                          "rgba(255,255,255,0.07)",
-                        border:
-                          "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          color: "#8BC53F",
-                          mb: 1,
-                        }}
-                      >
-                        {service.icon}
-                      </Box>
+                    {service.icon}
+                  </Box>
 
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 700,
-                        }}
-                      >
-                        {service.title}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-          </Grid>
-        </Grid>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      color: "#fff",
+                    }}
+                  >
+                    {service.title}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
+        </Box>
       </Container>
     </Box>
   );
