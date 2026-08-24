@@ -101,7 +101,7 @@ export default function ClientKits() {
                   if (
                     kit.id === "welcome-kit" ||
                     kit.id ===
-                      "client-discovery-kit"
+                      "client-discovery-kit" || kit.id === "client-contract-kit"
                   ) {
                     router.push(
                       `/interior-design/login?kit=${kit.id}`

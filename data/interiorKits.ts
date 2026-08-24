@@ -25,7 +25,7 @@ export const interiorKits: InteriorKit[] = [
     title: "Client Contract Kit",
     description:
       "Interior design agreement, scope, deliverables, fees, responsibilities and project terms.",
-    available: false,
+    available: true,
   },
 
   {

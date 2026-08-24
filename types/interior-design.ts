@@ -186,3 +186,96 @@ export const initialClientDiscoveryForm: ClientDiscoveryFormData = {
   decisionMakers: "",
   additionalNotes: "",
 };
+
+
+export interface ClientContractFormData {
+  /* Client */
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientAddress: string;
+
+  /* Project */
+  projectName: string;
+  projectAddress: string;
+  propertyType: string;
+
+  /* Scope */
+  scopeOfWork: string;
+  includedSpaces: string;
+  deliverables: string;
+  serviceLevel: string;
+
+  /* Commercial */
+  totalProjectFee: string;
+  designFee: string;
+  paymentSchedule: string;
+
+  /* Timeline */
+  estimatedStartDate: string;
+  estimatedCompletionDate: string;
+
+  /* Revisions */
+  includedRevisions: string;
+  additionalRevisionFee: string;
+
+  /* Responsibilities */
+  clientResponsibilities: string;
+  networkTenResponsibilities: string;
+
+  /* Terms */
+  exclusions: string;
+  cancellationTerms: string;
+  intellectualPropertyTerms: string;
+  confidentialityTerms: string;
+  disputeResolutionTerms: string;
+
+  /* Acceptance */
+  clientAccepted: boolean;
+  clientSignature: string;
+  acceptanceDate: string;
+
+  /* Optional notes */
+  additionalNotes: string;
+}
+
+export const initialClientContractForm: ClientContractFormData = {
+  clientName: "",
+  clientEmail: "",
+  clientPhone: "",
+  clientAddress: "",
+
+  projectName: "",
+  projectAddress: "",
+  propertyType: "",
+
+  scopeOfWork: "",
+  includedSpaces: "",
+  deliverables: "",
+  serviceLevel: "",
+
+  totalProjectFee: "",
+  designFee: "",
+  paymentSchedule: "",
+
+  estimatedStartDate: "",
+  estimatedCompletionDate: "",
+
+  includedRevisions: "",
+  additionalRevisionFee: "",
+
+  clientResponsibilities: "",
+  networkTenResponsibilities: "",
+
+  exclusions: "",
+  cancellationTerms: "",
+  intellectualPropertyTerms: "",
+  confidentialityTerms: "",
+  disputeResolutionTerms: "",
+
+  clientAccepted: false,
+  clientSignature: "",
+  acceptanceDate: "",
+
+  additionalNotes: "",
+};
