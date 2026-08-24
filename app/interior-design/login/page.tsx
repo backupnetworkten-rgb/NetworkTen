@@ -47,7 +47,8 @@ import { auth } from "@/lib/firebase/client";
 type KitId =
   | "welcome-kit"
   | "client-discovery-kit"
-  | "client-contract-kit";
+  | "client-contract-kit"
+  | "e-design-contract-kit";
 
 interface KitConfig {
   id: KitId;
@@ -66,37 +67,84 @@ const KIT_CONFIGS: Record<
   KitId,
   KitConfig
 > = {
+  /* =======================================================
+     01 — WELCOME KIT
+  ======================================================= */
+
   "welcome-kit": {
     id: "welcome-kit",
+
     number: "01",
+
     title: "Welcome Kit",
+
     shortTitle: "Welcome",
+
     description:
       "Begin your Network Ten interior design journey by sharing your basic project, lifestyle and design information.",
+
     redirect:
       "/interior-design/kits/welcome",
   },
 
+  /* =======================================================
+     02 — CLIENT DISCOVERY KIT
+  ======================================================= */
+
   "client-discovery-kit": {
     id: "client-discovery-kit",
+
     number: "02",
+
     title: "Client Discovery Kit",
+
     shortTitle: "Discovery",
+
     description:
       "Help our interior design team understand your lifestyle, project goals, design preferences and requirements.",
+
     redirect:
       "/interior-design/kits/discovery",
   },
 
+  /* =======================================================
+     03 — CLIENT CONTRACT KIT
+  ======================================================= */
+
   "client-contract-kit": {
     id: "client-contract-kit",
+
     number: "03",
+
     title: "Client Contract Kit",
+
     shortTitle: "Contract",
+
     description:
       "Review your project scope, deliverables, fees, responsibilities and contract acceptance information.",
+
     redirect:
       "/interior-design/kits/contract",
+  },
+
+  /* =======================================================
+     04 — E-DESIGN CONTRACT KIT
+  ======================================================= */
+
+  "e-design-contract-kit": {
+    id: "e-design-contract-kit",
+
+    number: "04",
+
+    title: "E-Design Contract Kit",
+
+    shortTitle: "E-Design",
+
+    description:
+      "Review your E-Design agreement, digital deliverables, communication process, payment terms, responsibilities and project conditions.",
+
+    redirect:
+      "/interior-design/kits/e-design",
   },
 };
 
@@ -110,7 +158,8 @@ function isValidKit(
   return (
     value === "welcome-kit" ||
     value === "client-discovery-kit" ||
-    value === "client-contract-kit"
+    value === "client-contract-kit" ||
+    value === "e-design-contract-kit"
   );
 }
 
@@ -124,12 +173,19 @@ function InteriorDesignLoginContent() {
   const searchParams =
     useSearchParams();
 
+  /* =======================================================
+     GET SELECTED KIT FROM URL
+  ======================================================= */
+
   const selectedKitParam =
     searchParams.get("kit");
 
   /*
-   * If no kit is provided,
-   * default to Welcome Kit.
+   * If no kit is supplied,
+   * Welcome Kit is used as the default.
+   *
+   * If a valid kit is supplied,
+   * that kit is used.
    */
 
   const selectedKit: KitId =
@@ -177,6 +233,7 @@ function InteriorDesignLoginContent() {
       setError(
         "Please enter your email address."
       );
+
       return;
     }
 
@@ -184,22 +241,42 @@ function InteriorDesignLoginContent() {
       setError(
         "Please enter your password."
       );
+
       return;
     }
 
     setLoading(true);
 
     try {
+      /* =================================================
+         FIREBASE LOGIN
+      ================================================= */
+
       await signInWithEmailAndPassword(
         auth,
         cleanEmail,
         password
       );
 
-      /*
-       * Redirect according to
-       * selected kit.
-       */
+      /* =================================================
+         IMPORTANT:
+         REDIRECT ACCORDING TO SELECTED KIT
+      ================================================= */
+
+      console.log(
+        "Authenticated user:",
+        cleanEmail
+      );
+
+      console.log(
+        "Selected kit:",
+        selectedKit
+      );
+
+      console.log(
+        "Redirecting to:",
+        kit.redirect
+      );
 
       router.replace(
         kit.redirect
@@ -262,9 +339,9 @@ function InteriorDesignLoginContent() {
     }
   }
 
-  /* =======================================================
+  /* =========================================================
      NAVIGATION
-  ======================================================= */
+  ========================================================= */
 
   function handleBack() {
     router.push(
@@ -272,9 +349,9 @@ function InteriorDesignLoginContent() {
     );
   }
 
-  /* =======================================================
+  /* =========================================================
      UI
-  ======================================================= */
+  ========================================================= */
 
   return (
     <Box
@@ -305,6 +382,7 @@ function InteriorDesignLoginContent() {
         overflow: "hidden",
       }}
     >
+
       {/* =====================================================
           BACKGROUND DECORATION
       ===================================================== */}
@@ -322,7 +400,6 @@ function InteriorDesignLoginContent() {
             "rgba(139,197,63,0.08)",
 
           top: -180,
-
           right: -120,
 
           pointerEvents: "none",
@@ -342,7 +419,6 @@ function InteriorDesignLoginContent() {
             "rgba(16,32,72,0.05)",
 
           bottom: -160,
-
           left: -120,
 
           pointerEvents: "none",
@@ -353,10 +429,10 @@ function InteriorDesignLoginContent() {
         maxWidth="md"
         sx={{
           position: "relative",
-
           zIndex: 1,
         }}
       >
+
         {/* ===================================================
             BACK BUTTON
         =================================================== */}
@@ -402,6 +478,7 @@ function InteriorDesignLoginContent() {
               "0 25px 70px rgba(16,32,72,0.10)",
           }}
         >
+
           <Box
             sx={{
               display: {
@@ -413,6 +490,7 @@ function InteriorDesignLoginContent() {
                 "0.9fr 1.1fr",
             }}
           >
+
             {/* =================================================
                 LEFT BRAND PANEL
             ================================================= */}
@@ -446,7 +524,8 @@ function InteriorDesignLoginContent() {
                 overflow: "hidden",
               }}
             >
-              {/* Decorative circle */}
+
+              {/* Decorative circles */}
 
               <Box
                 sx={{
@@ -461,7 +540,6 @@ function InteriorDesignLoginContent() {
                     "1px solid rgba(139,197,63,0.15)",
 
                   right: -90,
-
                   top: -70,
                 }}
               />
@@ -479,7 +557,6 @@ function InteriorDesignLoginContent() {
                     "1px solid rgba(255,255,255,0.07)",
 
                   left: -80,
-
                   bottom: 70,
                 }}
               />
@@ -489,7 +566,6 @@ function InteriorDesignLoginContent() {
               <Box
                 sx={{
                   position: "relative",
-
                   zIndex: 1,
                 }}
               >
@@ -662,6 +738,7 @@ function InteriorDesignLoginContent() {
                 },
               }}
             >
+
               {/* =================================================
                   SELECTED KIT
               ================================================= */}
@@ -687,6 +764,7 @@ function InteriorDesignLoginContent() {
                   mb: 3,
                 }}
               >
+
                 <Box
                   sx={{
                     width: 46,
@@ -761,6 +839,7 @@ function InteriorDesignLoginContent() {
                     fontSize: 22,
                   }}
                 />
+
               </Box>
 
               {/* =================================================
@@ -796,6 +875,7 @@ function InteriorDesignLoginContent() {
                   }}
                 >
                   Sign in to continue with{" "}
+
                   <Box
                     component="span"
                     sx={{
@@ -844,6 +924,7 @@ function InteriorDesignLoginContent() {
                 onSubmit={handleSubmit}
               >
                 <Stack spacing={2.3}>
+
                   {/* EMAIL */}
 
                   <TextField
@@ -929,15 +1010,11 @@ function InteriorDesignLoginContent() {
                               edge="end"
                               onClick={() =>
                                 setShowPassword(
-                                  (
-                                    previous
-                                  ) =>
+                                  (previous) =>
                                     !previous
                                 )
                               }
-                              disabled={
-                                loading
-                              }
+                              disabled={loading}
                               aria-label={
                                 showPassword
                                   ? "Hide password"
@@ -995,7 +1072,9 @@ function InteriorDesignLoginContent() {
                     }}
                   />
 
-                  {/* LOGIN BUTTON */}
+                  {/* =================================================
+                      LOGIN BUTTON
+                  ================================================= */}
 
                   <Button
                     type="submit"
@@ -1055,6 +1134,7 @@ function InteriorDesignLoginContent() {
                       ? "Signing In..."
                       : `Continue to ${kit.shortTitle}`}
                   </Button>
+
                 </Stack>
               </Box>
 
@@ -1173,6 +1253,7 @@ function InteriorDesignLoginContent() {
               >
                 Choose a different kit
               </Button>
+
             </Box>
           </Box>
         </Paper>
@@ -1192,8 +1273,10 @@ function InteriorDesignLoginContent() {
           }}
         >
           © {new Date().getFullYear()} Network Ten
-          · Interior Design Client Portal
+          {" · "}
+          Interior Design Client Portal
         </Typography>
+
       </Container>
     </Box>
   );
@@ -1202,7 +1285,7 @@ function InteriorDesignLoginContent() {
 /* =========================================================
    PAGE WRAPPER
 
-   useSearchParams() is inside Suspense.
+   useSearchParams() must remain inside Suspense
 ========================================================= */
 
 export default function InteriorDesignLoginPage() {

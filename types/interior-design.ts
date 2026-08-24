@@ -279,3 +279,123 @@ export const initialClientContractForm: ClientContractFormData = {
 
   additionalNotes: "",
 };
+
+export interface EDesignContractFormData {
+  clientName: string;
+
+  clientEmail: string;
+
+  clientPhone: string;
+
+  clientAddress: string;
+
+  projectName: string;
+
+  projectAddress: string;
+
+  propertyType: string;
+
+  projectDescription: string;
+
+  roomsIncluded: string;
+
+  serviceLevel: string;
+
+  deliverables: string;
+
+  designProcess: string;
+
+  communicationMethod: string;
+
+  expectedStartDate: string;
+
+  expectedCompletionDate: string;
+
+  revisionPolicy: string;
+
+  totalFee: string;
+
+  paymentTerms: string;
+
+  clientResponsibilities: string;
+
+  networkTenResponsibilities: string;
+
+  clientProvidedMeasurements: string;
+
+  exclusions: string;
+
+  intellectualPropertyTerms: string;
+
+  confidentialityTerms: string;
+
+  cancellationTerms: string;
+
+  additionalNotes: string;
+
+  clientAccepted: boolean;
+
+  clientSignature: string;
+
+  acceptanceDate: string;
+}
+
+export const initialEDesignContractForm: EDesignContractFormData = {
+  clientName: "",
+
+  clientEmail: "",
+
+  clientPhone: "",
+
+  clientAddress: "",
+
+  projectName: "",
+
+  projectAddress: "",
+
+  propertyType: "",
+
+  projectDescription: "",
+
+  roomsIncluded: "",
+
+  serviceLevel: "",
+
+  deliverables: "",
+
+  designProcess: "",
+
+  communicationMethod: "",
+
+  expectedStartDate: "",
+
+  expectedCompletionDate: "",
+
+  revisionPolicy: "",
+
+  totalFee: "",
+
+  paymentTerms: "",
+
+  clientResponsibilities: "",
+
+  networkTenResponsibilities: "",
+
+  clientProvidedMeasurements: "",
+
+  exclusions: "",
+
+  intellectualPropertyTerms: "",
+
+  confidentialityTerms: "",
+
+  cancellationTerms: "",
+
+  additionalNotes: "",
+
+  clientAccepted: false,
+
+  clientSignature: "",
+
+  acceptanceDate: "",
+};

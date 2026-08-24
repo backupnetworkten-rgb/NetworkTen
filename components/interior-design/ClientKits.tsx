@@ -15,6 +15,18 @@ import KitCard from "./KitCard";
 export default function ClientKits() {
   const router = useRouter();
 
+  function handleOpenKit(kitId: string) {
+    const loginUrl =
+      `/interior-design/login?kit=${encodeURIComponent(
+        kitId
+      )}`;
+
+    console.log("Opening kit:", kitId);
+    console.log("Login URL:", loginUrl);
+
+    router.push(loginUrl);
+  }
+
   return (
     <Box
       id="client-kits"
@@ -24,16 +36,19 @@ export default function ClientKits() {
           xs: 8,
           md: 12,
         },
+
         bgcolor: "#f7f9fc",
       }}
     >
       <Container maxWidth="xl">
 
-        {/* HEADER */}
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
 
         <Box
           sx={{
-            maxWidth: 800,
+            maxWidth: 850,
             mx: "auto",
             textAlign: "center",
           }}
@@ -55,6 +70,7 @@ export default function ClientKits() {
               mt: 1,
               fontWeight: 800,
               color: "#102048",
+
               fontSize: {
                 xs: "2rem",
                 md: "3rem",
@@ -69,15 +85,19 @@ export default function ClientKits() {
               mt: 2,
               color: "#64748b",
               lineHeight: 1.8,
+              maxWidth: 720,
+              mx: "auto",
             }}
           >
-            Client documents are securely controlled by
-            Network Ten. Only approved clients can access
-            their authorized kits.
+            Access your Network Ten interior
+            design documents and complete each
+            stage of your project securely.
           </Typography>
         </Box>
 
-        {/* KIT CARDS */}
+        {/* =====================================================
+            KIT CARDS
+        ===================================================== */}
 
         <Grid
           container
@@ -97,17 +117,9 @@ export default function ClientKits() {
             >
               <KitCard
                 kit={kit}
-                onOpen={() => {
-                  if (
-                    kit.id === "welcome-kit" ||
-                    kit.id ===
-                      "client-discovery-kit" || kit.id === "client-contract-kit"
-                  ) {
-                    router.push(
-                      `/interior-design/login?kit=${kit.id}`
-                    );
-                  }
-                }}
+                onOpen={() =>
+                  handleOpenKit(kit.id)
+                }
               />
             </Grid>
           ))}

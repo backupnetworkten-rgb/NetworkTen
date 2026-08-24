@@ -34,6 +34,6 @@ export const interiorKits: InteriorKit[] = [
     title: "E-Design Contract Kit",
     description:
       "E-design agreement, deliverables, payment terms and project documentation.",
-    available: false,
+    available: true,
   },
 ];
