@@ -16,7 +16,7 @@ export const interiorKits: InteriorKit[] = [
     title: "Client Discovery Kit",
     description:
       "Detailed questionnaire covering your lifestyle, room requirements, preferences and project expectations.",
-    available: false,
+    available: true,
   },
 
   {

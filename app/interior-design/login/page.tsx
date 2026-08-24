@@ -25,16 +25,52 @@ import {
 
 import { auth } from "@/lib/firebase/client";
 
-import { useRouter } from "next/navigation";
+import {
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 export default function InteriorDesignLoginPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const searchParams =
+    useSearchParams();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  /*
+   * Determine which kit the client
+   * selected before coming to login.
+   *
+   * Examples:
+   *
+   * ?kit=welcome-kit
+   *
+   * ?kit=client-discovery-kit
+   */
+
+  const selectedKit =
+    searchParams.get("kit");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  /*
+   * Human-readable kit name
+   */
+
+  const kitTitle =
+    selectedKit ===
+    "client-discovery-kit"
+      ? "Client Discovery Kit"
+      : "Welcome Kit";
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -51,9 +87,26 @@ export default function InteriorDesignLoginPage() {
         password
       );
 
-      router.push(
-        "/interior-design/kits/welcome"
-      );
+      /*
+       * IMPORTANT:
+       *
+       * Redirect according to the kit
+       * selected before login.
+       */
+
+      if (
+        selectedKit ===
+        "client-discovery-kit"
+      ) {
+        router.push(
+          "/interior-design/kits/discovery"
+        );
+      } else {
+        router.push(
+          "/interior-design/kits/welcome"
+        );
+      }
+
     } catch (error: any) {
       console.error(
         "Network Ten login error:",
@@ -91,6 +144,16 @@ export default function InteriorDesignLoginPage() {
     }
   }
 
+  /*
+   * Return to the Client Kits section.
+   */
+
+  function handleBack() {
+    router.push(
+      "/interior-design#client-kits"
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -98,8 +161,10 @@ export default function InteriorDesignLoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+
         background:
-          "linear-gradient(135deg, #08111f 0%, #102048 60%, #182d57 100%)",
+          "radial-gradient(circle at 20% 20%, rgba(139,197,63,0.10), transparent 30%), linear-gradient(135deg, #08111f 0%, #102048 60%, #182d57 100%)",
+
         py: 6,
         px: 2,
       }}
@@ -112,7 +177,11 @@ export default function InteriorDesignLoginPage() {
               xs: 3,
               sm: 5,
             },
+
             borderRadius: 5,
+
+            boxShadow:
+              "0 30px 80px rgba(0,0,0,0.25)",
           }}
         >
           <Stack spacing={3}>
@@ -127,14 +196,21 @@ export default function InteriorDesignLoginPage() {
               <Box
                 sx={{
                   mx: "auto",
+
                   width: 64,
                   height: 64,
+
                   borderRadius: 3,
+
                   bgcolor: "#102048",
                   color: "#8BC53F",
+
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+
+                  boxShadow:
+                    "0 15px 30px rgba(16,32,72,0.18)",
                 }}
               >
                 <LockIcon
@@ -149,9 +225,13 @@ export default function InteriorDesignLoginPage() {
                 sx={{
                   display: "block",
                   mt: 3,
+
                   color: "#6da82e",
+
                   fontWeight: 900,
-                  letterSpacing: "0.25em",
+
+                  letterSpacing:
+                    "0.25em",
                 }}
               >
                 NETWORK TEN
@@ -161,7 +241,9 @@ export default function InteriorDesignLoginPage() {
                 variant="h4"
                 sx={{
                   mt: 1,
+
                   fontWeight: 800,
+
                   color: "#102048",
                 }}
               >
@@ -171,12 +253,61 @@ export default function InteriorDesignLoginPage() {
               <Typography
                 sx={{
                   mt: 1,
+
                   color: "#64748b",
+
                   lineHeight: 1.7,
                 }}
               >
-                Sign in to access your authorized
-                interior design kit.
+                Sign in to access your
+                authorized{" "}
+                {kitTitle}.
+              </Typography>
+            </Box>
+
+            {/* SELECTED KIT */}
+
+            <Box
+              sx={{
+                p: 2,
+
+                borderRadius: 3,
+
+                bgcolor:
+                  "rgba(139,197,63,0.08)",
+
+                border:
+                  "1px solid rgba(139,197,63,0.20)",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 10,
+
+                  fontWeight: 900,
+
+                  color: "#6da82e",
+
+                  letterSpacing:
+                    "0.15em",
+
+                  textTransform:
+                    "uppercase",
+                }}
+              >
+                Accessing
+              </Typography>
+
+              <Typography
+                sx={{
+                  mt: 0.5,
+
+                  fontWeight: 800,
+
+                  color: "#102048",
+                }}
+              >
+                {kitTitle}
               </Typography>
             </Box>
 
@@ -207,12 +338,15 @@ export default function InteriorDesignLoginPage() {
                   type="email"
                   label="Email Address"
                   placeholder="client@example.com"
+
                   value={email}
+
                   onChange={(event) =>
                     setEmail(
                       event.target.value
                     )
                   }
+
                   autoComplete="email"
                 />
 
@@ -222,12 +356,15 @@ export default function InteriorDesignLoginPage() {
                   type="password"
                   label="Password"
                   placeholder="Enter your password"
+
                   value={password}
+
                   onChange={(event) =>
                     setPassword(
                       event.target.value
                     )
                   }
+
                   autoComplete="current-password"
                 />
 
@@ -235,20 +372,32 @@ export default function InteriorDesignLoginPage() {
                   type="submit"
                   fullWidth
                   variant="contained"
+
                   disabled={loading}
+
                   sx={{
                     py: 1.5,
+
                     borderRadius: 2.5,
+
                     bgcolor: "#102048",
+
                     fontWeight: 800,
+
                     fontSize: "1rem",
+
                     "&:hover": {
-                      bgcolor: "#8BC53F",
-                      color: "#102048",
+                      bgcolor:
+                        "#8BC53F",
+                      color:
+                        "#102048",
                     },
+
                     "&.Mui-disabled": {
-                      bgcolor: "#cbd5e1",
-                      color: "#64748b",
+                      bgcolor:
+                        "#cbd5e1",
+                      color:
+                        "#64748b",
                     },
                   }}
                 >
@@ -260,21 +409,21 @@ export default function InteriorDesignLoginPage() {
               </Stack>
             </Box>
 
-            {/* BACK BUTTON */}
+            {/* BACK */}
 
             <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() =>
-                router.push(
-                  "/interior-design"
-                )
+              startIcon={
+                <ArrowBackIcon />
               }
+
+              onClick={handleBack}
+
               sx={{
                 color: "#64748b",
                 fontWeight: 700,
               }}
             >
-              Back to Network Ten
+              Back to Client Kits
             </Button>
 
           </Stack>

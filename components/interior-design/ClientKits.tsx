@@ -29,6 +29,8 @@ export default function ClientKits() {
     >
       <Container maxWidth="xl">
 
+        {/* HEADER */}
+
         <Box
           sx={{
             maxWidth: 800,
@@ -75,10 +77,14 @@ export default function ClientKits() {
           </Typography>
         </Box>
 
+        {/* KIT CARDS */}
+
         <Grid
           container
           spacing={3}
-          sx={{ mt: 6 }}
+          sx={{
+            mt: 6,
+          }}
         >
           {interiorKits.map((kit) => (
             <Grid
@@ -93,11 +99,12 @@ export default function ClientKits() {
                 kit={kit}
                 onOpen={() => {
                   if (
+                    kit.id === "welcome-kit" ||
                     kit.id ===
-                    "welcome-kit"
+                      "client-discovery-kit"
                   ) {
                     router.push(
-                      "/interior-design/login"
+                      `/interior-design/login?kit=${kit.id}`
                     );
                   }
                 }}
