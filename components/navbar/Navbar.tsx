@@ -121,7 +121,10 @@ export default function Navbar() {
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   const theme  = useTheme();
-  const mobile = useMediaQuery(theme.breakpoints.down("lg"));
+  // NOTE: switched from "lg" to "xl" — the desktop row (8 nav items + search +
+  // cart + Shop Now + user badge) needs more room than "lg" gives it, which
+  // was causing "Shop Desk" (and other labels) to wrap/crush after login.
+  const mobile = useMediaQuery(theme.breakpoints.down("xl"));
 
   useEffect(() => {
     setMounted(true);
@@ -257,7 +260,7 @@ export default function Navbar() {
           }}
         >
           {/* LEFT */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, lg: 5 }, flex: 1, overflow: "visible" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, lg: 3, xl: 4 }, flex: 1, overflow: "visible" }}>
             <Link href="/" style={{ textDecoration: "none" }}>
               <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, cursor: "pointer" }}>
                 <Image
@@ -279,6 +282,7 @@ export default function Navbar() {
                   <Button sx={{
                     color: "#102048", fontWeight: 700, textTransform: "none",
                     fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    whiteSpace: "nowrap", flexShrink: 0,
                     transition: "0.3s",
                     "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
                   }}>
@@ -293,6 +297,7 @@ export default function Navbar() {
                   sx={{
                     color: "#102048", fontWeight: 700, textTransform: "none",
                     fontSize: "15px", px: 1.8, borderRadius: "10px", minWidth: "auto",
+                    whiteSpace: "nowrap", flexShrink: 0,
                     transition: "0.3s",
                     "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
                   }}
@@ -342,6 +347,8 @@ export default function Navbar() {
                     py: 0.5,
                     borderRadius: "9px",
                     minWidth: "auto",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
                     background: "linear-gradient(135deg, #1FA37A 0%, #16C784 45%, #8BC53F 100%)",
                     boxShadow: "0 4px 14px rgba(23,181,130,0.32), inset 0 1px 0 rgba(255,255,255,0.25)",
                     transition: "0.25s",
@@ -360,7 +367,7 @@ export default function Navbar() {
                   ref={solutionsRef}
                   onMouseEnter={handleSolutionsEnter}
                   onMouseLeave={handleSolutionsLeave}
-                  sx={{ position: "relative" }}
+                  sx={{ position: "relative", flexShrink: 0 }}
                 >
                   <Button
                     endIcon={
@@ -379,6 +386,7 @@ export default function Navbar() {
                       px: 1.8,
                       borderRadius: "10px",
                       minWidth: "auto",
+                      whiteSpace: "nowrap",
                       transition: "0.3s",
                       background: solutionsOpen ? "#f4f8fd" : "transparent",
                       "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
@@ -588,6 +596,7 @@ export default function Navbar() {
                     sx={{
                       color: "#102048", fontWeight: 700, textTransform: "none",
                       fontSize: "15px", px: 1.4, py: 0.6, borderRadius: "10px", minWidth: "auto",
+                      whiteSpace: "nowrap", flexShrink: 0,
                       transition: "0.3s",
                       display: "flex", alignItems: "flex-start", gap: 0.5,
                       "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
@@ -626,6 +635,7 @@ export default function Navbar() {
                     sx={{
                       color: "#102048", fontWeight: 700, textTransform: "none",
                       fontSize: "15px", px: 1.4, py: 0.6, borderRadius: "10px", minWidth: "auto",
+                      whiteSpace: "nowrap", flexShrink: 0,
                       transition: "0.3s",
                       display: "flex", alignItems: "flex-start", gap: 0.5,
                       "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
@@ -663,6 +673,7 @@ export default function Navbar() {
                   <Button sx={{
                     color: "#102048", fontWeight: 700, textTransform: "none",
                     fontSize: "15px", px: 1.8, mr: 2, borderRadius: "10px", minWidth: "auto",
+                    whiteSpace: "nowrap", flexShrink: 0,
                     transition: "0.3s",
                     "&:hover": { background: "#f4f8fd", color: "#8BC53F" },
                   }}>
@@ -675,7 +686,7 @@ export default function Navbar() {
 
           {/* RIGHT — DESKTOP */}
           {!mobile ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.1, flexShrink: 0 }}>
               {/* ── Search icon (opens a small popover input, right before Cart) ── */}
               <IconButton
                 onClick={openDesktopSearch}
@@ -685,6 +696,7 @@ export default function Navbar() {
                   background: Boolean(searchAnchor) ? "#102048" : "#f5f7fb",
                   border: "1px solid #edf1f7",
                   transition: "all 0.2s",
+                  flexShrink: 0,
                   "&:hover": { background: "#102048", "& svg": { color: "#fff" } },
                 }}
               >
@@ -757,6 +769,7 @@ export default function Navbar() {
                   background: "#f5f7fb",
                   border: "1px solid #edf1f7",
                   transition: "all 0.2s",
+                  flexShrink: 0,
                   "&:hover": { background: "#102048", "& .cart-icon": { color: "#fff" } },
                 }}
               >
@@ -780,6 +793,7 @@ export default function Navbar() {
                   background: "#8BC53F", borderRadius: "40px", px: 2.2,
                   minWidth: "118px", height: "46px", fontWeight: 700,
                   textTransform: "none", fontSize: "14px", whiteSpace: "nowrap",
+                  flexShrink: 0,
                   boxShadow: "0 10px 24px rgba(139,197,63,0.18)", transition: "0.3s",
                   "&:hover": { background: "#74ab35", transform: "translateY(-2px)" },
                 }}>
@@ -804,12 +818,14 @@ export default function Navbar() {
                       display: "flex",
                       alignItems: "center",
                       gap: 1.2,
+                      flexShrink: 0,
+                      maxWidth: 190,
                       transition: ".25s",
                       "&:hover": { background: "#f9fbff", transform: "translateY(-1px)" },
                     }}
                   >
                     <Box sx={{
-                      width: 36, height: 36, borderRadius: "50%",
+                      width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
                       background: "linear-gradient(135deg,#8BC53F,#74ab35)",
                       display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px",
                     }}>
@@ -834,7 +850,7 @@ export default function Navbar() {
                           : user?.name?.split(" ")[0] || "User"}
                       </Typography>
                     </Box>
-                    <KeyboardArrowDownRoundedIcon sx={{ color: "#667085" }} />
+                    <KeyboardArrowDownRoundedIcon sx={{ color: "#667085", flexShrink: 0 }} />
                   </Button>
 
                   <Menu
@@ -857,6 +873,7 @@ export default function Navbar() {
                       background: "linear-gradient(135deg,#102048,#08142e)",
                       borderRadius: "40px", height: "46px", px: 2.6,
                       textTransform: "none", fontWeight: 700,
+                      whiteSpace: "nowrap", flexShrink: 0,
                     }}
                   >
                     Login
@@ -1275,7 +1292,7 @@ export default function Navbar() {
                 Browse Products
               </Button>
               <Button
-                onClick={() => setCartOpen(false)}
+                onClick={() => { setCartOpen(false); router.push("/products"); }}
                 sx={{
                   color: "#9aa0af", textTransform: "none", fontSize: "13px", fontWeight: 600,
                   "&:hover": { background: "transparent", color: "#102048" },

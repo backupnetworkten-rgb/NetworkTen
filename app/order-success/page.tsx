@@ -105,6 +105,29 @@ export default function OrderSuccessPage() {
   const isCOD = order?.paymentMethod === "cod";
   const codCharge = isCOD ? (order?.codCharge ?? DEFAULT_COD_CHARGE) : 0;
 
+  // COD is split into two payments:
+  // 1) ₹149 is paid online when the order is placed.
+  // 2) The remaining amount is collected at delivery.
+  //
+  // Prefer the values persisted by checkout. The fallback keeps older
+  // orders readable when these fields were not stored yet.
+  const amountPaidOnline = isCOD
+    ? Math.min(
+        Number((order as any)?.amountPaidOnline ?? codCharge),
+        Number(order?.grandTotal ?? 0)
+      )
+    : Number(order?.grandTotal ?? 0);
+
+  const amountDueCash = isCOD
+    ? Math.max(
+        Number(
+          (order as any)?.amountDueCash ??
+          (Number(order?.grandTotal ?? 0) - amountPaidOnline)
+        ),
+        0
+      )
+    : 0;
+
   // Build a real address query string for the map, e.g.
   // "E3 / 37D chanakya place part 1, uttam nagar, New delhi, DL, 110059, India"
   const mapQuery = order
@@ -322,9 +345,42 @@ export default function OrderSuccessPage() {
                           <Box sx={{ width: 14, height: 2, background: C.textMuted, borderRadius: "1px" }} />
                         </Box>
                         <Typography sx={valueSx}>
-                          {isCOD ? "Cash on Delivery" : "UPI / Online"} · ₹{order.grandTotal.toLocaleString("en-IN")} INR
+                          {isCOD
+                            ? `Cash on Delivery · Total ₹${order.grandTotal.toLocaleString("en-IN")} INR`
+                            : `UPI / Online · ₹${order.grandTotal.toLocaleString("en-IN")} INR`}
                         </Typography>
                       </Box>
+
+                      {isCOD && (
+                        <Box
+                          sx={{
+                            mt: 1.2,
+                            p: 1.4,
+                            borderRadius: "9px",
+                            background: "#F7FAFF",
+                            border: `1px solid ${C.blueLight}`,
+                          }}
+                        >
+                          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.55 }}>
+                            <Typography sx={{ fontSize: "12px", color: C.textSub, fontFamily: sans }}>
+                              Paid online at order placement
+                            </Typography>
+                            <Typography sx={{ fontSize: "12px", color: C.green, fontWeight: 700, fontFamily: sans }}>
+                              ₹{amountPaidOnline.toLocaleString("en-IN")}
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                            <Typography sx={{ fontSize: "12px", color: C.textSub, fontFamily: sans }}>
+                              Remaining at delivery
+                            </Typography>
+                            <Typography sx={{ fontSize: "12px", color: C.ink, fontWeight: 700, fontFamily: sans }}>
+                              ₹{amountDueCash.toLocaleString("en-IN")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      )}
+
                       {paymentId && (
                         <Typography
                           onClick={() => copyToClipboard(paymentId, "Transaction ID copied to clipboard!")}
@@ -497,13 +553,50 @@ export default function OrderSuccessPage() {
                     </Typography>
                   </Box>
 
-                  {/* COD charge — mirrors checkout, only shown for Cash on Delivery orders */}
-                  {isCOD && codCharge > 0 && (
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.2 }}>
-                      <Typography sx={{ fontSize: "13px", color: C.textSub, fontFamily: sans }}>COD charges</Typography>
-                      <Typography sx={{ fontSize: "13px", color: C.text, fontFamily: sans, fontWeight: 600 }}>
-                        ₹{codCharge.toLocaleString("en-IN")}
+                  {/* COD payment split — ₹149 is already included in the total,
+                      not added on top of it. */}
+                  {isCOD && (
+                    <Box
+                      sx={{
+                        mt: 0.8,
+                        mb: 1.8,
+                        p: 1.6,
+                        borderRadius: "11px",
+                        background: "linear-gradient(180deg, #F7FAFF 0%, #FFFFFF 100%)",
+                        border: `1px solid ${C.blueLight}`,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: C.blue,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.45px",
+                          fontFamily: sans,
+                          mb: 1,
+                        }}
+                      >
+                        Cash on Delivery payment split
                       </Typography>
+
+                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
+                        <Typography sx={{ fontSize: "12.5px", color: C.textSub, fontFamily: sans }}>
+                          Paid now · Razorpay
+                        </Typography>
+                        <Typography sx={{ fontSize: "12.5px", color: C.green, fontWeight: 700, fontFamily: sans }}>
+                          ₹{amountPaidOnline.toLocaleString("en-IN")}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <Typography sx={{ fontSize: "12.5px", color: C.textSub, fontFamily: sans }}>
+                          Pay at delivery
+                        </Typography>
+                        <Typography sx={{ fontSize: "12.5px", color: C.ink, fontWeight: 700, fontFamily: sans }}>
+                          ₹{amountDueCash.toLocaleString("en-IN")}
+                        </Typography>
+                      </Box>
                     </Box>
                   )}
 
@@ -525,6 +618,21 @@ export default function OrderSuccessPage() {
                     {billing?.gstAmount != null && (
                       <Typography sx={{ fontSize: "11.5px", color: C.textMuted, fontFamily: sans, textAlign: "right", mt: 0.5 }}>
                         Including ₹{billing.gstAmount.toLocaleString("en-IN")} in taxes
+                      </Typography>
+                    )}
+
+                    {isCOD && (
+                      <Typography
+                        sx={{
+                          fontSize: "11.5px",
+                          color: C.green,
+                          fontWeight: 700,
+                          fontFamily: sans,
+                          textAlign: "right",
+                          mt: 0.8,
+                        }}
+                      >
+                        ₹{amountPaidOnline.toLocaleString("en-IN")} paid already · ₹{amountDueCash.toLocaleString("en-IN")} due at delivery
                       </Typography>
                     )}
                   </Box>

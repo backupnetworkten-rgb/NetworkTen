@@ -1125,11 +1125,12 @@ export default function ProductDetailPage() {
                     fullWidth
                     variant="outlined"
                     sx={{
-                      height: 50, borderRadius: "11px", fontWeight: 600, fontSize: "14px",
+                      height: 50, borderRadius: "11px", fontWeight: 700, fontSize: "14px",
                       textTransform: "none", fontFamily: sans,
-                      borderColor: C.border, color: C.heading, borderWidth: "1.5px",
+                      borderColor: C.blue, color: C.blue, borderWidth: "1.5px",
                       letterSpacing: "-0.1px",
-                      "&:hover": { borderColor: C.heading, background: "#f5f5f5", borderWidth: "1.5px" },
+                      background: C.blueLight,
+                      "&:hover": { borderColor: C.razorBlue, background: "#dbeafe", borderWidth: "1.5px" },
                       "&:disabled": { background: C.surfaceGray, color: C.textMuted, borderColor: C.border },
                     }}>
                     {product.stock === 0 ? "Out of Stock" : "Add to cart"}

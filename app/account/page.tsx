@@ -10,7 +10,6 @@ import AccountHero from "@/components/account/AccountHero";
 import AccountSidebar, { AccountSection } from "@/components/account/AccountSidebar";
 import ProfileSection from "@/components/account/ProfileSection";
 import AddressSection from "@/components/account/AddressSection";
-import SecuritySection from "@/components/account/SecuritySection";
 
 import { subscribeToCurrentUser } from "@/services/userService";
 import { UserData } from "@/types/user";
@@ -85,7 +84,6 @@ export default function AccountPage() {
               <Box>
                 {active === "profile"   && <ProfileSection  user={user} />}
                 {active === "addresses" && <AddressSection  user={user} />}
-                {active === "security"  && <SecuritySection />}
               </Box>
             </Box>
           )}
