@@ -427,7 +427,7 @@ export default function CartPage() {
                         <img src={proxyImage(item.image)} alt={item.name} style={{ width: 100, height: 100, objectFit: "contain", filter: "drop-shadow(0 8px 14px rgba(12,18,48,0.10))" }} />
                       </Box>
                       {/* Info panel */}
-                      <Box sx={{ flex: 1, minWidth: 0, p: { xs: "16px", md: "20px 22px" }, display: "flex", flexDirection: "column", minWidth: 0 }}>
+                      <Box sx={{ flex: 1, minWidth: 0, p: { xs: "16px", md: "20px 22px" }, display: "flex", flexDirection: "column" }}>
                         <Typography sx={{ fontSize: "9.5px", fontWeight: 700, color: C.primary, textTransform: "uppercase", letterSpacing: "1px", mb: 0.6, fontFamily: sans }}>
                           {item.brand}
                         </Typography>
