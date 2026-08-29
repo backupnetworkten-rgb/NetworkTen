@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   Box,
   Container,
-  Stack,
   Typography,
 } from "@mui/material";
 
@@ -87,15 +86,13 @@ export default function ConferenceShowcase() {
           }}
         >
           <Box>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={0.75}
+            <Box
               sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 0.75,
                 color: "#5ee6ad",
-                fontSize: 11,
-                fontWeight: 800,
-                letterSpacing: ".16em",
               }}
             >
               <Box
@@ -118,7 +115,7 @@ export default function ConferenceShowcase() {
               >
                 SEE IT IN ACTION
               </Typography>
-            </Stack>
+            </Box>
 
             <Typography
               sx={{
@@ -202,14 +199,15 @@ export default function ConferenceShowcase() {
             />
 
             {/* duration badge, top-left */}
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={0.75}
+            <Box
               sx={{
                 position: "absolute",
                 top: { xs: 16, md: 24 },
                 left: { xs: 16, md: 24 },
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 0.75,
                 px: 1.5,
                 py: 0.75,
                 borderRadius: "999px",
@@ -231,7 +229,7 @@ export default function ConferenceShowcase() {
               >
                 PROJECT REEL · {activeVideo.duration}
               </Typography>
-            </Stack>
+            </Box>
 
             {/* central play icon, decorative */}
             <Box
@@ -302,10 +300,13 @@ export default function ConferenceShowcase() {
         </Box>
 
         {/* THUMBNAIL SELECTOR ROW */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          sx={{ mt: 3 }}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            mt: 3,
+          }}
         >
           {videos.map((video) => {
             const isActive = video.id === activeId;
@@ -400,7 +401,7 @@ export default function ConferenceShowcase() {
               </Box>
             );
           })}
-        </Stack>
+        </Box>
       </Container>
     </Box>
   );
