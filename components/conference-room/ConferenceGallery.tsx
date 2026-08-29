@@ -3,8 +3,6 @@
 import {
   Box,
   Container,
-  Grid,
-  Stack,
   Typography,
 } from "@mui/material";
 
@@ -14,10 +12,18 @@ const projects = [
   {
     // TODO: replace with your own project photo
     image:
-      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1400&q=80",
     title: "Executive Boardroom",
     category: "Corporate",
-    size: "large",
+    area: "hero",
+  },
+  {
+    // TODO: replace with your own project photo
+    image:
+      "https://images.unsplash.com/photo-1560439514-4e9645039924?auto=format&fit=crop&w=1000&q=80",
+    title: "Premium Presentation Room",
+    category: "AV Integration",
+    area: "tall",
   },
   {
     // TODO: replace with your own project photo
@@ -25,7 +31,7 @@ const projects = [
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
     title: "Modern Meeting Room",
     category: "Collaboration",
-    size: "normal",
+    area: "small1",
   },
   {
     // TODO: replace with your own project photo
@@ -33,15 +39,7 @@ const projects = [
       "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=900&q=80",
     title: "Video Conference Setup",
     category: "Video Conferencing",
-    size: "normal",
-  },
-  {
-    // TODO: replace with your own project photo
-    image:
-      "https://images.unsplash.com/photo-1560439514-4e9645039924?auto=format&fit=crop&w=1200&q=80",
-    title: "Premium Presentation Room",
-    category: "AV Integration",
-    size: "large",
+    area: "small2",
   },
   {
     // TODO: replace with your own project photo
@@ -49,19 +47,177 @@ const projects = [
       "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80",
     title: "Smart Meeting Space",
     category: "Smart Automation",
-    size: "normal",
+    area: "small3",
   },
   {
     // TODO: replace with your own project photo
     image:
-      "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=1400&q=80",
     title: "Enterprise Conference Room",
     category: "Enterprise",
-    size: "normal",
+    area: "wide",
   },
 ];
 
+type Project = (typeof projects)[number];
+
+function ProjectTile({
+  project,
+  index,
+  minHeight,
+}: {
+  project: Project;
+  index: number;
+  minHeight: number;
+}) {
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        height: "100%",
+        minHeight,
+        width: "100%",
+        borderRadius: "22px",
+        overflow: "hidden",
+        cursor: "pointer",
+        backgroundColor: "#e8ecf0",
+        boxShadow: "0 1px 2px rgba(7,21,47,.04)",
+        transition: "box-shadow .35s ease",
+
+        "& img": {
+          transition: "transform .7s cubic-bezier(.2,.8,.2,1)",
+        },
+        "&:hover": {
+          boxShadow: "0 30px 60px rgba(7,21,47,.16)",
+        },
+        "&:hover img": {
+          transform: "scale(1.07)",
+        },
+        "&:hover .project-overlay": {
+          opacity: 1,
+        },
+        "&:hover .project-content": {
+          transform: "translateY(0)",
+        },
+        "&:hover .project-cta": {
+          opacity: 1,
+          transform: "translateY(0)",
+        },
+      }}
+    >
+      <Box
+        component="img"
+        src={project.image}
+        alt={project.title}
+        loading="lazy"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
+
+      {/* index badge, top-left */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 18,
+          left: 20,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 0.75,
+          px: 1.25,
+          py: 0.5,
+          borderRadius: "999px",
+          backgroundColor: "rgba(6,20,43,.4)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <Typography sx={{ color: "#fff", fontSize: 11, fontWeight: 800 }}>
+          {String(index + 1).padStart(2, "0")}
+        </Typography>
+      </Box>
+
+      {/* view arrow, appears on hover */}
+      <Box
+        className="project-cta"
+        sx={{
+          position: "absolute",
+          top: 18,
+          right: 20,
+          display: { xs: "none", md: "flex" },
+          alignItems: "center",
+          justifyContent: "center",
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          backgroundColor: "#fff",
+          color: "#07152f",
+          opacity: 0,
+          transform: "translateY(-6px)",
+          transition: "opacity .3s ease, transform .3s ease",
+          boxShadow: "0 10px 25px rgba(0,0,0,.25)",
+        }}
+      >
+        <ArrowOutwardRoundedIcon sx={{ fontSize: 18 }} />
+      </Box>
+
+      <Box
+        className="project-overlay"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          opacity: { xs: 1, md: 0 },
+          transition: "opacity .35s ease",
+          background:
+            "linear-gradient(180deg,transparent 35%,rgba(0,0,0,.82))",
+        }}
+      />
+
+      <Box
+        className="project-content"
+        sx={{
+          position: "absolute",
+          left: 24,
+          right: 24,
+          bottom: 22,
+          color: "#fff",
+          transform: { xs: "translateY(0)", md: "translateY(12px)" },
+          transition: "transform .35s ease",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: ".13em",
+            color: "#7cf0bc",
+          }}
+        >
+          {project.category}
+        </Typography>
+        <Typography
+          sx={{
+            mt: 0.8,
+            fontSize: 20,
+            fontWeight: 750,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {project.title}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
 export default function ConferenceGallery() {
+  const [hero, tall, small1, small2, small3, wide] = projects;
+
   return (
     <Box
       sx={{
@@ -98,10 +254,13 @@ export default function ConferenceGallery() {
           }}
         >
           <Box>
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={0.75}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 0.75,
+              }}
             >
               <Box
                 sx={{
@@ -121,7 +280,7 @@ export default function ConferenceGallery() {
               >
                 OUR WORK
               </Typography>
-            </Stack>
+            </Box>
 
             <Typography
               sx={{
@@ -155,179 +314,60 @@ export default function ConferenceGallery() {
           </Typography>
         </Box>
 
-        <Grid container spacing={2.5}>
-          {projects.map((project, index) => (
-            <Grid
-              key={project.title}
-              size={{
-                xs: 12,
-                sm: 6,
-                md: project.size === "large" ? 6 : 3,
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  height: {
-                    xs: 300,
-                    sm: 340,
-                    md: project.size === "large" ? 440 : 340,
-                  },
-                  width: "100%",
-                  borderRadius: "22px",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  backgroundColor: "#e8ecf0",
-                  boxShadow: "0 1px 2px rgba(7,21,47,.04)",
-                  transition: "box-shadow .35s ease",
-
-                  "& img": {
-                    transition:
-                      "transform .7s cubic-bezier(.2,.8,.2,1)",
-                  },
-
-                  "&:hover": {
-                    boxShadow: "0 30px 60px rgba(7,21,47,.16)",
-                  },
-
-                  "&:hover img": {
-                    transform: "scale(1.07)",
-                  },
-
-                  "&:hover .project-overlay": {
-                    opacity: 1,
-                  },
-
-                  "&:hover .project-content": {
-                    transform: "translateY(0)",
-                  },
-
-                  "&:hover .project-cta": {
-                    opacity: 1,
-                    transform: "translateY(0)",
-                  },
-                }}
-              >
-                <Box
-                  component="img"
-                  src={project.image}
-                  alt={project.title}
-                  loading="lazy"
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-
-                {/* index number, top-left */}
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={0.75}
-                  sx={{
-                    position: "absolute",
-                    top: 18,
-                    left: 20,
-                    px: 1.25,
-                    py: 0.5,
-                    borderRadius: "999px",
-                    backgroundColor: "rgba(6,20,43,.4)",
-                    backdropFilter: "blur(8px)",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: "#fff",
-                      fontSize: 11,
-                      fontWeight: 800,
-                    }}
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </Typography>
-                </Stack>
-
-                {/* view project pill, top-right, appears on hover (desktop) */}
-                <Box
-                  className="project-cta"
-                  sx={{
-                    position: "absolute",
-                    top: 18,
-                    right: 20,
-                    display: { xs: "none", md: "flex" },
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    backgroundColor: "#fff",
-                    color: "#07152f",
-                    opacity: 0,
-                    transform: "translateY(-6px)",
-                    transition:
-                      "opacity .3s ease, transform .3s ease",
-                    boxShadow: "0 10px 25px rgba(0,0,0,.25)",
-                  }}
-                >
-                  <ArrowOutwardRoundedIcon sx={{ fontSize: 18 }} />
-                </Box>
-
-                <Box
-                  className="project-overlay"
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    opacity: { xs: 1, md: 0 },
-                    transition: "opacity .35s ease",
-                    background:
-                      "linear-gradient(180deg,transparent 35%,rgba(0,0,0,.82))",
-                  }}
-                />
-
-                <Box
-                  className="project-content"
-                  sx={{
-                    position: "absolute",
-                    left: 24,
-                    right: 24,
-                    bottom: 22,
-                    color: "#fff",
-                    transform: {
-                      xs: "translateY(0)",
-                      md: "translateY(12px)",
-                    },
-                    transition: "transform .35s ease",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      letterSpacing: ".13em",
-                      color: "#7cf0bc",
-                    }}
-                  >
-                    {project.category}
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      mt: 0.8,
-                      fontSize: 20,
-                      fontWeight: 750,
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {project.title}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+        {/* BENTO GRID — plain CSS grid, no MUI Grid/Stack dependency */}
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2.5,
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "1.3fr 0.85fr 0.85fr",
+            },
+            gridTemplateAreas: {
+              xs: `
+                "hero"
+                "tall"
+                "small1"
+                "small2"
+                "small3"
+                "wide"
+              `,
+              sm: `
+                "hero hero"
+                "tall small1"
+                "tall small2"
+                "wide wide"
+                "small3 small3"
+              `,
+              md: `
+                "hero hero tall"
+                "small1 small2 tall"
+                "wide wide wide"
+              `,
+            },
+            gridAutoRows: { xs: "auto", md: "170px" },
+          }}
+        >
+          <Box sx={{ gridArea: "hero" }}>
+            <ProjectTile project={hero} index={0} minHeight={320} />
+          </Box>
+          <Box sx={{ gridArea: "tall" }}>
+            <ProjectTile project={tall} index={1} minHeight={320} />
+          </Box>
+          <Box sx={{ gridArea: "small1" }}>
+            <ProjectTile project={small1} index={2} minHeight={260} />
+          </Box>
+          <Box sx={{ gridArea: "small2" }}>
+            <ProjectTile project={small2} index={3} minHeight={260} />
+          </Box>
+          <Box sx={{ gridArea: "small3" }}>
+            <ProjectTile project={small3} index={4} minHeight={260} />
+          </Box>
+          <Box sx={{ gridArea: "wide" }}>
+            <ProjectTile project={wide} index={5} minHeight={260} />
+          </Box>
+        </Box>
       </Container>
     </Box>
   );
