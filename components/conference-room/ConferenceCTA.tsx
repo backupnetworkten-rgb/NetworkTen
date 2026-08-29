@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Container,
-  Stack,
   Typography,
 } from "@mui/material";
 
@@ -87,7 +86,14 @@ export default function ConferenceCTA() {
               maxWidth: 850,
             }}
           >
-            <Stack direction="row" alignItems="center" spacing={0.75}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 0.75,
+              }}
+            >
               <Box
                 sx={{
                   width: 6,
@@ -107,7 +113,7 @@ export default function ConferenceCTA() {
               >
                 READY TO BUILD?
               </Typography>
-            </Stack>
+            </Box>
 
             <Typography
               sx={{
@@ -137,10 +143,13 @@ export default function ConferenceCTA() {
               right conference solution for your business.
             </Typography>
 
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              sx={{ mt: 4 }}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                mt: 4,
+              }}
             >
               <Button
                 href="/contact"
@@ -168,7 +177,7 @@ export default function ConferenceCTA() {
               </Button>
 
               <Button
-                href="tel:+919999999999"
+                href="tel:+918687878755"
                 variant="outlined"
                 startIcon={<PhoneRoundedIcon />}
                 sx={{
@@ -182,7 +191,8 @@ export default function ConferenceCTA() {
                   fontSize: 15,
                   backgroundColor: "rgba(255,255,255,.04)",
                   backdropFilter: "blur(8px)",
-                  transition: "border-color .2s ease, background-color .2s ease, transform .2s ease",
+                  transition:
+                    "border-color .2s ease, background-color .2s ease, transform .2s ease",
                   "&:hover": {
                     borderColor: "#fff",
                     background: "rgba(255,255,255,.08)",
@@ -192,19 +202,27 @@ export default function ConferenceCTA() {
               >
                 Talk to Our Team
               </Button>
-            </Stack>
+            </Box>
 
             {/* contact info strip */}
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={{ xs: 1.5, sm: 4 }}
+            <Box
               sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: 1.5, sm: 4 },
                 mt: { xs: 4.5, md: 5.5 },
                 pt: { xs: 3.5, md: 4 },
                 borderTop: "1px solid rgba(255,255,255,.1)",
               }}
             >
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
                 <MailOutlineRoundedIcon
                   sx={{ fontSize: 18, color: "#65e7b2" }}
                 />
@@ -217,9 +235,16 @@ export default function ConferenceCTA() {
                 >
                   info@networkten.in
                 </Typography>
-              </Stack>
+              </Box>
 
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
                 <PhoneRoundedIcon sx={{ fontSize: 18, color: "#65e7b2" }} />
                 <Typography
                   sx={{
@@ -230,9 +255,16 @@ export default function ConferenceCTA() {
                 >
                   +91 8687878755
                 </Typography>
-              </Stack>
+              </Box>
 
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
                 <AccessTimeRoundedIcon
                   sx={{ fontSize: 18, color: "#65e7b2" }}
                 />
@@ -245,8 +277,8 @@ export default function ConferenceCTA() {
                 >
                   Response within 24 hours
                 </Typography>
-              </Stack>
-            </Stack>
+              </Box>
+            </Box>
           </Box>
         </Box>
       </Container>
