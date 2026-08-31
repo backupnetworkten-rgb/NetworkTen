@@ -13,39 +13,79 @@ export interface InteriorKit {
 }
 
 export interface WelcomeKitFormData {
+  // =========================================================
   // Personal Details
+  // =========================================================
+
   fullName: string;
   email: string;
   phone: string;
   city: string;
 
+  // =========================================================
   // Property
+  // =========================================================
+
   propertyType: string;
   totalArea: string;
   configuration: string;
   propertyStatus: string;
   possessionDate: string;
 
+  // =========================================================
   // Design Style
+  // =========================================================
+
   designStyles: string[];
   dreamSpace: string;
   colorsLove: string;
   colorsAvoid: string;
 
-  // Rooms
+  // =========================================================
+  // Dynamic Room Requirements
+  //
+  // This is the NEW structure.
+  //
+  // Example:
+  //
+  // {
+  //   "living-room": "Large TV unit...",
+  //   "kitchen": "Island counter...",
+  //   "bedroom-2": "Study table..."
+  // }
+  //
+  // The keys are generated according to the
+  // selected property type/configuration.
+  // =========================================================
+
+  roomRequirements: Record<string, string>;
+
+  // =========================================================
+  // Legacy Room Fields
+  //
+  // Keep these so existing Firebase/PDF code does not break.
+  // They can be populated from roomRequirements.
+  // =========================================================
+
   livingRoom: string;
   masterBedroom: string;
   kitchen: string;
   diningArea: string;
   otherRooms: string;
 
+  // =========================================================
   // Budget
+  // =========================================================
+
   totalBudget: string;
   designFeeBudget: string;
   preferredStartDate: string;
   targetCompletionDate: string;
 
+  // =========================================================
   // Lifestyle
+  // =========================================================
+
   familyMembers: string;
   elderlyMembers: string;
   children: string;
@@ -54,10 +94,17 @@ export interface WelcomeKitFormData {
   additionalNotes: string;
 }
 
+// =============================================================
+// INTERIOR CLIENT
+// =============================================================
+
 export interface InteriorClient {
   uid: string;
+
   name: string;
+
   email: string;
+
   interiorDesignAccess: boolean;
 
   kits: {
@@ -68,29 +115,42 @@ export interface InteriorClient {
   };
 }
 
+// =============================================================
+// CLIENT DISCOVERY FORM
+// =============================================================
 
 export interface ClientDiscoveryFormData {
+  // =========================================================
   // 01 — Client & Project
+  // =========================================================
+
   fullName: string;
   email: string;
   phone: string;
   city: string;
 
   projectName: string;
+
   propertyType: string;
   totalArea: string;
   configuration: string;
   propertyStatus: string;
   possessionDate: string;
 
+  // =========================================================
   // 02 — Vision & Goals
+  // =========================================================
+
   projectVision: string;
   dreamSpace: string;
   problemsToSolve: string;
   mustHaveFeatures: string;
   inspirationReferences: string;
 
+  // =========================================================
   // 03 — Lifestyle
+  // =========================================================
+
   familyMembers: string;
   elderlyMembers: string;
   children: string;
@@ -99,15 +159,23 @@ export interface ClientDiscoveryFormData {
   entertaining: string;
   lifestyleDescription: string;
 
+  // =========================================================
   // 04 — Design Preferences
+  // =========================================================
+
   designStyles: string[];
+
   colorsLove: string;
   colorsAvoid: string;
+
   materialsPreference: string;
   lightingPreference: string;
   overallMood: string;
 
+  // =========================================================
   // 05 — Room Requirements
+  // =========================================================
+
   livingRoom: string;
   masterBedroom: string;
   bedroom2: string;
@@ -120,35 +188,57 @@ export interface ClientDiscoveryFormData {
   poojaRoom: string;
   otherRooms: string;
 
+  // =========================================================
   // 06 — Budget & Timeline
+  // =========================================================
+
   totalBudget: string;
   preferredStartDate: string;
   targetCompletionDate: string;
 
   topPriorities: string[];
+
   maintenancePreference: string;
   decisionMakers: string;
+
   additionalNotes: string;
 }
 
+// =============================================================
+// INITIAL CLIENT DISCOVERY FORM
+// =============================================================
+
 export const initialClientDiscoveryForm: ClientDiscoveryFormData = {
+  // =========================================================
+  // 01 — Client & Project
+  // =========================================================
+
   fullName: "",
   email: "",
   phone: "",
   city: "",
 
   projectName: "",
+
   propertyType: "",
   totalArea: "",
   configuration: "",
   propertyStatus: "",
   possessionDate: "",
 
+  // =========================================================
+  // 02 — Vision & Goals
+  // =========================================================
+
   projectVision: "",
   dreamSpace: "",
   problemsToSolve: "",
   mustHaveFeatures: "",
   inspirationReferences: "",
+
+  // =========================================================
+  // 03 — Lifestyle
+  // =========================================================
 
   familyMembers: "",
   elderlyMembers: "",
@@ -158,12 +248,22 @@ export const initialClientDiscoveryForm: ClientDiscoveryFormData = {
   entertaining: "",
   lifestyleDescription: "",
 
+  // =========================================================
+  // 04 — Design Preferences
+  // =========================================================
+
   designStyles: [],
+
   colorsLove: "",
   colorsAvoid: "",
+
   materialsPreference: "",
   lightingPreference: "",
   overallMood: "",
+
+  // =========================================================
+  // 05 — Room Requirements
+  // =========================================================
 
   livingRoom: "",
   masterBedroom: "",
@@ -177,95 +277,154 @@ export const initialClientDiscoveryForm: ClientDiscoveryFormData = {
   poojaRoom: "",
   otherRooms: "",
 
+  // =========================================================
+  // 06 — Budget & Timeline
+  // =========================================================
+
   totalBudget: "",
   preferredStartDate: "",
   targetCompletionDate: "",
 
   topPriorities: [],
+
   maintenancePreference: "",
   decisionMakers: "",
+
   additionalNotes: "",
 };
 
+// =============================================================
+// CLIENT CONTRACT FORM
+// =============================================================
 
 export interface ClientContractFormData {
-  /* Client */
+  // =========================================================
+  // Client
+  // =========================================================
+
   clientName: string;
   clientEmail: string;
   clientPhone: string;
   clientAddress: string;
 
-  /* Project */
+  // =========================================================
+  // Project
+  // =========================================================
+
   projectName: string;
   projectAddress: string;
   propertyType: string;
 
-  /* Scope */
+  // =========================================================
+  // Scope
+  // =========================================================
+
   scopeOfWork: string;
   includedSpaces: string;
   deliverables: string;
   serviceLevel: string;
 
-  /* Commercial */
+  // =========================================================
+  // Commercial
+  // =========================================================
+
   totalProjectFee: string;
   designFee: string;
   paymentSchedule: string;
 
-  /* Timeline */
+  // =========================================================
+  // Timeline
+  // =========================================================
+
   estimatedStartDate: string;
   estimatedCompletionDate: string;
 
-  /* Revisions */
+  // =========================================================
+  // Revisions
+  // =========================================================
+
   includedRevisions: string;
   additionalRevisionFee: string;
 
-  /* Responsibilities */
+  // =========================================================
+  // Responsibilities
+  // =========================================================
+
   clientResponsibilities: string;
   networkTenResponsibilities: string;
 
-  /* Terms */
+  // =========================================================
+  // Terms
+  // =========================================================
+
   exclusions: string;
   cancellationTerms: string;
   intellectualPropertyTerms: string;
   confidentialityTerms: string;
   disputeResolutionTerms: string;
 
-  /* Acceptance */
+  // =========================================================
+  // Acceptance
+  // =========================================================
+
   clientAccepted: boolean;
   clientSignature: string;
   acceptanceDate: string;
 
-  /* Optional notes */
+  // =========================================================
+  // Optional Notes
+  // =========================================================
+
   additionalNotes: string;
 }
 
+// =============================================================
+// INITIAL CLIENT CONTRACT FORM
+// =============================================================
+
 export const initialClientContractForm: ClientContractFormData = {
+  // Client
+
   clientName: "",
   clientEmail: "",
   clientPhone: "",
   clientAddress: "",
 
+  // Project
+
   projectName: "",
   projectAddress: "",
   propertyType: "",
+
+  // Scope
 
   scopeOfWork: "",
   includedSpaces: "",
   deliverables: "",
   serviceLevel: "",
 
+  // Commercial
+
   totalProjectFee: "",
   designFee: "",
   paymentSchedule: "",
 
+  // Timeline
+
   estimatedStartDate: "",
   estimatedCompletionDate: "",
+
+  // Revisions
 
   includedRevisions: "",
   additionalRevisionFee: "",
 
+  // Responsibilities
+
   clientResponsibilities: "",
   networkTenResponsibilities: "",
+
+  // Terms
 
   exclusions: "",
   cancellationTerms: "",
@@ -273,129 +432,167 @@ export const initialClientContractForm: ClientContractFormData = {
   confidentialityTerms: "",
   disputeResolutionTerms: "",
 
+  // Acceptance
+
   clientAccepted: false,
   clientSignature: "",
   acceptanceDate: "",
 
+  // Optional Notes
+
   additionalNotes: "",
 };
 
+// =============================================================
+// E-DESIGN CONTRACT FORM
+// =============================================================
+
 export interface EDesignContractFormData {
+  // =========================================================
+  // Client
+  // =========================================================
+
   clientName: string;
-
   clientEmail: string;
-
   clientPhone: string;
-
   clientAddress: string;
 
+  // =========================================================
+  // Project
+  // =========================================================
+
   projectName: string;
-
   projectAddress: string;
-
   propertyType: string;
 
+  // =========================================================
+  // Scope / Service
+  // =========================================================
+
   projectDescription: string;
-
   roomsIncluded: string;
-
   serviceLevel: string;
-
   deliverables: string;
 
   designProcess: string;
-
   communicationMethod: string;
 
-  expectedStartDate: string;
+  // =========================================================
+  // Timeline
+  // =========================================================
 
+  expectedStartDate: string;
   expectedCompletionDate: string;
+
+  // =========================================================
+  // Revisions
+  // =========================================================
 
   revisionPolicy: string;
 
-  totalFee: string;
+  // =========================================================
+  // Commercial
+  // =========================================================
 
+  totalFee: string;
   paymentTerms: string;
 
-  clientResponsibilities: string;
+  // =========================================================
+  // Responsibilities
+  // =========================================================
 
+  clientResponsibilities: string;
   networkTenResponsibilities: string;
 
   clientProvidedMeasurements: string;
 
+  // =========================================================
+  // Terms
+  // =========================================================
+
   exclusions: string;
-
   intellectualPropertyTerms: string;
-
   confidentialityTerms: string;
-
   cancellationTerms: string;
+
+  // =========================================================
+  // Additional Notes
+  // =========================================================
 
   additionalNotes: string;
 
+  // =========================================================
+  // Acceptance
+  // =========================================================
+
   clientAccepted: boolean;
-
   clientSignature: string;
-
   acceptanceDate: string;
 }
 
+// =============================================================
+// INITIAL E-DESIGN CONTRACT FORM
+// =============================================================
+
 export const initialEDesignContractForm: EDesignContractFormData = {
+  // Client
+
   clientName: "",
-
   clientEmail: "",
-
   clientPhone: "",
-
   clientAddress: "",
 
+  // Project
+
   projectName: "",
-
   projectAddress: "",
-
   propertyType: "",
 
+  // Scope / Service
+
   projectDescription: "",
-
   roomsIncluded: "",
-
   serviceLevel: "",
-
   deliverables: "",
 
   designProcess: "",
-
   communicationMethod: "",
 
-  expectedStartDate: "",
+  // Timeline
 
+  expectedStartDate: "",
   expectedCompletionDate: "",
+
+  // Revisions
 
   revisionPolicy: "",
 
-  totalFee: "",
+  // Commercial
 
+  totalFee: "",
   paymentTerms: "",
 
-  clientResponsibilities: "",
+  // Responsibilities
 
+  clientResponsibilities: "",
   networkTenResponsibilities: "",
 
   clientProvidedMeasurements: "",
 
+  // Terms
+
   exclusions: "",
-
   intellectualPropertyTerms: "",
-
   confidentialityTerms: "",
-
   cancellationTerms: "",
+
+  // Additional Notes
 
   additionalNotes: "",
 
+  // Acceptance
+
   clientAccepted: false,
-
   clientSignature: "",
-
   acceptanceDate: "",
 };

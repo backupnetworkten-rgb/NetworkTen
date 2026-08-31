@@ -1,7 +1,9 @@
 "use client";
 
-import React, {
+import {
   FormEvent,
+  useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -11,17 +13,21 @@ import {
   Button,
   Checkbox,
   Container,
+  Divider,
   FormControlLabel,
-  MenuItem,
+  Grid,
   Paper,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DownloadIcon from "@mui/icons-material/Download";
-import LogoutIcon from "@mui/icons-material/Logout";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
+import MeetingRoomRoundedIcon from "@mui/icons-material/MeetingRoomRounded";
 
 import { useRouter } from "next/navigation";
 
@@ -34,15 +40,22 @@ import {
   saveWelcomeKitSubmission,
 } from "@/services/welcomeKitService";
 
-import {
+import type {
   WelcomeKitFormData,
 } from "@/types/interior-design";
+
+import {
+  WELCOME_CONFIGURATIONS,
+  WELCOME_PROPERTY_TYPES,
+  createInitialRoomRequirements,
+  getWelcomeKitRooms,
+} from "@/data/welcomeKitRooms";
 
 /* =========================================================
    DESIGN STYLES
 ========================================================= */
 
-const designStyles = [
+const DESIGN_STYLES = [
   "Modern Minimalist",
   "Contemporary",
   "Japandi / Wabi-Sabi",
@@ -75,6 +88,11 @@ const initialForm: WelcomeKitFormData = {
   colorsLove: "",
   colorsAvoid: "",
 
+  roomRequirements: {},
+
+  /*
+   * Legacy compatibility fields.
+   */
   livingRoom: "",
   masterBedroom: "",
   kitchen: "",
@@ -119,42 +137,49 @@ function FormSection({
           xs: 2.5,
           sm: 4,
         },
+
         borderRadius: 4,
-        border: "1px solid #e5eaf0",
-        backgroundColor: "#ffffff",
+
+        border:
+          "1px solid #e4e9ef",
+
+        bgcolor: "#fff",
+
+        boxShadow:
+          "0 10px 35px rgba(16,32,72,0.035)",
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        {/* SECTION HEADER */}
-
+      <Stack spacing={3}>
         <Box>
-          <Box
+          <Stack
+            direction="row"
+            spacing={2}
             sx={{
-              display: "flex",
-              flexDirection: "row",
               alignItems: "center",
-              gap: 2,
             }}
           >
             <Box
               sx={{
-                minWidth: 48,
                 width: 48,
                 height: 48,
-                borderRadius: 2.5,
-                backgroundColor: "#102048",
-                color: "#8BC53F",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
+
                 flexShrink: 0,
+
+                borderRadius: 2.5,
+
+                bgcolor: "#102048",
+
+                color: "#8BC53F",
+
+                display: "flex",
+
+                alignItems: "center",
+
+                justifyContent: "center",
+
+                fontWeight: 900,
+
+                fontSize: "13px",
               }}
             >
               {number}
@@ -164,7 +189,7 @@ function FormSection({
               <Typography
                 variant="h6"
                 sx={{
-                  fontWeight: 800,
+                  fontWeight: 900,
                   color: "#102048",
                 }}
               >
@@ -174,21 +199,28 @@ function FormSection({
               <Box
                 sx={{
                   mt: 0.7,
+
                   width: 38,
                   height: 3,
-                  borderRadius: 2,
-                  backgroundColor: "#8BC53F",
+
+                  borderRadius: 10,
+
+                  bgcolor: "#8BC53F",
                 }}
               />
             </Box>
-          </Box>
+          </Stack>
 
           {description && (
             <Typography
               sx={{
                 mt: 2,
+
                 color: "#64748b",
-                lineHeight: 1.7,
+
+                lineHeight: 1.75,
+
+                fontSize: "14px",
               }}
             >
               {description}
@@ -196,90 +228,51 @@ function FormSection({
           )}
         </Box>
 
-        {/* SECTION CONTENT */}
-
         {children}
-      </Box>
+      </Stack>
     </Paper>
   );
 }
 
 /* =========================================================
-   TWO COLUMN LAYOUT
+   INPUT STYLE
 ========================================================= */
 
-function TwoColumnLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          md: "repeat(2, minmax(0, 1fr))",
-        },
-        gap: 2.5,
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
+const inputSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 2.5,
+
+    backgroundColor: "#fbfcfd",
+
+    transition:
+      "all .2s ease",
+
+    "&:hover": {
+      backgroundColor: "#fff",
+    },
+
+    "&.Mui-focused": {
+      backgroundColor: "#fff",
+
+      boxShadow:
+        "0 0 0 3px rgba(139,197,63,.10)",
+    },
+
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+      {
+        borderColor: "#8BC53F",
+        borderWidth: 2,
+      },
+  },
+
+  "& .MuiInputLabel-root.Mui-focused":
+    {
+      color: "#6da82e",
+    },
+};
 
 /* =========================================================
-   THREE COLUMN LAYOUT
-========================================================= */
-
-function ThreeColumnLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, minmax(0, 1fr))",
-          md: "repeat(3, minmax(0, 1fr))",
-        },
-        gap: 1.5,
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
-/* =========================================================
-   FIELD WRAPPER
-========================================================= */
-
-function FullWidthField({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        gridColumn: {
-          xs: "auto",
-          md: "1 / -1",
-        },
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
-/* =========================================================
-   MAIN COMPONENT
+   COMPONENT
 ========================================================= */
 
 export default function WelcomeKitForm() {
@@ -295,6 +288,24 @@ export default function WelcomeKitForm() {
 
   const [error, setError] =
     useState("");
+
+  /* =======================================================
+     CURRENT ROOMS
+  ======================================================= */
+
+  const rooms = useMemo(() => {
+    if (!form.propertyType) {
+      return [];
+    }
+
+    return getWelcomeKitRooms(
+      form.propertyType,
+      form.configuration
+    );
+  }, [
+    form.propertyType,
+    form.configuration,
+  ]);
 
   /* =======================================================
      UPDATE FIELD
@@ -313,20 +324,222 @@ export default function WelcomeKitForm() {
   }
 
   /* =======================================================
-     TOGGLE DESIGN STYLE
+     UPDATE ROOM REQUIREMENT
   ======================================================= */
 
-  function toggleStyle(style: string) {
+  function updateRoomRequirement(
+    roomId: string,
+    value: string
+  ) {
+    setForm((previous) => ({
+      ...previous,
+
+      roomRequirements: {
+        ...previous.roomRequirements,
+
+        [roomId]: value,
+      },
+    }));
+  }
+
+  /* =======================================================
+     PROPERTY TYPE CHANGE
+  ======================================================= */
+
+  function handlePropertyTypeChange(
+    propertyType: string
+  ) {
+    const configurationOptions =
+      WELCOME_CONFIGURATIONS[
+        propertyType as keyof typeof WELCOME_CONFIGURATIONS
+      ] ?? [];
+
+    const firstConfiguration =
+      configurationOptions[0]?.value ?? "";
+
+    const newRooms =
+      propertyType
+        ? getWelcomeKitRooms(
+            propertyType,
+            firstConfiguration
+          )
+        : [];
+
+    setForm((previous) => ({
+      ...previous,
+
+      propertyType,
+
+      configuration:
+        firstConfiguration,
+
+      roomRequirements:
+        createInitialRoomRequirements(
+          newRooms
+        ),
+
+      /*
+       * Reset old compatibility fields.
+       */
+      livingRoom: "",
+      masterBedroom: "",
+      kitchen: "",
+      diningArea: "",
+      otherRooms: "",
+    }));
+  }
+
+  /* =======================================================
+     CONFIGURATION CHANGE
+  ======================================================= */
+
+  function handleConfigurationChange(
+    configuration: string
+  ) {
+    const newRooms =
+      getWelcomeKitRooms(
+        form.propertyType,
+        configuration
+      );
+
     setForm((previous) => {
-      const exists =
-        previous.designStyles.includes(style);
+      const previousRequirements =
+        previous.roomRequirements;
+
+      const nextRequirements =
+        createInitialRoomRequirements(
+          newRooms
+        );
+
+      /*
+       * Preserve matching rooms when
+       * configuration changes.
+       */
+      newRooms.forEach((room) => {
+        if (
+          previousRequirements[
+            room.id
+          ] !== undefined
+        ) {
+          nextRequirements[
+            room.id
+          ] =
+            previousRequirements[
+              room.id
+            ];
+        }
+      });
 
       return {
         ...previous,
 
-        designStyles: exists
+        configuration,
+
+        roomRequirements:
+          nextRequirements,
+      };
+    });
+  }
+
+  /* =======================================================
+     KEEP LEGACY PDF FIELDS IN SYNC
+  ======================================================= */
+
+  useEffect(() => {
+    const requirements =
+      form.roomRequirements;
+
+    setForm((previous) => {
+      const next = {
+        ...previous,
+
+        livingRoom:
+          requirements[
+            "living-room"
+          ] ?? "",
+
+        masterBedroom:
+          requirements[
+            "master-bedroom"
+          ] ?? "",
+
+        kitchen:
+          requirements[
+            "kitchen"
+          ] ?? "",
+
+        diningArea:
+          requirements[
+            "dining-area"
+          ] ?? "",
+
+        otherRooms:
+          Object.entries(
+            requirements
+          )
+            .filter(
+              ([key]) =>
+                ![
+                  "living-room",
+                  "master-bedroom",
+                  "kitchen",
+                  "dining-area",
+                ].includes(key)
+            )
+            .map(
+              ([key, value]) =>
+                value
+                  ? `${key}: ${value}`
+                  : ""
+            )
+            .filter(Boolean)
+            .join("\n\n"),
+      };
+
+      /*
+       * Prevent unnecessary state update.
+       */
+      if (
+        next.livingRoom ===
+          previous.livingRoom &&
+        next.masterBedroom ===
+          previous.masterBedroom &&
+        next.kitchen ===
+          previous.kitchen &&
+        next.diningArea ===
+          previous.diningArea &&
+        next.otherRooms ===
+          previous.otherRooms
+      ) {
+        return previous;
+      }
+
+      return next;
+    });
+  }, [
+    form.roomRequirements,
+  ]);
+
+  /* =======================================================
+     DESIGN STYLE TOGGLE
+  ======================================================= */
+
+  function toggleStyle(
+    style: string
+  ) {
+    setForm((previous) => {
+      const selected =
+        previous.designStyles.includes(
+          style
+        );
+
+      return {
+        ...previous,
+
+        designStyles: selected
           ? previous.designStyles.filter(
-              (item) => item !== style
+              (item) =>
+                item !== style
             )
           : [
               ...previous.designStyles,
@@ -346,19 +559,78 @@ export default function WelcomeKitForm() {
     event.preventDefault();
 
     setError("");
+
+    if (!form.fullName.trim()) {
+      setError(
+        "Please enter your full name."
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
+    if (!form.propertyType) {
+      setError(
+        "Please select your property type."
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
+    if (!form.configuration) {
+      setError(
+        "Please select your property configuration."
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
+    if (
+      form.designStyles.length === 0
+    ) {
+      setError(
+        "Please select at least one preferred design style."
+      );
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      /* SAVE TO FIREBASE */
+      /*
+       * Save form.
+       */
+      await saveWelcomeKitSubmission(
+        form
+      );
 
-      await saveWelcomeKitSubmission(form);
-
-      /* GENERATE PDF */
-
+      /*
+       * Generate PDF.
+       */
       const pdf =
-        await generateWelcomeKitPdf(form);
-
-      /* DOWNLOAD PDF */
+        await generateWelcomeKitPdf(
+          form
+        );
 
       const url =
         URL.createObjectURL(pdf);
@@ -368,19 +640,14 @@ export default function WelcomeKitForm() {
 
       anchor.href = url;
 
-      const safeName =
-        form.fullName
-          .trim()
-          .replace(/\s+/g, "-")
-          .replace(
-            /[^a-zA-Z0-9-_]/g,
-            ""
-          );
-
       anchor.download =
-        `Network-Ten-Welcome-Kit-${safeName || "Client"}.pdf`;
+        `Network-Ten-Welcome-Kit-${form.fullName
+          .trim()
+          .replace(/\s+/g, "-")}.pdf`;
 
-      document.body.appendChild(anchor);
+      document.body.appendChild(
+        anchor
+      );
 
       anchor.click();
 
@@ -388,14 +655,11 @@ export default function WelcomeKitForm() {
 
       URL.revokeObjectURL(url);
 
-      /* SUCCESS PAGE */
-
       router.push(
         "/interior-design/kits/welcome?success=true"
       );
     } catch (submitError) {
       console.error(
-        "Welcome Kit submission error:",
         submitError
       );
 
@@ -414,23 +678,23 @@ export default function WelcomeKitForm() {
   ======================================================= */
 
   async function logout() {
-    try {
-      await signOut(auth);
+    await signOut(auth);
 
-      router.push(
-        "/interior-design"
-      );
-    } catch (logoutError) {
-      console.error(
-        "Logout error:",
-        logoutError
-      );
-
-      setError(
-        "Unable to sign out. Please try again."
-      );
-    }
+    router.push(
+      "/interior-design"
+    );
   }
+
+  /* =======================================================
+     CURRENT CONFIG OPTIONS
+  ======================================================= */
+
+  const configurationOptions =
+    form.propertyType
+      ? WELCOME_CONFIGURATIONS[
+          form.propertyType as keyof typeof WELCOME_CONFIGURATIONS
+        ] ?? []
+      : [];
 
   /* =======================================================
      UI
@@ -440,1010 +704,1638 @@ export default function WelcomeKitForm() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundColor: "#f7f9fc",
+
+        bgcolor: "#f5f7fa",
+
         py: {
           xs: 2,
           md: 4,
         },
       }}
     >
-      <Container maxWidth="lg">
+      <Container
+        maxWidth="lg"
+      >
+        <Stack spacing={3}>
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+          {/* =================================================
+              HEADER
+          ================================================= */}
 
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 4,
-            p: {
-              xs: 3,
-              md: 5,
-            },
-            borderRadius: 4,
-            color: "#ffffff",
-            background:
-              "linear-gradient(135deg, #08111f 0%, #102048 100%)",
-          }}
-        >
-          <Box
+          <Paper
+            elevation={0}
             sx={{
-              display: "flex",
-              flexDirection: {
-                xs: "column",
-                sm: "row",
+              p: {
+                xs: 3,
+                md: 5,
               },
-              gap: 3,
-              justifyContent:
-                "space-between",
-              alignItems: {
-                xs: "flex-start",
-                sm: "center",
-              },
+
+              borderRadius: 5,
+
+              color: "#fff",
+
+              position: "relative",
+
+              overflow: "hidden",
+
+              background:
+                "linear-gradient(135deg, #07101d 0%, #102048 60%, #182d57 100%)",
+
+              boxShadow:
+                "0 20px 55px rgba(16,32,72,.15)",
             }}
           >
-            {/* HEADER CONTENT */}
+            {/* Decorative glow */}
 
-            <Box>
-              <Typography
-                variant="overline"
-                sx={{
-                  color: "#8BC53F",
-                  fontWeight: 900,
-                  letterSpacing: "0.25em",
-                }}
-              >
-                NETWORK TEN
-              </Typography>
-
-              <Typography
-                variant="h3"
-                sx={{
-                  mt: 1,
-                  fontWeight: 800,
-                  lineHeight: 1.15,
-                  fontSize: {
-                    xs: "2rem",
-                    sm: "2.4rem",
-                    md: "2.8rem",
-                  },
-                }}
-              >
-                Client Welcome Kit
-              </Typography>
-
-              <Typography
-                sx={{
-                  mt: 1.5,
-                  maxWidth: 700,
-                  color:
-                    "rgba(255,255,255,0.72)",
-                  lineHeight: 1.7,
-                }}
-              >
-                Please complete the following
-                information so our interior
-                design team can understand
-                your project, lifestyle and
-                preferences.
-              </Typography>
-            </Box>
-
-            {/* LOGOUT */}
-
-            <Button
-              onClick={logout}
-              startIcon={
-                <LogoutIcon />
-              }
-              variant="outlined"
+            <Box
               sx={{
-                color: "#ffffff",
-                borderColor:
-                  "rgba(255,255,255,0.3)",
-                borderRadius: 2.5,
-                fontWeight: 700,
-                whiteSpace: "nowrap",
+                position:
+                  "absolute",
 
-                "&:hover": {
-                  borderColor:
-                    "#8BC53F",
-                  backgroundColor:
-                    "rgba(139,197,63,0.08)",
+                width: 320,
+                height: 320,
+
+                borderRadius:
+                  "50%",
+
+                background:
+                  "rgba(139,197,63,.10)",
+
+                filter:
+                  "blur(70px)",
+
+                right: -130,
+                top: -150,
+              }}
+            />
+
+            <Box
+              sx={{
+                position:
+                  "relative",
+
+                zIndex: 1,
+              }}
+            >
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={3}
+                sx={{
+                  alignItems: {
+                    xs: "flex-start",
+                    sm: "center",
+                  },
+
+                  justifyContent:
+                    "space-between",
+                }}
+              >
+                <Box>
+                  <Typography
+                    sx={{
+                      color:
+                        "#8BC53F",
+
+                      fontSize:
+                        "11px",
+
+                      fontWeight: 900,
+
+                      letterSpacing:
+                        "0.25em",
+                    }}
+                  >
+                    NETWORK TEN
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 1,
+
+                      fontWeight: 900,
+
+                      fontSize: {
+                        xs: "2rem",
+                        md: "3rem",
+                      },
+
+                      lineHeight: 1,
+                    }}
+                  >
+                    Client Welcome Kit
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 2,
+
+                      maxWidth: 650,
+
+                      color:
+                        "rgba(255,255,255,.68)",
+
+                      lineHeight: 1.75,
+
+                      fontSize:
+                        "14px",
+                    }}
+                  >
+                    Tell us about your
+                    space, lifestyle and
+                    design vision. Your
+                    requirements will
+                    automatically adapt to
+                    the property you select.
+                  </Typography>
+                </Box>
+
+                <Button
+                  onClick={
+                    logout
+                  }
+                  startIcon={
+                    <LogoutRoundedIcon />
+                  }
+                  variant="outlined"
+                  sx={{
+                    color: "#fff",
+
+                    borderColor:
+                      "rgba(255,255,255,.25)",
+
+                    borderRadius:
+                      "50px",
+
+                    fontWeight: 800,
+
+                    px: 2.5,
+
+                    "&:hover": {
+                      borderColor:
+                        "#8BC53F",
+
+                      bgcolor:
+                        "rgba(139,197,63,.08)",
+                    },
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </Stack>
+            </Box>
+          </Paper>
+
+          {/* =================================================
+              PROGRESS / PROPERTY SUMMARY
+          ================================================= */}
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+
+              borderRadius: 3,
+
+              border:
+                "1px solid #e5eaf0",
+
+              bgcolor: "#fff",
+            }}
+          >
+            <Stack
+              direction={{
+                xs: "column",
+                sm: "row",
+              }}
+              spacing={2}
+              sx={{
+                alignItems: {
+                  xs: "flex-start",
+                  sm: "center",
                 },
               }}
             >
-              Sign Out
-            </Button>
-          </Box>
-        </Paper>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
 
-        {/* =================================================
-            FORM
-        ================================================= */}
+                  borderRadius: 2,
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
-            }}
-          >
+                  bgcolor:
+                    "#f0f8e8",
 
-            {/* =================================================
-                SECTION 01
-            ================================================= */}
+                  color:
+                    "#6da82e",
 
-            <FormSection
-              number="01"
-              title="Personal Details"
-            >
-              <TwoColumnLayout>
+                  display: "flex",
 
-                <TextField
-                  fullWidth
-                  required
-                  label="Full Name"
-                  value={form.fullName}
-                  onChange={(event) =>
-                    updateField(
-                      "fullName",
-                      event.target.value
-                    )
-                  }
-                />
+                  alignItems:
+                    "center",
 
-                <TextField
-                  fullWidth
-                  required
-                  type="email"
-                  label="Email Address"
-                  value={form.email}
-                  onChange={(event) =>
-                    updateField(
-                      "email",
-                      event.target.value
-                    )
-                  }
-                />
+                  justifyContent:
+                    "center",
+                }}
+              >
+                <HomeWorkRoundedIcon />
+              </Box>
 
-                <TextField
-                  fullWidth
-                  required
-                  label="Phone / WhatsApp"
-                  value={form.phone}
-                  onChange={(event) =>
-                    updateField(
-                      "phone",
-                      event.target.value
-                    )
-                  }
-                />
+              <Box
+                sx={{
+                  flex: 1,
+                }}
+              >
+                <Typography
+                  sx={{
+                    color:
+                      "#102048",
 
-                <TextField
-                  fullWidth
-                  required
-                  label="City / Location"
-                  value={form.city}
-                  onChange={(event) =>
-                    updateField(
-                      "city",
-                      event.target.value
-                    )
-                  }
-                />
+                    fontWeight: 900,
 
-              </TwoColumnLayout>
-            </FormSection>
-
-            {/* =================================================
-                SECTION 02
-            ================================================= */}
-
-            <FormSection
-              number="02"
-              title="Your Property"
-            >
-              <TwoColumnLayout>
-
-                {/* PROPERTY TYPE */}
-
-                <TextField
-                  fullWidth
-                  select
-                  label="Property Type"
-                  value={
-                    form.propertyType
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "propertyType",
-                      event.target.value
-                    )
-                  }
-                >
-                  <MenuItem value="">
-                    Select property type
-                  </MenuItem>
-
-                  <MenuItem value="Apartment">
-                    Apartment
-                  </MenuItem>
-
-                  <MenuItem value="Villa">
-                    Villa
-                  </MenuItem>
-
-                  <MenuItem value="Independent House">
-                    Independent House
-                  </MenuItem>
-
-                  <MenuItem value="Penthouse">
-                    Penthouse
-                  </MenuItem>
-
-                  <MenuItem value="Office">
-                    Office
-                  </MenuItem>
-
-                  <MenuItem value="Commercial">
-                    Commercial
-                  </MenuItem>
-
-                  <MenuItem value="Other">
-                    Other
-                  </MenuItem>
-                </TextField>
-
-                {/* TOTAL AREA */}
-
-                <TextField
-                  fullWidth
-                  label="Total Area"
-                  placeholder="Example: 1800 sq.ft."
-                  value={
-                    form.totalArea
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "totalArea",
-                      event.target.value
-                    )
-                  }
-                />
-
-                {/* CONFIGURATION */}
-
-                <TextField
-                  fullWidth
-                  label="Configuration"
-                  placeholder="Example: 3 BHK"
-                  value={
-                    form.configuration
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "configuration",
-                      event.target.value
-                    )
-                  }
-                />
-
-                {/* PROPERTY STATUS */}
-
-                <TextField
-                  fullWidth
-                  select
-                  label="Property Status"
-                  value={
-                    form.propertyStatus
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "propertyStatus",
-                      event.target.value
-                    )
-                  }
-                >
-                  <MenuItem value="">
-                    Select property status
-                  </MenuItem>
-
-                  <MenuItem value="New Construction">
-                    New Construction
-                  </MenuItem>
-
-                  <MenuItem value="Under Construction">
-                    Under Construction
-                  </MenuItem>
-
-                  <MenuItem value="Ready to Move">
-                    Ready to Move
-                  </MenuItem>
-
-                  <MenuItem value="Renovation">
-                    Renovation
-                  </MenuItem>
-
-                  <MenuItem value="Other">
-                    Other
-                  </MenuItem>
-                </TextField>
-
-                {/* POSSESSION */}
-
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Possession / Start Date"
-                  value={
-                    form.possessionDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "possessionDate",
-                      event.target.value
-                    )
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
+                    fontSize:
+                      "13px",
                   }}
-                />
-
-              </TwoColumnLayout>
-            </FormSection>
-
-            {/* =================================================
-                SECTION 03
-            ================================================= */}
-
-            <FormSection
-              number="03"
-              title="Design Style Preferences"
-            >
-
-              <Box>
+                >
+                  {form.propertyType
+                    ? `${form.propertyType}${
+                        form.configuration
+                          ? ` · ${form.configuration}`
+                          : ""
+                      }`
+                    : "Select your property"}
+                </Typography>
 
                 <Typography
                   sx={{
-                    mb: 2,
-                    fontWeight: 700,
-                    color: "#102048",
+                    mt: 0.3,
+
+                    color:
+                      "#94a3b8",
+
+                    fontSize:
+                      "11px",
                   }}
                 >
-                  Which interior styles best
-                  describe what you like?
+                  Your room requirements
+                  update automatically
+                  based on your selection.
                 </Typography>
+              </Box>
 
-                <ThreeColumnLayout>
+              {rooms.length > 0 && (
+                <Box
+                  sx={{
+                    px: 1.5,
 
-                  {designStyles.map(
-                    (style) => {
-                      const selected =
-                        form.designStyles.includes(
-                          style
+                    py: 0.7,
+
+                    borderRadius:
+                      "50px",
+
+                    bgcolor:
+                      "#f1f7e9",
+
+                    color:
+                      "#557d2a",
+
+                    fontSize:
+                      "11px",
+
+                    fontWeight: 900,
+                  }}
+                >
+                  {rooms.length} spaces
+                </Box>
+              )}
+            </Stack>
+          </Paper>
+
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
+          {error && (
+            <Alert
+              severity="error"
+              sx={{
+                borderRadius: 3,
+              }}
+            >
+              {error}
+            </Alert>
+          )}
+
+          <Box
+            component="form"
+            onSubmit={
+              handleSubmit
+            }
+          >
+            <Stack spacing={3}>
+
+              {/* =================================================
+                  01 PERSONAL DETAILS
+              ================================================= */}
+
+              <FormSection
+                number="01"
+                title="Personal Details"
+                description="Tell us who we are designing for."
+              >
+                <Grid
+                  container
+                  spacing={2.5}
+                >
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      label="Full Name"
+                      value={
+                        form.fullName
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "fullName",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      type="email"
+                      label="Email Address"
+                      value={
+                        form.email
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "email",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      label="Phone / WhatsApp"
+                      value={
+                        form.phone
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "phone",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      label="City / Location"
+                      value={
+                        form.city
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "city",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+                </Grid>
+              </FormSection>
+
+              {/* =================================================
+                  02 PROPERTY
+              ================================================= */}
+
+              <FormSection
+                number="02"
+                title="Your Property"
+                description="Select your property type first. We will then show the appropriate configuration and room requirements."
+              >
+                <Grid
+                  container
+                  spacing={2.5}
+                >
+
+                  {/* PROPERTY TYPE */}
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      select
+                      label="Property Type"
+                      value={
+                        form.propertyType
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        handlePropertyTypeChange(
+                          event.target.value
+                        )
+                      }
+                      slotProps={{
+                        select: {
+                          native: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    >
+                      <option value="">
+                        Select property type
+                      </option>
+
+                      {WELCOME_PROPERTY_TYPES.map(
+                        (type) => (
+                          <option
+                            key={type}
+                            value={type}
+                          >
+                            {type}
+                          </option>
+                        )
+                      )}
+                    </TextField>
+                  </Grid>
+
+                  {/* CONFIGURATION */}
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      required
+                      select
+                      disabled={
+                        !form.propertyType
+                      }
+                      label="Property Configuration"
+                      value={
+                        form.configuration
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        handleConfigurationChange(
+                          event.target.value
+                        )
+                      }
+                      slotProps={{
+                        select: {
+                          native: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    >
+                      <option value="">
+                        Select configuration
+                      </option>
+
+                      {configurationOptions.map(
+                        (option) => (
+                          <option
+                            key={
+                              option.value
+                            }
+                            value={
+                              option.value
+                            }
+                          >
+                            {option.label}
+                          </option>
+                        )
+                      )}
+                    </TextField>
+                  </Grid>
+
+                  {/* AREA */}
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Total Area"
+                      placeholder="Example: 1800 sq.ft."
+                      value={
+                        form.totalArea
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "totalArea",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  {/* STATUS */}
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      select
+                      label="Property Status"
+                      value={
+                        form.propertyStatus
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "propertyStatus",
+                          event.target
+                            .value
+                        )
+                      }
+                      slotProps={{
+                        select: {
+                          native: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    >
+                      <option value="">
+                        Select status
+                      </option>
+
+                      <option value="New Construction">
+                        New Construction
+                      </option>
+
+                      <option value="Under Construction">
+                        Under Construction
+                      </option>
+
+                      <option value="Ready to Move">
+                        Ready to Move
+                      </option>
+
+                      <option value="Renovation">
+                        Renovation
+                      </option>
+
+                      <option value="Other">
+                        Other
+                      </option>
+                    </TextField>
+                  </Grid>
+
+                  {/* DATE */}
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Possession / Start Date"
+                      value={
+                        form.possessionDate
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "possessionDate",
+                          event.target
+                            .value
+                        )
+                      }
+                      slotProps={{
+                        inputLabel: {
+                          shrink: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                </Grid>
+              </FormSection>
+
+              {/* =================================================
+                  03 DESIGN STYLE
+              ================================================= */}
+
+              <FormSection
+                number="03"
+                title="Design Style & Vision"
+                description="Help us understand the aesthetic direction you prefer."
+              >
+                <Box>
+                  <Typography
+                    sx={{
+                      mb: 2,
+
+                      color:
+                        "#102048",
+
+                      fontWeight: 800,
+
+                      fontSize:
+                        "14px",
+                    }}
+                  >
+                    Which styles best describe
+                    what you like?
+                  </Typography>
+
+                  <Grid
+                    container
+                    spacing={1.3}
+                  >
+                    {DESIGN_STYLES.map(
+                      (style) => {
+                        const selected =
+                          form.designStyles.includes(
+                            style
+                          );
+
+                        return (
+                          <Grid
+                            key={style}
+                            size={{
+                              xs: 12,
+                              sm: 6,
+                              md: 4,
+                            }}
+                          >
+                            <Box
+                              onClick={() =>
+                                toggleStyle(
+                                  style
+                                )
+                              }
+                              sx={{
+                                p: 1.3,
+
+                                borderRadius:
+                                  2.5,
+
+                                border:
+                                  "1px solid",
+
+                                borderColor:
+                                  selected
+                                    ? "#8BC53F"
+                                    : "#e1e6ec",
+
+                                bgcolor:
+                                  selected
+                                    ? "#f1f8e9"
+                                    : "#fff",
+
+                                cursor:
+                                  "pointer",
+
+                                transition:
+                                  "all .2s ease",
+
+                                "&:hover":
+                                  {
+                                    borderColor:
+                                      "#8BC53F",
+
+                                    transform:
+                                      "translateY(-1px)",
+                                  },
+                              }}
+                            >
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={
+                                      selected
+                                    }
+                                    onChange={() =>
+                                      toggleStyle(
+                                        style
+                                      )
+                                    }
+                                    sx={{
+                                      color:
+                                        "#cbd5e1",
+
+                                      "&.Mui-checked":
+                                        {
+                                          color:
+                                            "#8BC53F",
+                                        },
+                                    }}
+                                  />
+                                }
+                                label={
+                                  <Typography
+                                    sx={{
+                                      fontSize:
+                                        "13px",
+
+                                      fontWeight:
+                                        selected
+                                          ? 800
+                                          : 500,
+                                    }}
+                                  >
+                                    {style}
+                                  </Typography>
+                                }
+                              />
+                            </Box>
+                          </Grid>
                         );
+                      }
+                    )}
+                  </Grid>
+                </Box>
 
-                      return (
-                        <Box
-                          key={style}
-                          onClick={() =>
-                            toggleStyle(
-                              style
-                            )
+                <TextField
+                  fullWidth
+                  multiline
+                  minRows={4}
+                  label="Tell us about your dream space"
+                  value={
+                    form.dreamSpace
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    updateField(
+                      "dreamSpace",
+                      event.target.value
+                    )
+                  }
+                  sx={inputSx}
+                />
+
+                <Grid
+                  container
+                  spacing={2.5}
+                >
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      multiline
+                      minRows={4}
+                      label="Colours You Love"
+                      value={
+                        form.colorsLove
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "colorsLove",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      multiline
+                      minRows={4}
+                      label="Colours to Avoid"
+                      value={
+                        form.colorsAvoid
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "colorsAvoid",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+                </Grid>
+              </FormSection>
+
+              {/* =================================================
+                  04 DYNAMIC ROOMS
+              ================================================= */}
+
+              <FormSection
+                number="04"
+                title="Room-by-Room Requirements"
+                description={
+                  form.propertyType
+                    ? `We have prepared ${
+                        rooms.length
+                      } relevant spaces for your ${
+                        form.propertyType
+                      }${
+                        form.configuration
+                          ? ` · ${form.configuration}`
+                          : ""
+                      }.`
+                    : "Select your property type and configuration above to generate the appropriate room list."
+                }
+              >
+                {!form.propertyType ? (
+                  <Box
+                    sx={{
+                      p: 5,
+
+                      borderRadius: 4,
+
+                      border:
+                        "1px dashed #cbd5e1",
+
+                      bgcolor:
+                        "#f8fafc",
+
+                      textAlign:
+                        "center",
+                    }}
+                  >
+                    <HomeWorkRoundedIcon
+                      sx={{
+                        fontSize: 42,
+
+                        color:
+                          "#8BC53F",
+                      }}
+                    />
+
+                    <Typography
+                      sx={{
+                        mt: 2,
+
+                        color:
+                          "#102048",
+
+                        fontWeight: 900,
+                      }}
+                    >
+                      Select your property
+                      first
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        mt: 1,
+
+                        color:
+                          "#64748b",
+
+                        fontSize:
+                          "13px",
+                      }}
+                    >
+                      Your room list will
+                      automatically be
+                      customized for your
+                      property.
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Stack
+                    spacing={2.5}
+                  >
+                    {rooms.map(
+                      (
+                        room,
+                        index
+                      ) => (
+                        <Paper
+                          key={
+                            room.id
+                          }
+                          elevation={
+                            0
                           }
                           sx={{
-                            cursor:
-                              "pointer",
-                            p: 1.5,
-                            borderRadius: 2.5,
-                            border:
-                              "1px solid",
-                            borderColor:
-                              selected
-                                ? "#8BC53F"
-                                : "#e0e5eb",
-                            backgroundColor:
-                              selected
-                                ? "#f0f8e9"
-                                : "#ffffff",
-                            transition:
-                              "all 0.2s ease",
-
-                            "&:hover": {
-                              borderColor:
-                                "#8BC53F",
-                              backgroundColor:
-                                "#f7fbf2",
+                            p: {
+                              xs: 2,
+                              md: 3,
                             },
+
+                            borderRadius:
+                              3,
+
+                            border:
+                              "1px solid #e6ebf0",
+
+                            bgcolor:
+                              "#fbfcfd",
+
+                            transition:
+                              "all .25s ease",
+
+                            "&:focus-within":
+                              {
+                                borderColor:
+                                  "#8BC53F",
+
+                                bgcolor:
+                                  "#fff",
+
+                                boxShadow:
+                                  "0 10px 30px rgba(16,32,72,.05)",
+                              },
                           }}
                         >
-                          <FormControlLabel
-                            sx={{
-                              m: 0,
-                              width:
-                                "100%",
-                            }}
-                            control={
-                              <Checkbox
-                                checked={
-                                  selected
-                                }
-                                onChange={() =>
-                                  toggleStyle(
-                                    style
-                                  )
-                                }
+                          <Stack
+                            spacing={
+                              1.5
+                            }
+                          >
+                            <Stack
+                              direction="row"
+                              spacing={
+                                1.5
+                              }
+                              sx={{
+                                alignItems:
+                                  "center",
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 38,
+                                  height: 38,
+
+                                  flexShrink: 0,
+
+                                  borderRadius:
+                                    2,
+
+                                  bgcolor:
+                                    "#102048",
+
+                                  color:
+                                    "#8BC53F",
+
+                                  display:
+                                    "flex",
+
+                                  alignItems:
+                                    "center",
+
+                                  justifyContent:
+                                    "center",
+
+                                  fontWeight:
+                                    900,
+
+                                  fontSize:
+                                    "11px",
+                                }}
+                              >
+                                {String(
+                                  index +
+                                    1
+                                ).padStart(
+                                  2,
+                                  "0"
+                                )}
+                              </Box>
+
+                              <Box
+                                sx={{
+                                  flex: 1,
+                                }}
+                              >
+                                <Typography
+                                  sx={{
+                                    color:
+                                      "#102048",
+
+                                    fontWeight:
+                                      900,
+
+                                    fontSize:
+                                      "15px",
+                                  }}
+                                >
+                                  {
+                                    room.title
+                                  }
+                                </Typography>
+
+                                <Typography
+                                  sx={{
+                                    mt: 0.3,
+
+                                    color:
+                                      "#94a3b8",
+
+                                    fontSize:
+                                      "11px",
+                                  }}
+                                >
+                                  {
+                                    room.description
+                                  }
+                                </Typography>
+                              </Box>
+
+                              <MeetingRoomRoundedIcon
                                 sx={{
                                   color:
                                     "#8BC53F",
 
-                                  "&.Mui-checked":
+                                  display:
                                     {
-                                      color:
-                                        "#8BC53F",
+                                      xs: "none",
+                                      sm: "block",
                                     },
                                 }}
                               />
-                            }
-                            label={
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontWeight:
-                                    selected
-                                      ? 700
-                                      : 500,
-                                  color:
-                                    "#102048",
-                                }}
-                              >
-                                {style}
-                              </Typography>
-                            }
-                          />
-                        </Box>
-                      );
-                    }
-                  )}
+                            </Stack>
 
-                </ThreeColumnLayout>
-
-              </Box>
-
-              {/* DREAM SPACE */}
-
-              <TextField
-                fullWidth
-                multiline
-                minRows={4}
-                label="Tell us about your dream space"
-                value={
-                  form.dreamSpace
-                }
-                onChange={(event) =>
-                  updateField(
-                    "dreamSpace",
-                    event.target.value
-                  )
-                }
-              />
-
-              {/* COLORS */}
-
-              <TwoColumnLayout>
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Colours You Love"
-                  value={
-                    form.colorsLove
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "colorsLove",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Colours to Avoid"
-                  value={
-                    form.colorsAvoid
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "colorsAvoid",
-                      event.target.value
-                    )
-                  }
-                />
-
-              </TwoColumnLayout>
-
-            </FormSection>
-
-            {/* =================================================
-                SECTION 04
-            ================================================= */}
-
-            <FormSection
-              number="04"
-              title="Room-by-Room Requirements"
-            >
-
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection:
-                    "column",
-                  gap: 2.5,
-                }}
-              >
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Living Room"
-                  value={
-                    form.livingRoom
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "livingRoom",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Master Bedroom"
-                  value={
-                    form.masterBedroom
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "masterBedroom",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Kitchen"
-                  value={
-                    form.kitchen
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "kitchen",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Dining Area"
-                  value={
-                    form.diningArea
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "diningArea",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={4}
-                  label="Other Rooms"
-                  value={
-                    form.otherRooms
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "otherRooms",
-                      event.target.value
-                    )
-                  }
-                />
-
-              </Box>
-
-            </FormSection>
-
-            {/* =================================================
-                SECTION 05
-            ================================================= */}
-
-            <FormSection
-              number="05"
-              title="Budget & Timeline"
-            >
-
-              <TwoColumnLayout>
-
-                <TextField
-                  fullWidth
-                  label="Total Budget"
-                  placeholder="Example: ₹25,00,000"
-                  value={
-                    form.totalBudget
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "totalBudget",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  label="Design Fee Budget"
-                  value={
-                    form.designFeeBudget
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "designFeeBudget",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Preferred Start Date"
-                  value={
-                    form.preferredStartDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "preferredStartDate",
-                      event.target.value
-                    )
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Target Completion Date"
-                  value={
-                    form.targetCompletionDate
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "targetCompletionDate",
-                      event.target.value
-                    )
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-
-              </TwoColumnLayout>
-
-            </FormSection>
-
-            {/* =================================================
-                SECTION 06
-            ================================================= */}
-
-            <FormSection
-              number="06"
-              title="Lifestyle & Additional Information"
-            >
-
-              <TwoColumnLayout>
-
-                <TextField
-                  fullWidth
-                  label="Number of Family Members"
-                  value={
-                    form.familyMembers
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "familyMembers",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  label="Elderly Family Members"
-                  value={
-                    form.elderlyMembers
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "elderlyMembers",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  label="Children / Ages"
-                  value={
-                    form.children
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "children",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <TextField
-                  fullWidth
-                  label="Pets"
-                  value={
-                    form.pets
-                  }
-                  onChange={(event) =>
-                    updateField(
-                      "pets",
-                      event.target.value
-                    )
-                  }
-                />
-
-                <FullWidthField>
-                  <TextField
-                    fullWidth
-                    label="Work From Home Requirements"
-                    value={
-                      form.workFromHome
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "workFromHome",
-                        event.target.value
+                            <TextField
+                              fullWidth
+                              multiline
+                              minRows={
+                                3
+                              }
+                              label={`Requirements for ${room.title}`}
+                              placeholder={
+                                room.placeholder
+                              }
+                              value={
+                                form
+                                  .roomRequirements[
+                                  room.id
+                                ] ??
+                                ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateRoomRequirement(
+                                  room.id,
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              sx={
+                                inputSx
+                              }
+                            />
+                          </Stack>
+                        </Paper>
                       )
-                    }
-                  />
-                </FullWidthField>
+                    )}
+                  </Stack>
+                )}
+              </FormSection>
 
-                <FullWidthField>
-                  <TextField
-                    fullWidth
-                    multiline
-                    minRows={5}
-                    label="Anything Else"
-                    value={
-                      form.additionalNotes
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "additionalNotes",
-                        event.target.value
-                      )
-                    }
-                  />
-                </FullWidthField>
+              {/* =================================================
+                  05 BUDGET
+              ================================================= */}
 
-              </TwoColumnLayout>
-
-            </FormSection>
-
-            {/* =================================================
-                ERROR
-            ================================================= */}
-
-            {error && (
-              <Alert
-                severity="error"
-                sx={{
-                  borderRadius: 3,
-                }}
+              <FormSection
+                number="05"
+                title="Budget & Timeline"
+                description="This helps our team understand the scale and planning requirements of your project."
               >
-                {error}
-              </Alert>
-            )}
-
-            {/* =================================================
-                SUBMIT CARD
-            ================================================= */}
-
-            <Paper
-              elevation={0}
-              sx={{
-                p: {
-                  xs: 3,
-                  md: 4,
-                },
-                borderRadius: 4,
-                backgroundColor:
-                  "#102048",
-                color: "#ffffff",
-              }}
-            >
-
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection:
-                    "column",
-                  gap: 2.5,
-                }}
-              >
-
-                {/* SUBMIT INFORMATION */}
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection:
-                      "row",
-                    alignItems:
-                      "flex-start",
-                    gap: 2,
-                  }}
+                <Grid
+                  container
+                  spacing={2.5}
                 >
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Total Project Budget"
+                      placeholder="Example: ₹25,00,000"
+                      value={
+                        form.totalBudget
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "totalBudget",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
 
-                  <CheckCircleIcon
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Design Fee Budget"
+                      value={
+                        form.designFeeBudget
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "designFeeBudget",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Preferred Start Date"
+                      value={
+                        form.preferredStartDate
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "preferredStartDate",
+                          event.target
+                            .value
+                        )
+                      }
+                      slotProps={{
+                        inputLabel: {
+                          shrink: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      type="date"
+                      label="Target Completion Date"
+                      value={
+                        form.targetCompletionDate
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "targetCompletionDate",
+                          event.target
+                            .value
+                        )
+                      }
+                      slotProps={{
+                        inputLabel: {
+                          shrink: true,
+                        },
+                      }}
+                      sx={inputSx}
+                    />
+                  </Grid>
+                </Grid>
+              </FormSection>
+
+              {/* =================================================
+                  06 LIFESTYLE
+              ================================================= */}
+
+              <FormSection
+                number="06"
+                title="Lifestyle & Additional Information"
+                description="A few additional details help us design a space that works for your everyday life."
+              >
+                <Grid
+                  container
+                  spacing={2.5}
+                >
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Number of Family Members"
+                      value={
+                        form.familyMembers
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "familyMembers",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Elderly Family Members"
+                      value={
+                        form.elderlyMembers
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "elderlyMembers",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Children / Ages"
+                      value={
+                        form.children
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "children",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Pets"
+                      value={
+                        form.pets
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "pets",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Work From Home Requirements"
+                      value={
+                        form.workFromHome
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "workFromHome",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+
+                  <Grid
+                    size={{
+                      xs: 12,
+                    }}
+                  >
+                    <TextField
+                      fullWidth
+                      multiline
+                      minRows={5}
+                      label="Anything Else You Want Us To Know?"
+                      value={
+                        form.additionalNotes
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateField(
+                          "additionalNotes",
+                          event.target
+                            .value
+                        )
+                      }
+                      sx={inputSx}
+                    />
+                  </Grid>
+                </Grid>
+              </FormSection>
+
+              {/* =================================================
+                  SUBMIT
+              ================================================= */}
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: {
+                    xs: 3,
+                    md: 4,
+                  },
+
+                  borderRadius: 4,
+
+                  bgcolor:
+                    "#102048",
+
+                  color: "#fff",
+                }}
+              >
+                <Stack
+                  spacing={2.5}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={2}
                     sx={{
-                      color:
-                        "#8BC53F",
-                      fontSize: 30,
-                      flexShrink: 0,
+                      alignItems:
+                        "flex-start",
+                    }}
+                  >
+                    <CheckCircleRoundedIcon
+                      sx={{
+                        color:
+                          "#8BC53F",
+
+                        fontSize:
+                          30,
+                      }}
+                    />
+
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight:
+                            900,
+                        }}
+                      >
+                        Ready to submit?
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          mt: 0.8,
+
+                          color:
+                            "rgba(255,255,255,.68)",
+
+                          lineHeight:
+                            1.7,
+
+                          fontSize:
+                            "13px",
+                        }}
+                      >
+                        Your information will
+                        be securely saved and
+                        your personalized
+                        Network Ten Welcome Kit
+                        PDF will be generated.
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Divider
+                    sx={{
+                      borderColor:
+                        "rgba(255,255,255,.1)",
                     }}
                   />
 
-                  <Box>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    disabled={
+                      submitting
+                    }
+                    startIcon={
+                      <DownloadRoundedIcon />
+                    }
+                    sx={{
+                      minHeight: 56,
 
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 800,
-                      }}
-                    >
-                      Ready to submit?
-                    </Typography>
+                      borderRadius:
+                        2.5,
 
-                    <Typography
-                      sx={{
-                        mt: 0.8,
-                        color:
-                          "rgba(255,255,255,0.7)",
-                        lineHeight: 1.7,
-                      }}
-                    >
-                      Your information will
-                      be securely saved to
-                      your Network Ten
-                      client record and a
-                      personalized Welcome
-                      Kit PDF will be
-                      generated.
-                    </Typography>
+                      bgcolor:
+                        "#8BC53F",
 
-                  </Box>
-
-                </Box>
-
-                {/* SUBMIT BUTTON */}
-
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  disabled={submitting}
-                  startIcon={
-                    <DownloadIcon />
-                  }
-                  sx={{
-                    py: 1.6,
-                    borderRadius: 2.5,
-                    backgroundColor:
-                      "#8BC53F",
-                    color: "#102048",
-                    fontWeight: 900,
-                    fontSize:
-                      "0.95rem",
-
-                    "&:hover": {
-                      backgroundColor:
-                        "#ffffff",
                       color:
                         "#102048",
-                    },
 
-                    "&.Mui-disabled": {
-                      backgroundColor:
-                        "#64748b",
-                      color:
-                        "#dbe2ea",
-                    },
-                  }}
-                >
-                  {submitting
-                    ? "Submitting & Generating PDF..."
-                    : "Submit & Generate Welcome Kit PDF"}
-                </Button>
+                      fontWeight:
+                        900,
 
-              </Box>
+                      "&:hover": {
+                        bgcolor:
+                          "#fff",
+                      },
 
-            </Paper>
+                      "&.Mui-disabled":
+                        {
+                          bgcolor:
+                            "#d9e5ca",
 
-            {/* =================================================
-                BACK BUTTON
-            ================================================= */}
+                          color:
+                            "#64748b",
+                        },
+                    }}
+                  >
+                    {submitting
+                      ? "Submitting & Generating PDF..."
+                      : "Submit & Generate Welcome Kit PDF"}
+                  </Button>
+                </Stack>
+              </Paper>
 
-            <Box
-              sx={{
-                textAlign: "center",
-                pb: 5,
-              }}
-            >
-              <Button
-                type="button"
-                startIcon={
-                  <ArrowBackIcon />
-                }
-                onClick={() =>
-                  router.push(
-                    "/interior-design"
-                  )
-                }
+              {/* =================================================
+                  BACK
+              ================================================= */}
+
+              <Box
                 sx={{
-                  color: "#64748b",
-                  fontWeight: 700,
+                  textAlign:
+                    "center",
 
-                  "&:hover": {
-                    color: "#102048",
-                    backgroundColor:
-                      "rgba(16,32,72,0.04)",
-                  },
+                  pb: 5,
                 }}
               >
-                Back to Network Ten
-              </Button>
-            </Box>
+                <Button
+                  startIcon={
+                    <ArrowBackRoundedIcon />
+                  }
+                  onClick={() =>
+                    router.push(
+                      "/interior-design"
+                    )
+                  }
+                  sx={{
+                    color:
+                      "#64748b",
 
+                    fontWeight:
+                      700,
+                  }}
+                >
+                  Back to Network Ten
+                </Button>
+              </Box>
+            </Stack>
           </Box>
-        </Box>
+        </Stack>
       </Container>
     </Box>
   );
