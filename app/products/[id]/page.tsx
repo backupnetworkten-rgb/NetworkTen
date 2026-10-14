@@ -33,6 +33,9 @@ import { auth } from "@/lib/firebase";
 import { fetchUserOrders } from "@/lib/orderStore";
 import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
 
+import { useRequireLogin } from "@/hooks/useRequireLogin";
+import LoginModal from "@/components/auth/LoginModal";
+
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
   pageBg:      "#f5f5f7",
@@ -245,6 +248,9 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<"description" | "specifications" | "datasheet">("description");
   const [snackbar,  setSnackbar]  = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
+  // ── NEW: login gate for the whole product page ──
+  const { checking: authChecking, isLoggedIn, markLoggedIn } = useRequireLogin();
+
   // ── Reviews visibility gate: logged in + has ordered THIS product ──
   const [isAuthed,             setIsAuthed]             = useState(false);
   const [canViewReviews,       setCanViewReviews]       = useState(false);
@@ -373,7 +379,15 @@ export default function ProductDetailPage() {
   const scrollCarousel = (d: "left" | "right") =>
     carouselRef.current?.scrollBy({ left: d === "left" ? -220 : 220, behavior: "smooth" });
 
-  if (loading) return (
+  // ── After login: close popup and stay on this same product page ──
+  const handleLoginSuccess = () => {
+    markLoggedIn();
+    router.replace(`/products/${id}`);
+    router.refresh();
+  };
+
+  // ── Also wait for the login check so the popup doesn't flash ──
+  if (loading || authChecking) return (
     <>
       <Header />
       <Box
@@ -1499,6 +1513,23 @@ export default function ProductDetailPage() {
       </Tooltip>
 
       <Footer />
+
+      {/* ── LOGIN POPUP: shown only when the visitor is NOT logged in ── */}
+            <div
+        style={{
+          position: "fixed", bottom: 0, left: 0, zIndex: 99999,
+          background: "#000", color: "#0f0", padding: 8, fontSize: 12,
+        }}
+      >
+        authChecking: {String(authChecking)} | isLoggedIn: {String(isLoggedIn)}
+      </div>
+
+      <LoginModal
+        open={!isLoggedIn}
+        onSuccess={markLoggedIn}
+        onBack={() => router.push("/products")}
+        backLabel="Back to products"
+      />
     </>
   );
 }

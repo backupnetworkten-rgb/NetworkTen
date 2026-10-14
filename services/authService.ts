@@ -1,16 +1,15 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
-  GoogleAuthProvider,
-  signInWithPopup,
+import {createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+RecaptchaVerifier,
+signInWithPhoneNumber,
+ConfirmationResult,
+GoogleAuthProvider,
+signInWithPopup,
 } from "firebase/auth";
 
 import {
-  doc,
-  setDoc,
+ doc,
+ setDoc,
 } from "firebase/firestore";
 
 import {
@@ -22,6 +21,7 @@ declare global {
   interface Window {
     recaptchaVerifier: any;
     recaptchaWidgetId: number | undefined;
+    recaptchaContainerEl: HTMLElement | null | undefined;
     grecaptcha: any;
   }
 }
@@ -33,43 +33,43 @@ let confirmationResult: ConfirmationResult | undefined;
 // SIGNUP
 
 export const signupUser = async (
-  name: string,
-  email: string,
-  password: string
+  name: string,
+  email: string,
+  password: string
 ) => {
 
-  const userCredential =
-    await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+  const userCredential =
+    await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-  const user =
-    userCredential.user;
+  const user =
+    userCredential.user;
 
-  await setDoc(
-    doc(
-      db,
-      "users",
-      user.uid
-    ),
-    {
-      uid: user.uid,
+  await setDoc(
+    doc(
+      db,
+      "users",
+      user.uid
+    ),
+    {
+      uid: user.uid,
 
-      name,
+      name,
 
-      email,
+      email,
 
-      loginType:
-        "email",
+      loginType:
+        "email",
 
-      createdAt:
-        Date.now(),
-    }
-  );
+      createdAt:
+        Date.now(),
+    }
+  );
 
-  return user;
+  return user;
 };
 
 
@@ -78,16 +78,16 @@ export const signupUser = async (
 
 export const loginUser =
 async (
-  email: string,
-  password: string
+  email: string,
+  password: string
 ) => {
 
-  return await
-  signInWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+  return await
+  signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 
 };
 
@@ -97,40 +97,40 @@ async (
 
 export const loginWithGoogle = async () => {
 
-  const provider = new GoogleAuthProvider();
+  const provider = new GoogleAuthProvider();
 
-  const result = await signInWithPopup(
-    auth,
-    provider
-  );
+  const result = await signInWithPopup(
+    auth,
+    provider
+  );
 
-  const user = result.user;
+  const user = result.user;
 
-  // Save/update user in Firestore
+  // Save/update user in Firestore
 
-  await setDoc(
-    doc(
-      db,
-      "users",
-      user.uid
-    ),
-    {
-      uid: user.uid,
+  await setDoc(
+    doc(
+      db,
+      "users",
+      user.uid
+    ),
+    {
+      uid: user.uid,
 
-      name: user.displayName,
+      name: user.displayName,
 
-      email: user.email,
+      email: user.email,
 
-      photoURL: user.photoURL,
+      photoURL: user.photoURL,
 
-      loginType: "google",
+      loginType: "google",
 
-      createdAt: Date.now(),
-    },
-    { merge: true }
-  );
+      createdAt: Date.now(),
+    },
+    { merge: true }
+  );
 
-  return result;
+  return result;
 
 };
 
@@ -146,43 +146,36 @@ export const loginWithGoogle = async () => {
 // it causes "Cannot read properties of null" errors.
 
 export const generateRecaptcha = async () => {
+  if (typeof window === "undefined") return;
 
-  if (typeof window === "undefined") return;
+  const container = document.getElementById("recaptcha-container");
+  if (!container) {
+    throw new Error("reCAPTCHA container not found on this page");
+  }
 
-  if (!window.recaptchaVerifier) {
+  // If a verifier exists but was built for a different (now removed) DOM
+  // node, e.g. after moving between /login and a product page, discard it.
+  if (window.recaptchaVerifier && window.recaptchaContainerEl !== container) {
+    try {
+      window.recaptchaVerifier.clear();
+    } catch {
+      /* old node already gone — ignore */
+    }
+    window.recaptchaVerifier = undefined;
+    window.recaptchaWidgetId = undefined;
+  }
 
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      auth,
-      "recaptcha-container",
-      {
-        size: "invisible",
-
-        callback: () => {
-          console.log("Recaptcha verified");
-        }
-      }
-    );
-
-    window.recaptchaWidgetId =
-      await window.recaptchaVerifier.render();
-
-  } else if (
-    window.grecaptcha &&
-    window.recaptchaWidgetId !== undefined
-  ) {
-
-    // Reset the existing widget so it can be used again
-    // for a new sendOTP attempt (invisible reCAPTCHA
-    // tokens are single-use).
-
-    window.grecaptcha.reset(
-      window.recaptchaWidgetId
-    );
-
-  }
-
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, container, {
+      size: "invisible",
+      callback: () => console.log("Recaptcha verified"),
+    });
+    window.recaptchaContainerEl = container;
+    window.recaptchaWidgetId = await window.recaptchaVerifier.render();
+  } else if (window.grecaptcha && window.recaptchaWidgetId !== undefined) {
+    window.grecaptcha.reset(window.recaptchaWidgetId);
+  }
 };
-
 
 
 // SEND OTP

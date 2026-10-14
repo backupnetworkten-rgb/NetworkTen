@@ -31,6 +31,11 @@ import {
 } from "@/lib/cartStore";
 import { proxyImage } from "@/lib/proxyImage";
 
+// ── UPDATED: Firebase sign-out + your session helpers ──
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { getSession, clearSession, isSessionValid } from "@/services/sessionManager";
+
 // ── Solutions mega-menu data
 const solutions = [
   {
@@ -129,8 +134,10 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
     setCartItems(getCart());
-    const saved = localStorage.getItem("user");
-    if (saved) setUser(JSON.parse(saved));
+
+    // ── UPDATED: read the session through sessionManager so an expired
+    //    session is treated as logged out (returns null if missing/expired)
+    setUser(getSession());
 
     // NEW: restore any note already saved from the cart/checkout pages
     try {
@@ -157,6 +164,13 @@ export default function Navbar() {
     }
   }, [cartOpen]);
 
+    // Refresh navbar user when login happens via the popup
+  useEffect(() => {
+    const refresh = () => setUser(getSession());
+    window.addEventListener("nt-auth-changed", refresh);
+    return () => window.removeEventListener("nt-auth-changed", refresh);
+  }, []);
+
   // Autofocus the desktop search popover input when it opens
   useEffect(() => {
     if (searchAnchor) {
@@ -181,8 +195,14 @@ export default function Navbar() {
   const openAboutMenu  = (e: React.MouseEvent<HTMLElement>) => setAboutAnchor(e.currentTarget);
   const closeAboutMenu = () => setAboutAnchor(null);
 
-  const logout = () => {
-    localStorage.removeItem("user");
+  // ── UPDATED: sign out of Firebase AND clear your own session
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch {
+      /* ignore — still clear the local session below */
+    }
+    clearSession();
     setUser(null);
     router.push("/");
   };
@@ -1448,8 +1468,8 @@ export default function Navbar() {
               variant="contained"
               onClick={() => {
                 setCartOpen(false);
-                const user = localStorage.getItem("user");
-                if (!user) {
+                // ── UPDATED: use the expiry-aware session check
+                if (!isSessionValid()) {
                   localStorage.setItem("redirectAfterLogin", "/checkout");
                   router.push("/login");
                   return;
