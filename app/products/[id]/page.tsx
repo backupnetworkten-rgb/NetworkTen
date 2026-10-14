@@ -1514,16 +1514,6 @@ export default function ProductDetailPage() {
 
       <Footer />
 
-      {/* ── LOGIN POPUP: shown only when the visitor is NOT logged in ── */}
-            <div
-        style={{
-          position: "fixed", bottom: 0, left: 0, zIndex: 99999,
-          background: "#000", color: "#0f0", padding: 8, fontSize: 12,
-        }}
-      >
-        authChecking: {String(authChecking)} | isLoggedIn: {String(isLoggedIn)}
-      </div>
-
       <LoginModal
         open={!isLoggedIn}
         onSuccess={markLoggedIn}
