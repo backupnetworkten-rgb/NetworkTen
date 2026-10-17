@@ -83,6 +83,11 @@ const customers = [
     name: "Customer 13",
     logo: "/customers/yashoda.png",
   },
+
+   {
+    name: "Customer 14",
+    logo: "/customers/IB.jpeg",
+  },
 ];
 
 export default function CustomersSection() {

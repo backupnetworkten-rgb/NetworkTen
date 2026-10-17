@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useRef, useState, type SyntheticEvent } from "react";
 import {
   Box,
   Button,
@@ -9,436 +11,576 @@ import {
 } from "@mui/material";
 
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import PlayCircleOutlineRoundedIcon from "@mui/icons-material/PlayCircleOutlineRounded";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
 interface ConferenceHeroProps {
   onExplore: () => void;
 }
 
+const benefits = [
+  {
+    title: "Smart AV Integration",
+    description: "Audio, video and displays",
+  },
+  {
+    title: "Complete Installation",
+    description: "Planning to deployment",
+  },
+  {
+    title: "Reliable Support",
+    description: "Assistance when you need it",
+  },
+];
+
+const features = [
+  "Video Conferencing",
+  "Professional AV",
+  "Room Integration",
+];
+
 export default function ConferenceHero({
   onExplore,
 }: ConferenceHeroProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const projectVideoRef = useRef<HTMLDivElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  const handleSeeProjects = () => {
+    projectVideoRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
+  const handleVideoMetadata = (
+    event: SyntheticEvent<HTMLVideoElement>
+  ) => {
+    const video = event.currentTarget;
+
+    if (video.duration > 0 && Number.isFinite(video.duration)) {
+      try {
+        video.currentTime = Math.min(1.5, video.duration / 2);
+      } catch {
+        // Keep the browser's default starting position if seeking fails.
+      }
+    }
+  };
+
   return (
     <Box
       component="section"
       sx={{
         position: "relative",
+        isolation: "isolate",
         width: "100%",
-        minHeight: {
-          xs: "82vh",
-          sm: "86vh",
-          md: "calc(100vh - 94px)",
-        },
+        minHeight: { xs: "auto", md: "min(790px, calc(100vh - 80px))" },
         display: "flex",
         alignItems: "center",
         overflow: "hidden",
-        backgroundColor: "#06142c",
+        color: "#fff",
+        background:
+          "linear-gradient(115deg, #071327 0%, #0a1c35 58%, #081b29 100%)",
+
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          zIndex: -1,
+          width: 600,
+          height: 600,
+          top: -300,
+          right: -100,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(57,218,158,.15), transparent 70%)",
+          pointerEvents: "none",
+        },
+
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          zIndex: -1,
+          width: 550,
+          height: 550,
+          bottom: -360,
+          left: -180,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(54,109,235,.13), transparent 70%)",
+          pointerEvents: "none",
+        },
       }}
     >
-      {/* BACKGROUND VIDEO */}
-
+      {/* SUBTLE BACKGROUND DETAIL */}
       <Box
-        component="video"
-        autoPlay
-        muted
-        loop
-        playsInline
-        // TODO: replace with your own poster still
-        poster="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80"
         aria-hidden="true"
         sx={{
           position: "absolute",
           inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          opacity: {
-            xs: 0.38,
-            md: 0.55,
-          },
-        }}
-      >
-        <source
-          src="/conference/videos/conference-hero.mp4"
-          type="video/mp4"
-        />
-      </Box>
-
-      {/* SUBTLE GRID TEXTURE */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.25,
+          zIndex: -1,
+          opacity: 0.09,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
+            "linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px)",
+          backgroundSize: "54px 54px",
           maskImage:
-            "radial-gradient(ellipse 80% 60% at 30% 30%, black 30%, transparent 75%)",
+            "linear-gradient(90deg, black, transparent 95%)",
           pointerEvents: "none",
         }}
       />
-
-      {/* DARK OVERLAY */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          background: `
-            linear-gradient(
-              90deg,
-              rgba(4,14,33,.97) 0%,
-              rgba(4,14,33,.86) 38%,
-              rgba(4,14,33,.5) 72%,
-              rgba(4,14,33,.3) 100%
-            ),
-            linear-gradient(
-              180deg,
-              rgba(4,14,33,.15),
-              rgba(4,14,33,.78)
-            )
-          `,
-        }}
-      />
-
-      {/* GREEN LIGHT */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          width: { xs: 280, sm: 420, md: 620 },
-          height: { xs: 280, sm: 420, md: 620 },
-          right: { xs: -150, md: -200 },
-          top: { xs: -110, md: -200 },
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle,rgba(40,203,137,.28),transparent 68%)",
-          filter: "blur(10px)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* SECONDARY BLUE LIGHT — adds depth/balance */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          width: { xs: 240, sm: 340, md: 480 },
-          height: { xs: 240, sm: 340, md: 480 },
-          left: { xs: -140, md: -160 },
-          bottom: { xs: -120, md: -160 },
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle,rgba(56,120,255,.18),transparent 70%)",
-          filter: "blur(14px)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* CONTENT */}
 
       <Container
         maxWidth="xl"
         sx={{
-          position: "relative",
-          zIndex: 2,
-          px: { xs: 2.5, sm: 4, md: 5, lg: 6 },
+          px: { xs: 2.5, sm: 4, md: 5, lg: 7 },
+          py: { xs: 7, sm: 8, md: 7, lg: 8 },
         }}
       >
         <Box
           sx={{
-            width: "100%",
-            maxWidth: 900,
-            py: { xs: 10, sm: 12, md: 14, lg: 16 },
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "minmax(0, 1.16fr) minmax(0, .84fr)",
+            },
+            alignItems: "center",
+            columnGap: { xs: 0, md: 5, lg: 7 },
+            rowGap: { xs: 5, md: 0 },
           }}
         >
-          {/* LABEL */}
-
+          {/* LEFT CONTENT: USE THE AVAILABLE WIDTH */}
           <Box
-            component="span"
             sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.75,
-              minHeight: 34,
-              px: 1.5,
-              borderRadius: "999px",
-              color: "#b9ffe3",
-              backgroundColor: "rgba(24,190,130,.13)",
-              border: "1px solid rgba(130,255,210,.2)",
-              backdropFilter: "blur(12px)",
-              fontWeight: 800,
-              fontSize: 11,
-              letterSpacing: ".12em",
-            }}
-          >
-            <Box
-              component="span"
-              sx={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                backgroundColor: "#4de0a2",
-                boxShadow: "0 0 8px rgba(77,224,162,.9)",
-              }}
-            />
-            CONFERENCE ROOM SOLUTIONS
-          </Box>
-
-          {/* HEADING */}
-
-          <Typography
-            component="h1"
-            sx={{
-              mt: 3,
-              color: "#fff",
-              fontWeight: 800,
-              fontSize: { xs: 43, sm: 56, md: 72, lg: 88 },
-              lineHeight: { xs: 1.02, md: 0.98 },
-              letterSpacing: "-.055em",
-              maxWidth: 850,
-            }}
-          >
-            The room
-            <br />
-            <Box
-              component="span"
-              sx={{
-                background: "linear-gradient(90deg,#fff,#72e8bd)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              becomes smarter.
-            </Box>
-          </Typography>
-
-          {/* DESCRIPTION */}
-
-          <Typography
-            sx={{
-              mt: { xs: 2.5, md: 3.5 },
+              minWidth: 0,
               width: "100%",
-              maxWidth: 680,
-              color: "rgba(255,255,255,.72)",
-              fontSize: { xs: 15, sm: 16, md: 19 },
-              lineHeight: 1.75,
+              maxWidth: 730,
+              justifySelf: "start",
             }}
           >
-            Transform your meeting space into a premium
-            communication environment with intelligent
-            video conferencing, immersive displays,
-            professional audio and seamless room control.
-          </Typography>
-
-          {/* ACTIONS */}
-
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{
-              mt: { xs: 3.5, md: 4.5 },
-              alignItems: { xs: "stretch", sm: "center" },
-            }}
-          >
-            <Button
-              type="button"
-              variant="contained"
-              onClick={onExplore}
-              endIcon={<ArrowForwardRoundedIcon />}
+            {/* EYEBROW */}
+            <Box
               sx={{
-                minHeight: 56,
-                px: { xs: 2.5, sm: 3.5 },
-                borderRadius: "15px",
-                textTransform: "none",
-                fontWeight: 800,
-                fontSize: 15,
-                color: "#06152b",
-                background: "linear-gradient(135deg,#a5f7d5,#49d99d)",
-                boxShadow: "0 15px 40px rgba(54,224,158,.22)",
-                transition: "transform .2s ease, box-shadow .2s ease",
-                "&:hover": {
-                  background: "linear-gradient(135deg,#8deec8,#35c88d)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 18px 45px rgba(54,224,158,.28)",
-                },
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                px: 1.5,
+                py: 0.85,
+                borderRadius: "50px",
+                border: "1px solid rgba(91,230,174,.25)",
+                background: "rgba(44,191,133,.08)",
               }}
             >
-              Design My Conference Room
-            </Button>
-
-            <Button
-              component="a"
-              href="#project-video"
-              variant="outlined"
-              startIcon={<PlayCircleOutlineRoundedIcon />}
-              sx={{
-                minHeight: 56,
-                px: { xs: 2.5, sm: 3.5 },
-                borderRadius: "15px",
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: 15,
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,.25)",
-                backgroundColor: "rgba(255,255,255,.06)",
-                backdropFilter: "blur(12px)",
-                transition: "transform .2s ease, background-color .2s ease",
-                "&:hover": {
-                  borderColor: "rgba(255,255,255,.55)",
-                  backgroundColor: "rgba(255,255,255,.1)",
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              See Our Projects
-            </Button>
-          </Stack>
-
-          {/* TRUST POINTS */}
-
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: { xs: 1.5, sm: 2, md: 3 },
-              mt: { xs: 4.5, md: 6 },
-            }}
-          >
-            {[
-              "Professional AV Integration",
-              "End-to-End Installation",
-              "After-Sales Support",
-            ].map((item) => (
               <Box
-                key={item}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  color: "rgba(255,255,255,.68)",
+                  width: 7,
+                  height: 7,
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  background: "#5ce4a6",
+                  boxShadow: "0 0 12px rgba(92,228,166,.6)",
+                }}
+              />
+
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: { xs: 10, sm: 11 },
+                  fontWeight: 800,
+                  letterSpacing: ".13em",
+                  color: "#b5f8d9",
                 }}
               >
+                CONFERENCE ROOM SOLUTIONS
+              </Typography>
+            </Box>
+
+            {/* LARGE, CLEAN HEADLINE */}
+            <Typography
+              component="h1"
+              sx={{
+                mt: { xs: 3, md: 3.5 },
+                mb: 0,
+                fontSize: {
+                  xs: "clamp(43px, 10vw, 58px)",
+                  sm: "clamp(58px, 6.3vw, 76px)",
+                  md: "clamp(53px, 4.5vw, 68px)",
+                  lg: "clamp(65px, 4.7vw, 80px)",
+                },
+                lineHeight: { xs: 1.06, md: 1.04 },
+                fontWeight: 800,
+                letterSpacing: "-.058em",
+                color: "#fff",
+                overflowWrap: "break-word",
+              }}
+            >
+              Smarter meetings.
+              <Box
+                component="span"
+                sx={{
+                  display: "block",
+                  mt: 0.4,
+                  pb: 0.5,
+                  color: "#74e9b7",
+                  background:
+                    "linear-gradient(100deg, #d8ffed 0%, #70e6b4 75%, #50d69d 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Better spaces.
+              </Box>
+            </Typography>
+
+            {/* HEADLINE SUPPORTING TEXT */}
+            <Typography
+              sx={{
+                mt: 2.5,
+                maxWidth: 590,
+                fontSize: { xs: 15, sm: 16, md: 16.5 },
+                lineHeight: 1.85,
+                color: "rgba(231,240,255,.74)",
+                fontWeight: 400,
+              }}
+            >
+              Create a workplace that brings people, ideas and
+              technology together. From professional audio and
+              video conferencing to complete AV integration,
+              we help make every meeting work better.
+            </Typography>
+
+            {/* PRIMARY ACTIONS */}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{
+                mt: 3.5,
+                alignItems: { xs: "stretch", sm: "center" },
+              }}
+            >
+              <Button
+                type="button"
+                onClick={onExplore}
+                variant="contained"
+                endIcon={<ArrowForwardRoundedIcon />}
+                sx={{
+                  minHeight: 53,
+                  px: 2.6,
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontSize: 13.5,
+                  fontWeight: 800,
+                  color: "#06251b",
+                  background:
+                    "linear-gradient(135deg, #c1ffe4, #59dfa6)",
+                  boxShadow: "0 10px 28px rgba(60,215,155,.17)",
+                  transition: "all .2s ease",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #ddffef, #7beaba)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 14px 32px rgba(60,215,155,.24)",
+                  },
+                }}
+              >
+                Design My Conference Room
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleSeeProjects}
+                variant="outlined"
+                startIcon={<PlayArrowRoundedIcon />}
+                sx={{
+                  minHeight: 53,
+                  px: 2.4,
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  color: "#f5f8ff",
+                  borderColor: "rgba(255,255,255,.22)",
+                  background: "rgba(255,255,255,.035)",
+                  transition: "all .2s ease",
+                  "&:hover": {
+                    borderColor: "#6cebb5",
+                    background: "rgba(72,215,158,.09)",
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                See Our Projects
+              </Button>
+            </Stack>
+
+            {/* BENEFITS: THREE CLEAN COLUMNS */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "minmax(0, 1fr)",
+                  sm: "repeat(3, minmax(0, 1fr))",
+                },
+                gap: { xs: 2, sm: 1.5, lg: 2 },
+                mt: { xs: 4, md: 5 },
+                pt: 3,
+                borderTop: "1px solid rgba(255,255,255,.1)",
+              }}
+            >
+              {benefits.map((benefit) => (
                 <Box
+                  key={benefit.title}
                   sx={{
-                    flexShrink: 0,
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    backgroundColor: "#4de0a2",
-                    boxShadow: "0 0 12px rgba(77,224,162,.8)",
-                  }}
-                />
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: { xs: 11.5, sm: 12.5, md: 13 },
-                    fontWeight: 600,
-                    lineHeight: 1.4,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 1.1,
+                    minWidth: 0,
                   }}
                 >
-                  {item}
-                </Typography>
+                  <CheckCircleRoundedIcon
+                    sx={{
+                      mt: 0.15,
+                      fontSize: 18,
+                      flexShrink: 0,
+                      color: "#62e5ac",
+                    }}
+                  />
+
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        color: "#f5f8ff",
+                        fontSize: 11.5,
+                        fontWeight: 750,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {benefit.title}
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        mt: 0.35,
+                        color: "rgba(220,233,250,.56)",
+                        fontSize: 10.5,
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {benefit.description}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          {/* RIGHT CONTENT: COMPACT PROJECT VIDEO */}
+          <Box
+            ref={projectVideoRef}
+            id="project-video"
+            sx={{
+              minWidth: 0,
+              width: "100%",
+              maxWidth: { xs: "100%", md: 390, lg: 425 },
+              justifySelf: { xs: "stretch", md: "end" },
+              scrollMarginTop: "110px",
+            }}
+          >
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: "22px",
+                border: "1px solid rgba(255,255,255,.12)",
+                background:
+                  "linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.025) 55%, rgba(88,229,175,.12))",
+                boxShadow: "0 25px 65px rgba(0,0,0,.3)",
+              }}
+            >
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  borderRadius: "16px",
+                  background: "#071326",
+                }}
+              >
+                {/* VIDEO CARD HEADER */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 1.5,
+                    px: 2,
+                    py: 1.5,
+                    background:
+                      "linear-gradient(110deg, #142943, #09182b)",
+                    borderBottom:
+                      "1px solid rgba(255,255,255,.08)",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      sx={{
+                        color: "#69e8b4",
+                        fontSize: 9,
+                        fontWeight: 800,
+                        letterSpacing: ".13em",
+                      }}
+                    >
+                      PROJECT SHOWCASE
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        mt: 0.4,
+                        color: "#fff",
+                        fontSize: 14,
+                        fontWeight: 800,
+                      }}
+                    >
+                      Latest Installation
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.7,
+                      px: 1,
+                      py: 0.6,
+                      borderRadius: "50px",
+                      border: "1px solid rgba(92,230,173,.2)",
+                      background: "rgba(64,207,151,.08)",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        bgcolor: "#5ce5a7",
+                      }}
+                    />
+
+                    <Typography
+                      sx={{
+                        fontSize: 8.5,
+                        fontWeight: 800,
+                        color: "#a9f5d3",
+                      }}
+                    >
+                      VIDEO TOUR
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* VIDEO PLAYER */}
+                <Box
+                  component="video"
+                  ref={videoRef}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={handleVideoMetadata}
+                  onSeeked={() => setVideoReady(true)}
+                  aria-label="Executive boardroom installation video"
+                  sx={{
+                    display: "block",
+                    width: "100%",
+                    aspectRatio: "16 / 10",
+                    objectFit: "cover",
+                    backgroundColor: "#111c2b",
+                  }}
+                >
+                  <source
+                    src="/conference/videos/conference-hero.mp4"
+                    type="video/mp4"
+                  />
+                  Your browser does not support HTML video.
+                </Box>
+
+                {/* VIDEO INFORMATION */}
+                <Box sx={{ px: 2, py: 1.8 }}>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      fontSize: 15,
+                      fontWeight: 800,
+                      letterSpacing: "-.02em",
+                    }}
+                  >
+                    Executive Boardroom
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.6,
+                      color: "rgba(226,238,255,.64)",
+                      fontSize: 12,
+                      lineHeight: 1.75,
+                    }}
+                  >
+                    Professional AV integration and intelligent
+                    conference room technology.
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 0.8,
+                      mt: 1.5,
+                    }}
+                  >
+                    {features.map((feature) => (
+                      <Box
+                        key={feature}
+                        sx={{
+                          px: 1,
+                          py: 0.65,
+                          borderRadius: "7px",
+                          border:
+                            "1px solid rgba(255,255,255,.09)",
+                          background: "rgba(255,255,255,.035)",
+                          color: "rgba(239,246,255,.8)",
+                          fontSize: 9.5,
+                          fontWeight: 650,
+                        }}
+                      >
+                        {feature}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
               </Box>
-            ))}
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 0.8,
+                mt: 1.5,
+              }}
+            >
+              <CheckCircleRoundedIcon
+                sx={{ color: "#5bdfa4", fontSize: 15 }}
+              />
+
+              <Typography
+                sx={{
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  color: "rgba(228,240,255,.58)",
+                }}
+              >
+                Integrated solutions. Thoughtful execution.
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Container>
-
-      {/* FLOATING PREVIEW CARD — decorative, only shows on larger screens */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          zIndex: 2,
-          right: { md: 48, lg: 90 },
-          bottom: { md: 64, lg: 90 },
-          display: { xs: "none", lg: "block" },
-          width: 260,
-          borderRadius: "20px",
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,.15)",
-          boxShadow: "0 30px 70px rgba(0,0,0,.45)",
-          backdropFilter: "blur(10px)",
-        }}
-      >
-        <Box
-          component="img"
-          // TODO: replace with a real project photo
-          src="https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=800&q=80"
-          alt="Conference room preview"
-          sx={{
-            width: "100%",
-            height: 160,
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
-        <Box
-          sx={{
-            px: 2,
-            py: 1.5,
-            backgroundColor: "rgba(6,20,43,.9)",
-          }}
-        >
-          <Typography
-            sx={{
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: 13,
-            }}
-          >
-            Latest Install
-          </Typography>
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,.6)",
-              fontSize: 11.5,
-              mt: 0.25,
-            }}
-          >
-            Executive boardroom, 40-seat capacity
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* SCROLL INDICATOR */}
-
-      <Box
-        sx={{
-          position: "absolute",
-          left: "50%",
-          bottom: 25,
-          transform: "translateX(-50%)",
-          display: { xs: "none", md: "flex" },
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 1,
-          color: "rgba(255,255,255,.45)",
-          zIndex: 3,
-        }}
-      >
-        <Typography
-          component="span"
-          sx={{
-            fontSize: 10,
-            letterSpacing: ".2em",
-            fontWeight: 700,
-          }}
-        >
-          SCROLL
-        </Typography>
-        <Box
-          sx={{
-            width: "1px",
-            height: 40,
-            background: "linear-gradient(#fff,transparent)",
-          }}
-        />
-      </Box>
     </Box>
   );
 }

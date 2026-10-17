@@ -301,28 +301,30 @@ export default function ProductsPage() {
         sx={{
           background: "linear-gradient(180deg,#f6f8fc 0%,#eef2f9 100%)",
           minHeight: "100vh",
-          pt: 4,
-          pb: cartBarMounted ? 14 : 8,
+          pt: { xs: 2.5, md: 4 },
+          pb: cartBarMounted ? 14 : { xs: 6, md: 8 },
           transition: "padding-bottom 0.3s",
+          overflowX: "hidden",
         }}
       >
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{ px: { xs: 1.75, sm: 2.5, md: 3 } }}>
           {/* HERO */}
-          <Box sx={{ textAlign: "center", maxWidth: "700px", mx: "auto", mb: 4, px: 2 }}>
+          <Box sx={{ textAlign: "center", maxWidth: "700px", mx: "auto", mb: { xs: 2.5, md: 4 }, px: { xs: 0.5, md: 2 } }}>
             <Box
               sx={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 1,
-                background: "#eef8de",
+                background: "linear-gradient(135deg,#f1fae3,#e6f5cf)",
                 border: "1px solid #c9e89a",
                 borderRadius: "50px",
                 px: 2,
-                py: 0.5,
+                py: 0.55,
                 mb: 1.5,
+                boxShadow: "0 4px 14px rgba(139,197,63,0.15)",
               }}
             >
-              <Box sx={{ width: 6, height: 6, borderRadius: "50%", background: "#8BC53F" }} />
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", background: "#8BC53F", boxShadow: "0 0 0 3px rgba(139,197,63,0.25)" }} />
               <Typography
                 sx={{
                   fontSize: "11px",
@@ -338,98 +340,140 @@ export default function ProductsPage() {
 
             <Typography
               sx={{
-                fontSize: { xs: "26px", md: "36px" },
+                fontSize: { xs: "28px", md: "40px" },
                 fontWeight: 900,
                 color: "#0B1730",
                 lineHeight: 1.1,
+                letterSpacing: "-0.8px",
                 mb: 1,
               }}
             >
               Products
             </Typography>
 
-            <Typography sx={{ color: "#667085", fontSize: "14px", lineHeight: 1.6 }}>
+            <Typography
+              sx={{
+                color: "#667085",
+                fontSize: { xs: "13px", md: "14.5px" },
+                lineHeight: 1.65,
+                maxWidth: 520,
+                mx: "auto",
+              }}
+            >
               Premium networking, security and enterprise technology for modern businesses.
             </Typography>
           </Box>
 
           {/* MAIN LAYOUT: SIDEBAR + CONTENT */}
-          <Grid container spacing={2.5}>
-            {/* ── LEFT VERTICAL SIDEBAR ── */}
+          <Grid container spacing={{ xs: 2, md: 2.5 }}>
+            {/* ── LEFT SIDEBAR (becomes a compact filter bar on mobile) ── */}
             <Grid size={{ xs: 12, md: 3 }}>
               <Box
                 sx={{
                   background: "#fff",
-                  borderRadius: "18px",
+                  borderRadius: { xs: "16px", md: "20px" },
                   border: "1px solid rgba(11,23,48,.07)",
                   boxShadow: "0 12px 36px rgba(11,23,48,.06)",
-                  p: 2,
+                  p: { xs: 1.5, md: 2 },
                   position: { md: "sticky" },
                   top: { md: 90 },
                 }}
               >
-                {/* Search */}
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Search products..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchRoundedIcon sx={{ fontSize: 18, color: "#98A2B3" }} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
+                {/* Search + Sort (side by side on mobile, stacked on desktop) */}
+                <Box
                   sx={{
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      height: "42px",
-                      borderRadius: "10px",
-                      background: "#f7f9fc",
-                      fontSize: "13px",
-                    },
-                  }}
-                />
-
-                {/* Sort */}
-                <TextField
-                  select
-                  fullWidth
-                  size="small"
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  sx={{ ...filterSx, mb: 2.5 }}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SortRoundedIcon sx={{ fontSize: 16, color: "#0B1730" }} />
-                        </InputAdornment>
-                      ),
-                    },
+                    display: "flex",
+                    flexDirection: { xs: "row", md: "column" },
+                    gap: { xs: 1, md: 2 },
+                    mb: { xs: 1.5, md: 2.5 },
                   }}
                 >
-                  <MenuItem value="latest">Latest First</MenuItem>
-                  <MenuItem value="low">Price: Low to High</MenuItem>
-                  <MenuItem value="high">Price: High to Low</MenuItem>
-                </TextField>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchRoundedIcon sx={{ fontSize: 18, color: "#98A2B3" }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      "& .MuiOutlinedInput-root": {
+                        height: "42px",
+                        borderRadius: "12px",
+                        background: "#f7f9fc",
+                        fontSize: "13px",
+                        "& fieldset": { borderColor: "#e8ecf3" },
+                        "&:hover fieldset": { borderColor: "#0B1730" },
+                        "&.Mui-focused fieldset": { borderColor: "#0B1730", borderWidth: "1.5px" },
+                      },
+                    }}
+                  />
 
-                <Divider sx={{ mb: 1.5 }} />
+                  <TextField
+                    select
+                    size="small"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value)}
+                    sx={{
+                      ...filterSx,
+                      width: { xs: 138, sm: 200, md: "100%" },
+                      flexShrink: 0,
+                      "& .MuiOutlinedInput-root": {
+                        ...filterSx["& .MuiOutlinedInput-root"],
+                        height: "42px",
+                        fontSize: { xs: "12px", md: "13px" },
+                      },
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start" sx={{ mr: { xs: 0.4, md: 1 } }}>
+                            <SortRoundedIcon sx={{ fontSize: 16, color: "#0B1730" }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  >
+                    <MenuItem value="latest">Latest First</MenuItem>
+                    <MenuItem value="low">Price: Low to High</MenuItem>
+                    <MenuItem value="high">Price: High to Low</MenuItem>
+                  </TextField>
+                </Box>
+
+                <Divider sx={{ mb: 1.5, display: { xs: "none", md: "block" } }} />
 
                 {/* Category heading */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1, px: 0.5 }}>
                   <TuneRoundedIcon sx={{ fontSize: 16, color: "#0B1730" }} />
-                  <Typography sx={{ fontSize: "12px", fontWeight: 800, color: "#0B1730", letterSpacing: "0.4px" }}>
+                  <Typography sx={{ fontSize: "12px", fontWeight: 800, color: "#0B1730", letterSpacing: "0.6px" }}>
                     CATEGORIES
                   </Typography>
                 </Box>
 
-                {/* Vertical category list */}
-                <List disablePadding>
+                {/* Category list — horizontal swipe pills on mobile, vertical list on desktop */}
+                <List
+                  disablePadding
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "row", md: "column" },
+                    gap: { xs: 0.8, md: 0 },
+                    overflowX: { xs: "auto", md: "visible" },
+                    mx: { xs: -0.5, md: 0 },
+                    px: { xs: 0.5, md: 0 },
+                    pb: { xs: 0.6, md: 0 },
+                    scrollbarWidth: "none",
+                    "&::-webkit-scrollbar": { display: "none" },
+                  }}
+                >
                   {CATEGORIES.map((cat) => {
                     const active = category === cat;
                     return (
@@ -438,22 +482,31 @@ export default function ProductsPage() {
                         selected={active}
                         onClick={() => setCategory(cat)}
                         sx={{
-                          borderRadius: "10px",
-                          mb: 0.5,
-                          py: 0.7,
-                          px: 1.2,
+                          width: { xs: "auto", md: "100%" },
+                          flexShrink: 0,
+                          whiteSpace: "nowrap",
+                          borderRadius: { xs: "50px", md: "11px" },
+                          border: { xs: active ? "1px solid #0B1730" : "1px solid #e4e8f0", md: "1px solid transparent" },
+                          mb: { xs: 0, md: 0.5 },
+                          py: { xs: 0.55, md: 0.75 },
+                          px: { xs: 1.4, md: 1.3 },
+                          gap: { xs: 0.8, md: 0 },
+                          transition: "all .2s ease",
+                          "&:hover": { background: active ? undefined : "#f4f7fc" },
                           "&.Mui-selected": {
                             background: "#0B1730",
+                            boxShadow: "0 6px 16px rgba(11,23,48,0.18)",
                             "&:hover": { background: "#0a1428" },
                           },
                         }}
                       >
                         <ListItemText
                           primary={cat}
+                          sx={{ m: 0, flex: { xs: "0 0 auto", md: "1 1 auto" } }}
                           slotProps={{
                             primary: {
                               sx: {
-                                fontSize: "12.5px",
+                                fontSize: { xs: "12px", md: "12.5px" },
                                 fontWeight: active ? 700 : 500,
                                 color: active ? "#fff" : "#344054",
                                 lineHeight: 1.3,
@@ -468,8 +521,9 @@ export default function ProductsPage() {
                             height: 18,
                             fontSize: "10px",
                             fontWeight: 700,
-                            background: active ? "rgba(255,255,255,0.15)" : "#f0f4fa",
+                            background: active ? "rgba(255,255,255,0.18)" : "#f0f4fa",
                             color: active ? "#fff" : "#667085",
+                            "& .MuiChip-label": { px: 0.9 },
                           }}
                         />
                       </ListItemButton>
@@ -478,11 +532,13 @@ export default function ProductsPage() {
                 </List>
 
                 {/* ══════════════════════════════════════════════════════
-                    PREMIUM "BULK & IT ORDERS" CARD
+                    PREMIUM "BULK & IT ORDERS" CARD — desktop sidebar only
+                    (mobile gets a compact version below the product grid)
                 ══════════════════════════════════════════════════════ */}
                 {bulkCardVisible && (
                   <Box
                     sx={{
+                      display: { xs: "none", md: "block" },
                       mt: 2.5,
                       position: "relative",
                       borderRadius: "16px",
@@ -612,8 +668,8 @@ export default function ProductsPage() {
             {/* ── RIGHT CONTENT ── */}
             <Grid size={{ xs: 12, md: 9 }}>
               {!loading && (
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, px: 0.5, flexWrap: "wrap", gap: 1 }}>
-                  <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#667085" }}>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: { xs: 1.5, md: 2 }, px: 0.5, flexWrap: "wrap", gap: 1 }}>
+                  <Typography sx={{ fontSize: { xs: "12px", md: "13px" }, fontWeight: 700, color: "#667085" }}>
                     Showing {visibleProducts.length} of {filteredProducts.length} products
                   </Typography>
                   <Chip
@@ -622,8 +678,10 @@ export default function ProductsPage() {
                       borderRadius: "50px",
                       fontWeight: 800,
                       fontSize: "11px",
+                      height: { xs: 24, md: 28 },
                       background: "#0B1730",
                       color: "#fff",
+                      boxShadow: "0 4px 12px rgba(11,23,48,0.18)",
                     }}
                   />
                 </Box>
@@ -634,9 +692,17 @@ export default function ProductsPage() {
                   <CircularProgress sx={{ color: "#0B1730" }} />
                 </Box>
               ) : filteredProducts.length === 0 ? (
-                <Box sx={{ textAlign: "center", py: 10 }}>
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: { xs: 7, md: 10 },
+                    background: "#fff",
+                    borderRadius: "20px",
+                    border: "1px dashed #d8dfec",
+                  }}
+                >
                   <Typography sx={{ fontSize: "40px", mb: 1.5 }}>🔍</Typography>
-                  <Typography sx={{ fontWeight: 900, fontSize: "20px", color: "#0B1730", mb: 1 }}>
+                  <Typography sx={{ fontWeight: 900, fontSize: { xs: "18px", md: "20px" }, color: "#0B1730", mb: 1 }}>
                     No Products Found
                   </Typography>
                   <Typography sx={{ color: "#98A2B3", fontSize: "13px" }}>
@@ -645,7 +711,7 @@ export default function ProductsPage() {
                 </Box>
               ) : (
                 <>
-                  <Grid container spacing={{ xs: 1.75, sm: 2, md: 2.5 }}>
+                  <Grid container spacing={{ xs: 1.25, sm: 2, md: 2.5 }}>
                     {visibleProducts.map((product: any) => {
                       const discount =
                         product.price > product.salePrice
@@ -669,22 +735,27 @@ export default function ProductsPage() {
                               flexDirection: "column",
                               cursor: "pointer",
                               position: "relative",
-                              "&:hover": {
-                                transform: "translateY(-6px)",
-                                boxShadow: "0 22px 44px rgba(11,23,48,.15)",
-                                borderColor: "rgba(139,197,63,0.35)",
-                              },
-                              "&:hover .add-to-cart-btn": {
-                                background: "linear-gradient(135deg,#8BC53F,#6fa62f)",
+                              "&:active": { transform: "scale(0.985)" },
+                              // Hover effects only on devices that actually hover (not touch screens)
+                              "@media (hover: hover)": {
+                                "&:hover": {
+                                  transform: "translateY(-6px)",
+                                  boxShadow: "0 22px 44px rgba(11,23,48,.15)",
+                                  borderColor: "rgba(139,197,63,0.35)",
+                                },
+                                "&:hover .product-img": { transform: "scale(1.06)" },
+                                "&:hover .add-to-cart-btn": {
+                                  background: "linear-gradient(135deg,#8BC53F,#6fa62f)",
+                                },
                               },
                             }}
                           >
-                            {/* Image — transparent background, no visible box/frame */}
+                            {/* Image */}
                             <Box
                               sx={{
                                 position: "relative",
                                 overflow: "hidden",
-                                background: "transparent",
+                                background: "radial-gradient(circle at 50% 40%, #ffffff 0%, #f6f8fc 100%)",
                                 height: { xs: 150, sm: 190, md: 220 },
                                 display: "flex",
                                 alignItems: "center",
@@ -693,6 +764,7 @@ export default function ProductsPage() {
                               }}
                             >
                               <CardMedia
+                                className="product-img"
                                 component="img"
                                 image={proxyImage(product.image || "")}
                                 alt={product.name}
@@ -700,7 +772,7 @@ export default function ProductsPage() {
                                   width: "100%",
                                   height: "100%",
                                   objectFit: "contain",
-                                  transition: "transform .35s ease",
+                                  transition: "transform .4s ease",
                                 }}
                               />
 
@@ -710,8 +782,8 @@ export default function ProductsPage() {
                                     position: "absolute",
                                     top: { xs: 8, sm: 12 },
                                     left: { xs: 8, sm: 12 },
-                                    background: "#8BC53F",
-                                    px: 1.1,
+                                    background: "linear-gradient(135deg,#8BC53F,#6fa62f)",
+                                    px: { xs: 0.9, sm: 1.1 },
                                     py: 0.35,
                                     borderRadius: "30px",
                                     display: "flex",
@@ -719,7 +791,7 @@ export default function ProductsPage() {
                                     gap: 0.4,
                                     color: "#fff",
                                     fontWeight: 800,
-                                    fontSize: { xs: "9.5px", sm: "11px" },
+                                    fontSize: { xs: "9px", sm: "11px" },
                                     boxShadow: "0 3px 10px rgba(139,197,63,0.4)",
                                   }}
                                 >
@@ -735,13 +807,14 @@ export default function ProductsPage() {
                                   right: { xs: 8, sm: 12 },
                                   background: "rgba(255,255,255,0.94)",
                                   backdropFilter: "blur(8px)",
-                                  px: 1,
+                                  px: { xs: 0.8, sm: 1 },
                                   py: 0.32,
                                   borderRadius: "8px",
-                                  fontSize: { xs: "8.5px", sm: "10px" },
+                                  fontSize: { xs: "8px", sm: "10px" },
                                   fontWeight: 800,
                                   letterSpacing: "0.3px",
                                   color: product.stock > 0 ? "#16a34a" : "#ef4444",
+                                  boxShadow: "0 2px 8px rgba(11,23,48,0.08)",
                                 }}
                               >
                                 {product.stock > 0 ? "IN STOCK" : "OUT OF STOCK"}
@@ -760,21 +833,24 @@ export default function ProductsPage() {
 
                             <CardContent
                               sx={{
-                                p: { xs: 1.5, sm: 1.8, md: 2.2 },
+                                p: { xs: 1.3, sm: 1.8, md: 2.2 },
                                 flex: 1,
                                 display: "flex",
                                 flexDirection: "column",
-                                "&:last-child": { pb: { xs: 1.5, sm: 1.8, md: 2.2 } },
+                                "&:last-child": { pb: { xs: 1.3, sm: 1.8, md: 2.2 } },
                               }}
                             >
                               <Typography
                                 sx={{
-                                  fontSize: { xs: "9.5px", sm: "10.5px" },
+                                  fontSize: { xs: "9px", sm: "10.5px" },
                                   color: "#6fa62f",
                                   fontWeight: 800,
                                   textTransform: "uppercase",
-                                  letterSpacing: "0.6px",
+                                  letterSpacing: "0.7px",
                                   mb: 0.4,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
                               >
                                 {product.brand}
@@ -783,15 +859,16 @@ export default function ProductsPage() {
                               <Typography
                                 sx={{
                                   fontWeight: 800,
-                                  fontSize: { xs: "12.5px", sm: "14px", md: "15px" },
+                                  fontSize: { xs: "12px", sm: "14px", md: "15px" },
                                   color: "#0B1730",
                                   mb: 0.7,
                                   lineHeight: 1.3,
+                                  letterSpacing: "-0.1px",
                                   display: "-webkit-box",
                                   WebkitLineClamp: 2,
                                   WebkitBoxOrient: "vertical",
                                   overflow: "hidden",
-                                  minHeight: { xs: "32px", sm: "36px", md: "39px" },
+                                  minHeight: { xs: "31px", sm: "36px", md: "39px" },
                                 }}
                               >
                                 {product.name}
@@ -805,13 +882,14 @@ export default function ProductsPage() {
                               )}
 
                               <Box sx={{ mt: "auto" }}>
-                                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.8, mb: 1.2 }}>
+                                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.8, mb: 1.2, flexWrap: "wrap" }}>
                                   <Typography
                                     sx={{
-                                      fontSize: { xs: "15.5px", sm: "17.5px", md: "19px" },
+                                      fontSize: { xs: "15px", sm: "17.5px", md: "19px" },
                                       fontWeight: 900,
                                       color: "#0B1730",
                                       lineHeight: 1,
+                                      letterSpacing: "-0.4px",
                                     }}
                                   >
                                     ₹{product.salePrice?.toLocaleString("en-IN")}
@@ -819,7 +897,7 @@ export default function ProductsPage() {
                                   {product.price > product.salePrice && (
                                     <Typography
                                       sx={{
-                                        fontSize: { xs: "10.5px", sm: "12px" },
+                                        fontSize: { xs: "10px", sm: "12px" },
                                         textDecoration: "line-through",
                                         color: "#98A2B3",
                                       }}
@@ -895,6 +973,118 @@ export default function ProductsPage() {
                   )}
                 </>
               )}
+
+              {/* ── Compact Bulk & IT card — MOBILE ONLY (desktop version lives in the sidebar) ── */}
+              {bulkCardVisible && (
+                <Box
+                  sx={{
+                    display: { xs: "block", md: "none" },
+                    mt: 3,
+                    position: "relative",
+                    borderRadius: "18px",
+                    overflow: "hidden",
+                    background: "linear-gradient(160deg, #0a1428 0%, #0B1730 60%, #142850 100%)",
+                    boxShadow: "0 14px 32px rgba(11,23,48,0.22)",
+                    border: "1px solid rgba(139,197,63,0.18)",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      backgroundImage:
+                        "radial-gradient(circle at 90% 0%, rgba(139,197,63,0.22) 0%, transparent 55%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => setBulkCardVisible(false)}
+                    aria-label="Dismiss"
+                    size="small"
+                    sx={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      width: 24,
+                      height: 24,
+                      zIndex: 1,
+                      background: "rgba(255,255,255,0.10)",
+                      color: "rgba(255,255,255,0.75)",
+                    }}
+                  >
+                    <CloseRoundedIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
+
+                  <Box sx={{ position: "relative", p: 2.2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.2 }}>
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: "10px",
+                          background: "rgba(139,197,63,0.18)",
+                          border: "1px solid rgba(139,197,63,0.45)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Inventory2RoundedIcon sx={{ fontSize: 16, color: "#8BC53F" }} />
+                      </Box>
+                      <Typography
+                        sx={{ fontSize: "12px", fontWeight: 900, letterSpacing: "0.8px", textTransform: "uppercase", color: "#8BC53F" }}
+                      >
+                        Bulk &amp; IT Orders
+                      </Typography>
+                    </Box>
+
+                    <Typography sx={{ fontSize: "15px", fontWeight: 800, color: "#fff", lineHeight: 1.35, mb: 0.6, pr: 3 }}>
+                      Special pricing for corporate &amp; bulk orders
+                    </Typography>
+                    <Typography sx={{ fontSize: "12px", color: "rgba(255,255,255,0.62)", lineHeight: 1.6, mb: 1.8 }}>
+                      You can text us for any kind of IT Products or bulk order.
+                    </Typography>
+
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        fullWidth
+                        onClick={handleGoToContact}
+                        startIcon={<SupportAgentRoundedIcon sx={{ fontSize: 15 }} />}
+                        sx={{
+                          height: 40,
+                          borderRadius: "11px",
+                          background: "linear-gradient(135deg, #ffffff, #f3f5f9)",
+                          color: "#0B1730",
+                          fontWeight: 800,
+                          fontSize: "12px",
+                          textTransform: "none",
+                          "&:hover": { background: "#ffffff" },
+                        }}
+                      >
+                        Contact Us
+                      </Button>
+                      <Button
+                        fullWidth
+                        onClick={handleBulkCall}
+                        startIcon={<CallRoundedIcon sx={{ fontSize: 15 }} />}
+                        sx={{
+                          height: 40,
+                          borderRadius: "11px",
+                          background: "rgba(139,197,63,0.14)",
+                          border: "1px solid rgba(139,197,63,0.4)",
+                          color: "#8BC53F",
+                          fontWeight: 800,
+                          fontSize: "12px",
+                          textTransform: "none",
+                          "&:hover": { background: "rgba(139,197,63,0.22)" },
+                        }}
+                      >
+                        Call Now
+                      </Button>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
             </Grid>
           </Grid>
         </Container>
@@ -932,6 +1122,7 @@ export default function ProductsPage() {
               borderTop: "1px solid rgba(255,255,255,0.08)",
               boxShadow: "0 -12px 40px rgba(4,10,30,0.35)",
               backdropFilter: "blur(10px)",
+              pb: "env(safe-area-inset-bottom)",
             }}
           >
             <Container maxWidth="xl">
