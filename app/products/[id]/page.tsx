@@ -33,9 +33,6 @@ import { auth } from "@/lib/firebase";
 import { fetchUserOrders } from "@/lib/orderStore";
 import GoogleReviewBadge from "@/components/GoogleReview/GoogleReviewBadge";
 
-import { useRequireLogin } from "@/hooks/useRequireLogin";
-import LoginModal from "@/components/auth/LoginModal";
-
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
   pageBg:      "#f5f5f7",
@@ -248,29 +245,58 @@ export default function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<"description" | "specifications" | "datasheet">("description");
   const [snackbar,  setSnackbar]  = useState({ open: false, message: "", severity: "success" as "success" | "error" });
 
-  // ── NEW: login gate for the whole product page ──
-  const { checking: authChecking, isLoggedIn, markLoggedIn } = useRequireLogin();
-
   // ── Reviews visibility gate: logged in + has ordered THIS product ──
   const [isAuthed,             setIsAuthed]             = useState(false);
   const [canViewReviews,       setCanViewReviews]       = useState(false);
   const [checkingReviewAccess, setCheckingReviewAccess] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+
+    const loadProduct = async () => {
       setLoading(true);
+      setProduct(null);
+      setRelated([]);
+
       try {
         const data: any = await getProductById(id as string);
-        setProduct(data);
+
+        if (cancelled) return;
+
+        setProduct(data ?? null);
         setActiveImg(0);
         setActiveTab("description");
+
         if (data) {
           const all = await getProducts();
-          setRelated(all.filter((p: any) => p.category === data.category && p.id !== id).slice(0, 12));
+
+          if (!cancelled) {
+            setRelated(
+              all.filter(
+                (p: any) =>
+                  p.category === data.category &&
+                  String(p.id) !== String(id)
+              ).slice(0, 12)
+            );
+          }
         }
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    })();
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load product:", error);
+          setProduct(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const refreshProduct = async () => {
@@ -353,85 +379,96 @@ export default function ProductDetailPage() {
     setSnackbar({ open: true, message: "Added to cart!", severity: "success" });
   };
 
-  const buyNow = () => {
-    const user = localStorage.getItem("user");
-
-    if (!user) {
-      localStorage.setItem("redirectAfterLogin", "/checkout");
-      router.push("/login");
-      return;
-    }
-
-    addToCart({
-      id: product.id,
-      name: product.name,
-      brand: product.brand,
-      image: product.image,
-      price: product.price,
-      salePrice: product.salePrice,
-      quantity: BULK[selBulk].qty,
-      stock: product.stock,
-    });
-
-    router.push("/checkout");
-  };
+const buyNow = () => {
+  if (!product) return;
+  addToCart({
+    id: product.id, name: product.name, brand: product.brand,
+    image: product.image, price: product.price, salePrice: product.salePrice,
+    quantity: BULK[selBulk].qty, stock: product.stock,
+  });
+  router.push("/checkout");
+};
 
   const scrollCarousel = (d: "left" | "right") =>
     carouselRef.current?.scrollBy({ left: d === "left" ? -220 : 220, behavior: "smooth" });
 
-  // ── After login: close popup and stay on this same product page ──
-  const handleLoginSuccess = () => {
-    markLoggedIn();
-    router.replace(`/products/${id}`);
-    router.refresh();
-  };
-
-  // ── Also wait for the login check so the popup doesn't flash ──
-  if (loading || authChecking) return (
-    <>
-      <Header />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "70vh",
-          background: C.pageBg
-        }}>
-        <CircularProgress sx={{ color: C.razorBlue }} />
-      </Box>
-      <Footer />
-    </>
-  );
-
-  if (!product) return (
-    <>
-      <Header />
-      <Box
-        sx={{
-          textAlign: "center",
-          py: 16,
-          background: C.pageBg,
-          minHeight: "70vh"
-        }}>
-        <Typography sx={{
-          fontSize: "48px"
-        }}>😕</Typography>
-        <Typography
-          color={C.heading}
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <Box
           sx={{
-            fontWeight: 600,
-            fontSize: "20px",
-            mt: 1,
-            fontFamily: sans
-          }}>Product Not Found</Typography>
-        <Button onClick={() => router.push("/products")} sx={{ mt: 2, textTransform: "none", color: C.blue, fontWeight: 700, fontFamily: sans }}>
-          ← Back to Products
-        </Button>
-      </Box>
-      <Footer />
-    </>
-  );
+            minHeight: "70vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            background: C.pageBg,
+          }}
+        >
+          <CircularProgress
+            size={42}
+            thickness={4}
+            sx={{ color: C.blue }}
+          />
+          <Typography
+            sx={{
+              fontSize: "15px",
+              fontWeight: 600,
+              color: C.textSub,
+              fontFamily: sans,
+            }}
+          >
+            Loading product details...
+          </Typography>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!product) {
+    return (
+      <>
+        <Header />
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 16,
+            background: C.pageBg,
+            minHeight: "70vh",
+          }}
+        >
+          <Typography sx={{ fontSize: "48px" }}>😕</Typography>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: "20px",
+              mt: 1,
+              fontFamily: sans,
+              color: C.heading,
+            }}
+          >
+            Product Not Found
+          </Typography>
+          <Button
+            onClick={() => router.push("/products")}
+            sx={{
+              mt: 2,
+              textTransform: "none",
+              color: C.blue,
+              fontWeight: 700,
+              fontFamily: sans,
+            }}
+          >
+            ← Back to Products
+          </Button>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
 
   const descText = product.description ? String(product.description).trim() : "";
   const tabs = [
@@ -1513,13 +1550,6 @@ export default function ProductDetailPage() {
       </Tooltip>
 
       <Footer />
-
-      <LoginModal
-        open={!isLoggedIn}
-        onSuccess={markLoggedIn}
-        onBack={() => router.push("/products")}
-        backLabel="Back to products"
-      />
     </>
   );
 }

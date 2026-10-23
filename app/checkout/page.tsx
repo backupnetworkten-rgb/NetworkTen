@@ -40,6 +40,10 @@ import { subscribeToCurrentUser } from "@/services/userService";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer/Footer";
 
+// ── NEW: login popup gate (moved here from the product page) ──
+import { useRequireLogin } from "@/hooks/useRequireLogin";
+import LoginModal from "@/components/auth/LoginModal";
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -259,6 +263,10 @@ function StepHeader({
 
 export default function CheckoutPage() {
   const router = useRouter();
+
+  // ── NEW: login gate for the checkout page ──
+  const { checking: authChecking, isLoggedIn, markLoggedIn } = useRequireLogin();
+
   const [items,          setItems]          = useState<CartItem[]>([]);
   const [mounted,        setMounted]        = useState(false);
 
@@ -322,8 +330,8 @@ export default function CheckoutPage() {
         setIsAuthed(false);
         setIsCheckingAuth(false);
 
-        localStorage.setItem("redirectAfterLogin", "/checkout");
-        router.push("/login");
+        // ── CHANGED: no redirect to /login anymore.
+        //    The login popup below handles logged-out users.
       }
     });
 
@@ -345,7 +353,8 @@ export default function CheckoutPage() {
 
   if (!mounted) return null;
 
-  if (isCheckingAuth) {
+  // ── CHANGED: also wait for the login check so the popup doesn't flash ──
+  if (isCheckingAuth || authChecking) {
     return (
       <>
         <Navbar />
@@ -363,7 +372,22 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!isAuthed) return null;
+  // ── CHANGED: instead of `return null`, show the page shell + login popup ──
+  if (!isLoggedIn) {
+    return (
+      <>
+        <Navbar />
+        <Box sx={{ minHeight: "60vh", background: C.pageBg }} />
+        <Footer />
+        <LoginModal
+          open
+          onSuccess={markLoggedIn}
+          onBack={() => router.push("/products")}
+          backLabel="Back to products"
+        />
+      </>
+    );
+  }
 
   const gstinTrimmed = gstNumber.trim().toUpperCase();
   const isB2BInvoice = gstinTrimmed.length > 0 && isValidGstin(gstinTrimmed);
