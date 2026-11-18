@@ -1,6 +1,4 @@
 
-"use client";
-
 import Image from "next/image";
 
 import {
@@ -10,7 +8,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Stack,
   IconButton,
   Divider,
 } from "@mui/material";
@@ -29,7 +26,7 @@ const projects = [
     category: "Government Project",
     image: "/images/interior-design/projects/intelligence-bureau.png",
     description:
-      "A professional institutional interior project focused on creating an organised, functional and refined working environment. The design direction highlights a sophisticated conference space, balanced materials, contemporary detailing and a comfortable setting for professional interactions.",
+      "A thoughtfully planned institutional interior project designed around functionality, professional aesthetics and efficient space utilisation. The project highlights a refined conference environment, contemporary materials, carefully balanced lighting and comfortable spaces that support professional interactions.",
     features: [
       "Conference Space",
       "Professional Interiors",
@@ -43,7 +40,7 @@ const projects = [
     category: "Interior Design Project",
     image: "/images/interior-design/projects/motibagh-delhi.png",
     description:
-      "A contemporary interior design project bringing together elegant finishes, thoughtful space planning and a welcoming professional atmosphere. The visual approach combines warm textures, modern furniture and carefully balanced lighting to create a refined interior experience.",
+      "A contemporary interior design project bringing together elegant finishes, thoughtful space planning and a welcoming professional atmosphere. The design direction combines warm textures, modern furniture, natural elements and carefully balanced lighting to create a refined interior experience.",
     features: [
       "Modern Interiors",
       "Space Planning",
@@ -69,20 +66,29 @@ export default function OurProjects() {
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: {
+              xs: "column",
+              md: "row",
+            },
             justifyContent: "space-between",
-            alignItems: { xs: "flex-start", md: "flex-end" },
+            alignItems: {
+              xs: "flex-start",
+              md: "flex-end",
+            },
             gap: 3,
             mb: { xs: 4, md: 5 },
           }}
         >
+          {/* Heading */}
           <Box sx={{ maxWidth: 650 }}>
 
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1.5}
-              sx={{ mb: 2 }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 2,
+              }}
             >
               <Box
                 sx={{
@@ -94,16 +100,16 @@ export default function OurProjects() {
 
               <Typography
                 sx={{
+                  color: "#26834B",
                   fontSize: 12,
                   fontWeight: 800,
                   letterSpacing: 3,
-                  color: "#26834B",
                   textTransform: "uppercase",
                 }}
               >
                 Our Portfolio
               </Typography>
-            </Stack>
+            </Box>
 
             <Typography
               component="h2"
@@ -119,13 +125,10 @@ export default function OurProjects() {
                 lineHeight: 1.15,
               }}
             >
-              Spaces That
+              Spaces That{" "}
               <Box
                 component="span"
-                sx={{
-                  color: "#26834B",
-                  ml: 1,
-                }}
+                sx={{ color: "#26834B" }}
               >
                 Inspire.
               </Box>
@@ -134,10 +137,10 @@ export default function OurProjects() {
             <Typography
               sx={{
                 mt: 2,
+                maxWidth: 570,
                 color: "#727B74",
                 fontSize: { xs: 14, md: 15 },
                 lineHeight: 1.9,
-                maxWidth: 570,
               }}
             >
               Every space tells a story. Explore our selected projects
@@ -192,7 +195,7 @@ export default function OurProjects() {
           </Box>
         </Box>
 
-        {/* PROJECT CARDS */}
+        {/* PROJECT GRID */}
         <Box
           sx={{
             display: "grid",
@@ -216,15 +219,12 @@ export default function OurProjects() {
 
                 "&:hover": {
                   transform: "translateY(-5px)",
-                  boxShadow: "0 18px 45px rgba(26, 53, 32, 0.09)",
+                  boxShadow:
+                    "0 18px 45px rgba(26, 53, 32, 0.09)",
                 },
 
                 "&:hover .project-image": {
                   transform: "scale(1.045)",
-                },
-
-                "&:hover .project-number": {
-                  color: "#26834B",
                 },
 
                 "&:hover .project-arrow": {
@@ -263,12 +263,12 @@ export default function OurProjects() {
                     position: "absolute",
                     inset: 0,
                     background:
-                      "linear-gradient(180deg, rgba(0,0,0,0.03) 40%, rgba(0,0,0,0.42) 100%)",
+                      "linear-gradient(180deg, rgba(0,0,0,0.02) 40%, rgba(0,0,0,0.42) 100%)",
                     pointerEvents: "none",
                   }}
                 />
 
-                {/* CATEGORY */}
+                {/* CATEGORY LABEL */}
                 <Chip
                   label={project.category}
                   size="small"
@@ -281,7 +281,6 @@ export default function OurProjects() {
                     color: "#246B3E",
                     fontWeight: 700,
                     fontSize: 10,
-                    letterSpacing: 0.3,
                     borderRadius: "6px",
                     "& .MuiChip-label": {
                       px: 1.5,
@@ -289,33 +288,39 @@ export default function OurProjects() {
                   }}
                 />
 
-                {/* PROJECT NUMBER */}
-                <Typography
+                {/* IMAGE FOOTER */}
+                <Box
                   sx={{
                     position: "absolute",
                     bottom: 15,
                     left: 20,
-                    color: "#FFFFFF",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    letterSpacing: 2,
+                    right: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}
                 >
-                  PROJECT / {project.id}
-                </Typography>
+                  <Typography
+                    sx={{
+                      color: "#FFFFFF",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      letterSpacing: 2,
+                    }}
+                  >
+                    PROJECT / {project.id}
+                  </Typography>
 
-                <NorthEast
-                  sx={{
-                    position: "absolute",
-                    right: 20,
-                    bottom: 15,
-                    color: "#FFFFFF",
-                    fontSize: 23,
-                  }}
-                />
+                  <NorthEast
+                    sx={{
+                      color: "#FFFFFF",
+                      fontSize: 23,
+                    }}
+                  />
+                </Box>
               </Box>
 
-              {/* PROJECT INFORMATION */}
+              {/* PROJECT DETAILS */}
               <CardContent
                 sx={{
                   p: { xs: 2.5, md: 3 },
@@ -325,15 +330,17 @@ export default function OurProjects() {
                 }}
               >
                 {/* LOCATION */}
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={0.8}
-                  sx={{ mb: 1.5 }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.8,
+                    mb: 1.5,
+                  }}
                 >
                   <LocationOnOutlined
                     sx={{
-                      fontSize: 17,
+                      fontSize: 18,
                       color: "#26834B",
                     }}
                   />
@@ -347,7 +354,7 @@ export default function OurProjects() {
                   >
                     {project.location}
                   </Typography>
-                </Stack>
+                </Box>
 
                 {/* TITLE AND ARROW */}
                 <Box
@@ -361,7 +368,10 @@ export default function OurProjects() {
                   <Typography
                     component="h3"
                     sx={{
-                      fontSize: { xs: 21, md: 24 },
+                      fontSize: {
+                        xs: 21,
+                        md: 24,
+                      },
                       fontWeight: 800,
                       color: "#1C2B20",
                       letterSpacing: "-0.6px",
@@ -390,9 +400,9 @@ export default function OurProjects() {
                 <Typography
                   sx={{
                     mt: 1.5,
+                    color: "#788078",
                     fontSize: 13,
                     lineHeight: 1.9,
-                    color: "#788078",
                   }}
                 >
                   {project.description}
@@ -405,41 +415,38 @@ export default function OurProjects() {
                   }}
                 />
 
-                    {/* PROJECT FEATURES */}
-                    <Stack
-                    direction="row"
-                    useFlexGap
-                    spacing={1}
-                    sx={{
-                        flexWrap: "wrap",
-                        rowGap: 1,
-                        columnGap: 1,
-                    }}
+                {/* PROJECT FEATURES */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                  }}
+                >
+                  {project.features.map((feature) => (
+                    <Box
+                      key={feature}
+                      sx={{
+                        px: 1.5,
+                        py: 0.8,
+                        borderRadius: "5px",
+                        bgcolor: "#F3F7F2",
+                        color: "#52705A",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        whiteSpace: "nowrap",
+                      }}
                     >
-                    {project.features.map((feature) => (
-                        <Box
-                        key={feature}
-                        sx={{
-                            px: 1.5,
-                            py: 0.8,
-                            borderRadius: "5px",
-                            bgcolor: "#F3F7F2",
-                            color: "#52705A",
-                            fontSize: 10,
-                            fontWeight: 700,
-                            whiteSpace: "nowrap",
-                        }}
-                        >
-                        {feature}
-                        </Box>
-                    ))}
-                    </Stack>
+                      {feature}
+                    </Box>
+                  ))}
+                </Box>
               </CardContent>
             </Card>
           ))}
         </Box>
 
-        {/* BOTTOM SECTION */}
+        {/* BOTTOM STATEMENT */}
         <Box
           sx={{
             mt: { xs: 4, md: 5 },
@@ -448,9 +455,15 @@ export default function OurProjects() {
             borderRadius: "10px",
             bgcolor: "#EEF3ED",
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
             justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
+            alignItems: {
+              xs: "flex-start",
+              sm: "center",
+            },
             gap: 1.5,
           }}
         >
@@ -462,7 +475,8 @@ export default function OurProjects() {
               lineHeight: 1.7,
             }}
           >
-            Thoughtful spaces. Meaningful experiences. Lasting impressions.
+            Thoughtful spaces. Meaningful experiences.
+            Lasting impressions.
           </Typography>
 
           <Typography
